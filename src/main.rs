@@ -62,8 +62,8 @@ fn main() {
 
 fn parse_frame(frame: &[u8]) -> (f32, f32, f32) {
     let yaw = i16::from_le_bytes([frame[6],  frame[7] ]) as f32 / 32768.0 * 180.0;
-    let gy  = i16::from_le_bytes([frame[15], frame[16]]) as f32 / 32768.0 * 180.0;
-    let gz  = i16::from_le_bytes([frame[17], frame[18]]) as f32 / 32768.0 * 180.0;
+    let gy  = i16::from_le_bytes([frame[15], frame[16]]) as f32 / 32768.0 * 2000.0;
+    let gz  = i16::from_le_bytes([frame[17], frame[18]]) as f32 / 32768.0 * 2000.0;
 
     (yaw, gy, gz)
 }
