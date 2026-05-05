@@ -1,5 +1,5 @@
 #[derive(Debug, Default)]
-pub struct Gyro {
+pub struct GyroState {
     port: Option<Box<dyn serialport::SerialPort>>,
     buffer: [u8; 1],
     frame: Vec<u8>,
@@ -19,7 +19,7 @@ pub struct Gyro {
     gz: f32,
 }
 
-impl Gyro {
+impl GyroState {
     pub fn new() -> Result<Self, String> {
         let gyro_port = dotenv::var("GYRO_PORT")
             .map_err(|e| format!("GYRO_PORT not detected in .env: {}", e))?;
@@ -27,7 +27,7 @@ impl Gyro {
             .open()
             .map_err(|e| format!("Failed to open GYRO_PORT ({}): {}", gyro_port, e))?;
 
-        Ok(Gyro {
+        Ok(GyroState {
             port: Some(port),
             initial_yaw: f32::MAX,
             ..Default::default()
@@ -39,9 +39,7 @@ impl Gyro {
 
         loop {
             match port.read_exact(&mut self.buffer) {
-                Ok(n) => {
- 
-                }
+                Ok(n) => {}
                 Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => {
                     continue;
                 }
