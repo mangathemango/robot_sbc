@@ -1,13 +1,4 @@
-use serialport::Error;
-
 use crate::devices::DriverPort;
-
-#[derive(Debug)]
-pub struct Gyro {
-    driver: GyroDriver,
-    state: GyroState,
-}
-
 /// Driver struct to read + parse data sent from the gyro
 #[derive(Debug)]
 pub struct GyroDriver {
@@ -15,7 +6,7 @@ pub struct GyroDriver {
 }
 
 /// A data sample read from the gyroscope
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct GyroSample {
     yaw: f32,
     gy: f32,
@@ -23,7 +14,7 @@ pub struct GyroSample {
 }
 
 /// Current gyroscope state
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct GyroState {
     /// The first recorded yaw for relative yaw calculation for 0 point
     initial_yaw: f32,

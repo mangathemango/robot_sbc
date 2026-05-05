@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+arc-swap = "1.9.1"
 dotenv = "0.15.0"
+once_cell = "1.21.4"
 serialport = "4.9.0"
