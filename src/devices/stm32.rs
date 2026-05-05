@@ -7,7 +7,7 @@ const STM32_DOTENV_KEY: &str = "STM32_PATH";
 /// A packet of byte data will be formatted like this:
 ///     [[START] [COMMAND_ID] [LEN] [...DATA...] [CHK]]
 /// (CHK = Checksum for data integrity validation, XOR all the bytes from [START] to the end of [...DATA...])
-const START_BYTE: u8 = 0x67;
+const STM32_START_BYTE: u8 = 0x67;
 
 #[derive(Debug)]
 pub struct Stm32Driver {
@@ -65,7 +65,7 @@ impl Stm32Driver {
 
             match idx {
                 0 => {
-                    if byte != START_BYTE {
+                    if byte != STM32_START_BYTE {
                         continue;
                     }
                 }
@@ -244,7 +244,7 @@ impl PiToStm32Command {
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut buf = Vec::new();
 
-        buf.push(START_BYTE);
+        buf.push(STM32_START_BYTE);
 
         let id = self.id();
         buf.push(id);

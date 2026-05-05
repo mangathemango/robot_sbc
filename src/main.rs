@@ -2,6 +2,7 @@ mod debug;
 mod devices;
 mod robot;
 use crate::devices::gyro::{GyroDriver, GyroState};
+use crate::devices::maixcam::{MaixcamDriver, MaixcamState};
 use crate::devices::stm32::{PiToStm32Command, Stm32Controller, Stm32Driver, Stm32State};
 use once_cell::sync::Lazy;
 use robot::Robot;
@@ -69,6 +70,28 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
                 }
             }
             ROBOT.stm32_state.store(Arc::new(state.clone()))
+        }
+    });
+}
+
+pub fn spawn_maixcam_thread() {
+    std::thread::spawn(move || {
+        let mut driver = MaixcamDriver::new();
+        let mut state = MaixcamState::new();
+
+        loop {
+            // 🔵 2. Handle incoming data
+            match driver.try_read_frame() {
+                Ok(sample) => {
+                    state.update(sample);
+                    state.driver_is_active = true;
+                },
+                Err(_) => {
+                    state.driver_is_active = false;
+                    driver.reconnect();
+                }
+            }
+            ROBOT.maixcam_state.store(Arc::new(state.clone()))
         }
     });
 }
