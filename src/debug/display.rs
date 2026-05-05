@@ -222,13 +222,27 @@ fn draw_compass(f: &mut Frame, area: Rect, yaw_deg: f32, size_x: usize, size_y: 
         grid[cy as usize][size_x - 1] = 'E';
     }
 
-    let text: String = grid
+    let lines: Vec<Line> = grid
         .into_iter()
-        .map(|row| row.into_iter().collect::<String>())
-        .collect::<Vec<_>>()
-        .join("\n");
+        .map(|row| {
+            let spans: Vec<Span> = row
+                .into_iter()
+                .map(|ch| match ch {
+                    'N' => Span::styled("N", Style::default().fg(Color::Red)),
+                    'S' => Span::styled("S", Style::default().fg(Color::Red)),
+                    'E' => Span::styled("E", Style::default().fg(Color::Blue)),
+                    'W' => Span::styled("W", Style::default().fg(Color::Blue)),
+                    'O' => Span::styled("O", Style::default().fg(Color::Yellow)),
+                    '│' => Span::styled("│", Style::default().fg(Color::Green)),
+                    '•' => Span::styled("•", Style::default().fg(Color::DarkGray)),
+                    _ => Span::raw(ch.to_string()),
+                })
+                .collect();
 
-    let p = Paragraph::new(text).block(Block::default().title("COMPASS").borders(Borders::ALL));
+            Line::from(spans)
+        })
+        .collect();
+    let p = Paragraph::new(lines).block(Block::default().title("COMPASS").borders(Borders::ALL));
 
     f.render_widget(p, area);
 }
