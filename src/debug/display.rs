@@ -15,7 +15,6 @@ use ratatui::{
     widgets::{Axis, Block, Borders, Chart, Dataset, GraphType, Paragraph},
 };
 
-use once_cell::sync::Lazy;
 use std::sync::Arc;
 
 // 👇 IMPORT YOUR GLOBAL ROBOT
@@ -88,7 +87,7 @@ fn run() -> Result<(), io::Error> {
 fn ui(f: &mut Frame, gyro: &Arc<GyroState>, stm32: &Arc<Stm32State>, history: &Vec<(f64, f64)>) {
     let layout = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+        .constraints([Constraint::Length(13), Constraint::Percentage(50)])
         .split(f.size());
 
     draw_gyro(f, layout[0], gyro, history);
@@ -101,15 +100,15 @@ fn draw_gyro(f: &mut Frame, area: Rect, g: &GyroState, history: &Vec<(f64, f64)>
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Percentage(20),
-            Constraint::Percentage(20),
-            Constraint::Percentage(60),
+            Constraint::Length(23),
+            Constraint::Length(27),
+            Constraint::Fill(1),
         ])
         .split(area);
 
     draw_gyro_text(f, chunks[0], g);
     draw_compass(f, chunks[1], g.relative_yaw, 25, 11);
-    draw_yaw_graph(f, chunks[2], history, g);
+    draw_yaw_graph(f, chunks[2], history);
 }
 
 fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
@@ -141,7 +140,7 @@ fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
     f.render_widget(p, area);
 }
 
-fn draw_yaw_graph(f: &mut Frame, area: Rect, history: &Vec<(f64, f64)>, g: &GyroState) {
+fn draw_yaw_graph(f: &mut Frame, area: Rect, history: &Vec<(f64, f64)>) {
     let dataset = Dataset::default()
         .name("Yaw")
         .marker(symbols::Marker::Braille)

@@ -94,7 +94,7 @@ pub struct GyroSample {
 pub struct GyroState {
     /// flag to indicate activity
     pub driver_is_active: bool,
-    
+
     /// The first recorded yaw for relative yaw calculation for 0 point
     pub initial_yaw: f32,
     /// Current yaw recorded from gyro
@@ -114,18 +114,6 @@ impl GyroState {
             driver_is_active: true,
             ..Default::default()
         }
-    }
-
-    pub fn read(&self) -> f32 {
-        self.relative_yaw
-    }
-
-    pub fn is_active(&self) -> bool {
-        self.driver_is_active
-    }
-
-    pub fn set_activity(&mut self, active: bool) {
-        self.driver_is_active = active
     }
 
     pub fn update(&mut self, sample: GyroSample) {

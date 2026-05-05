@@ -7,7 +7,6 @@ use once_cell::sync::Lazy;
 use robot::Robot;
 use std::sync::Arc;
 use std::sync::mpsc::{self, Receiver};
-use std::{thread, time::Duration};
 
 static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());
 
@@ -15,7 +14,7 @@ fn main() {
     let (tx, rx) = mpsc::channel();
     let stm32 = Stm32Controller::new(tx);
 
-    // spawn_gyro_thread();
+    spawn_stm32_thread(rx);
     spawn_gyro_thread();
     debug::display::start();
     loop {}

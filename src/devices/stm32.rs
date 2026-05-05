@@ -111,10 +111,12 @@ impl Stm32Driver {
 
 /// A controller struct used to send Pi to STM32 commands from other threads
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Stm32Controller {
     tx: Sender<PiToStm32Command>,
 }
 
+#[allow(dead_code)]
 impl Stm32Controller {
     pub fn new(tx: Sender<PiToStm32Command>) -> Self {
         Self { tx }
@@ -181,6 +183,7 @@ impl Stm32State {
                 self.actual_velocity.x = (v[0] + v[1] + v[2] + v[3]) as f32 / 4.0;
                 self.actual_velocity.y = (-v[0] + v[1] + v[2] - v[3]) as f32 / 4.0;
                 self.actual_omega = (-v[0] + v[1] - v[2] + v[3]) as f32 / 4.0;
+                self.estimated_position += self.actual_velocity;
             }
             Stm32ToPiCommand::SetRunningFlag { running } => {
                 self.start_flag = running != 0;
