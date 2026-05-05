@@ -41,6 +41,9 @@ impl GyroDriver {
     }
 
 
+    pub fn reconnect(&mut self) {
+        self.port = DriverPort::from_dotenv_key(GYRO_DOTENV_PATH);
+    }
 
     fn parse_frame(frame: &[u8]) -> GyroSample {
         let yaw = i16::from_le_bytes([frame[6], frame[7]]) as f32 / 32768.0 * 180.0;
@@ -50,15 +53,16 @@ impl GyroDriver {
         GyroSample { yaw, gy, gz }
     }
 
+
+
     /// Reads serial bytes coming from self.port until a valid frame of bytes can be parsed into a GyroSample
     ///
     /// A valid frame of bytes coming from the HWT101CT has this structure:
     /// [0x55] [0x53] [...] [yaw] [...] [gy] [gz]
-    pub fn get_sample(&mut self) -> Result<GyroSample, String> {
+    fn get_sample(&mut self) -> Result<GyroSample, String> {
         match &mut self.port {
             DriverPort::Inactive => {
-                self.port = DriverPort::from_dotenv_key(GYRO_DOTENV_PATH);
-                Err("Gyro driver not active, cannot get sample\t Attempting to reconnect...".into())
+                Err("Gyro driver not active, cannot get sample".into())
             },
             DriverPort::Active(port) => {
                 let mut buffer = [0; 1];
@@ -71,7 +75,7 @@ impl GyroDriver {
                         }
                         Err(e) => {
                             self.port = DriverPort::Inactive;
-                            return Err(format!("Gyro get_sample error: {}\nAttempting to reconnect...", e));
+                            return Err(format!("Gyro get_sample error: {}", e));
                         }
                     }
 

@@ -33,8 +33,8 @@ fn gyro_fetcher() {
     loop {
         match driver.update_state(&mut state) {
             Ok(_) => (),
-            Err(e) => {
-                println!("Failed to update gyro state: {}", e);
+            Err(_) => {
+                driver.reconnect();
                 thread::sleep(Duration::from_millis(200));
             }
         };
