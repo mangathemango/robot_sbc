@@ -9,172 +9,12 @@ const STM32_DOTENV_KEY: &str = "STM32_PATH";
 /// (CHK = Checksum for data integrity validation, XOR all the bytes from [START] to the end of [...DATA...])
 const START_BYTE: u8 = 0x67;
 
-#[derive(Debug)]
-pub enum PiToStm32Command {
-    /// angle: 0-180
-    SetYawServoAngle {
-        angle: u8,
-    },
-    SetClawServoAngle {
-        angle: u8,
-    },
-    /// text: a string of ASCII characters
-    SetDisplayText {
-        text: String,
-    },
-
-    /// Motor drivers will (hopefully) handle these two
-    CalibrateVerticalArm {},
-    CalibrateHorizontalArm {},
-
-    /// position: values mapped from 0 (bottom/backwards) - 10000 (top/forwards)
-    SetVerticalArmPosition {
-        position: u16,
-    },
-    SetHorizontalArmPosition {
-        position: u16,
-    },
-
-    Beep {},
-    /// velocities: values mapped from -10000 (-max) - 10000 (max)
-    /// Note: Only set wheel velocity to target velocity, do not auto ramp velocity back to 0
-    SetWheelTargetVelocities {
-        velocities: [i16; 4],
-    },
-}
-
-#[derive(Debug)]
-pub enum Stm32ToPiCommand {
-    /// Actual wheel velocities from motor encoders
-    SendActualWheelVelocities { velocities: [i16; 4] },
-    /// running: 0x00 for false, 0x01 for true. Will set to 1 when button on STM32 is clicked
-    SetRunningFlag { running: u8 },
-}
 
 #[derive(Debug)]
 pub struct Stm32Driver {
     port: DriverPort,
 }
 
-#[derive(Debug)]
-pub struct Stm32Controller {
-    tx: Sender<PiToStm32Command>,
-}
-
-#[derive(Debug, Default, Clone, Copy)]
-pub struct Stm32State {
-    pub running: bool,
-    // Movements
-    pub actual_wheel_velocities: [i16; 4],
-    pub actual_velocity: Vec2,
-    pub actual_omega: f32,
-
-    pub estimated_position: Vec2, // Estimated position based on accumulated actual velocities
-}
-
-impl PiToStm32Command {
-    fn id(&self) -> u8 {
-        match self {
-            PiToStm32Command::SetYawServoAngle { .. } => 0x01,
-            PiToStm32Command::SetClawServoAngle { .. } => 0x02,
-            PiToStm32Command::SetDisplayText { .. } => 0x03,
-            PiToStm32Command::CalibrateVerticalArm { .. } => 0x04,
-            PiToStm32Command::CalibrateHorizontalArm { .. } => 0x05,
-            PiToStm32Command::SetVerticalArmPosition { .. } => 0x06,
-            PiToStm32Command::SetHorizontalArmPosition { .. } => 0x07,
-            PiToStm32Command::Beep { .. } => 0x08,
-            PiToStm32Command::SetWheelTargetVelocities { .. } => 0x09,
-        }
-    }
-
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-
-        buf.push(START_BYTE);
-
-        let id = self.id();
-        buf.push(id);
-
-        // reserve space for length (we fill later)
-        buf.push(0);
-
-        match self {
-            PiToStm32Command::SetYawServoAngle { angle } => {
-                buf.push(*angle);
-            }
-
-            PiToStm32Command::SetDisplayText { text } => {
-                let bytes = text.as_bytes();
-
-                // ⚠ enforce max length
-                let len = bytes.len().min(32);
-                buf.extend(&bytes[..len]);
-            }
-
-            PiToStm32Command::SetWheelTargetVelocities { velocities } => {
-                velocities.iter().for_each(|v| buf.extend(v.to_le_bytes()));
-            }
-
-            _ => {}
-        }
-
-        // fill in length (data only)
-        let data_len = buf.len() - 3;
-        buf[2] = data_len as u8;
-
-        // checksum (XOR)
-        let checksum = buf.iter().fold(0u8, |acc, x| acc ^ x);
-        buf.push(checksum);
-
-        buf
-    }
-}
-
-impl Stm32ToPiCommand {
-    pub fn from_id(id: u8) -> Option<Self> {
-        match id {
-            0x51 => Some(Stm32ToPiCommand::SendActualWheelVelocities { velocities: [0; 4] }),
-            0x52 => Some(Stm32ToPiCommand::SetRunningFlag { running: 0x0 }),
-            _ => None,
-        }
-    }
-
-    pub fn from_frame(frame: Vec<u8>) -> Result<Self, String> {
-        if frame.len() < 4 {
-            return Err("Frame too short".into());
-        }
-
-        let id = frame[1];
-        let len = frame[2] as usize;
-
-        let data = &frame[3..3 + len];
-
-        match id {
-            0x51 => {
-                if data.len() != 8 {
-                    return Err("Invalid velocity data length".into());
-                }
-
-                let mut velocities = [0i16; 4];
-                for i in 0..4 {
-                    velocities[i] = i16::from_le_bytes([data[i * 2], data[i * 2 + 1]]);
-                }
-
-                Ok(Stm32ToPiCommand::SendActualWheelVelocities { velocities })
-            }
-
-            0x52 => {
-                if data.len() != 1 {
-                    return Err("Invalid running flag length".into());
-                }
-
-                Ok(Stm32ToPiCommand::SetRunningFlag { running: data[0] })
-            }
-
-            _ => Err(format!("Unknown command ID: {}", id)),
-        }
-    }
-}
 
 impl Stm32Driver {
     pub fn new() -> Self {
@@ -267,26 +107,12 @@ impl Stm32Driver {
     }
 }
 
-impl Stm32State {
-    pub fn new() -> Stm32State {
-        Stm32State::default()
-    }
-
-    pub fn update(&mut self, command: Stm32ToPiCommand) {
-        match command {
-            Stm32ToPiCommand::SendActualWheelVelocities { velocities } => {
-                self.actual_wheel_velocities = velocities;
-                let v = velocities;
-                self.actual_velocity.x =    ( v[0] + v[1] + v[2] + v[3]) as f32 / 4.0;
-                self.actual_velocity.y =    (-v[0] + v[1] + v[2] - v[3]) as f32 / 4.0;
-                self.actual_omega =         (-v[0] + v[1] - v[2] + v[3]) as f32 / 4.0;
-            },
-            Stm32ToPiCommand::SetRunningFlag { running } => {
-                self.running = running != 0;
-            }
-        };
-    }
+/// A controller struct used to send Pi to STM32 commands from other threads
+#[derive(Debug)]
+pub struct Stm32Controller {
+    tx: Sender<PiToStm32Command>,
 }
+
 
 impl Stm32Controller {
     pub fn new(tx: Sender<PiToStm32Command>) -> Self {
@@ -334,3 +160,185 @@ impl Stm32Controller {
         ]
     }
 }
+
+/// A struct representing the current states polled from the Stm32
+#[derive(Debug, Default, Clone, Copy)]
+pub struct Stm32State {
+    pub running: bool,
+    // Movements
+    pub actual_wheel_velocities: [i16; 4],
+    pub actual_velocity: Vec2,
+    pub actual_omega: f32,
+
+    pub estimated_position: Vec2, // Estimated position based on accumulated actual velocities
+}
+
+
+impl Stm32State {
+    pub fn new() -> Stm32State {
+        Stm32State::default()
+    }
+
+    pub fn update(&mut self, command: Stm32ToPiCommand) {
+        match command {
+            Stm32ToPiCommand::SendActualWheelVelocities { velocities } => {
+                self.actual_wheel_velocities = velocities;
+                let v = velocities;
+                self.actual_velocity.x =    ( v[0] + v[1] + v[2] + v[3]) as f32 / 4.0;
+                self.actual_velocity.y =    (-v[0] + v[1] + v[2] - v[3]) as f32 / 4.0;
+                self.actual_omega =         (-v[0] + v[1] - v[2] + v[3]) as f32 / 4.0;
+            },
+            Stm32ToPiCommand::SetRunningFlag { running } => {
+                self.running = running != 0;
+            }
+        };
+    }
+}
+
+
+#[derive(Debug)]
+pub enum PiToStm32Command {
+    /// angle: 0-180
+    SetYawServoAngle {
+        angle: u8,
+    },
+    SetClawServoAngle {
+        angle: u8,
+    },
+    /// text: a string of ASCII characters
+    SetDisplayText {
+        text: String,
+    },
+
+    /// Motor drivers will (hopefully) handle these two
+    CalibrateVerticalArm {},
+    CalibrateHorizontalArm {},
+
+    /// position: values mapped from 0 (bottom/backwards) - 10000 (top/forwards)
+    SetVerticalArmPosition {
+        position: u16,
+    },
+    SetHorizontalArmPosition {
+        position: u16,
+    },
+
+    Beep {},
+    /// velocities: values mapped from -10000 (-max) - 10000 (max)
+    /// Note: Only set wheel velocity to target velocity, do not auto ramp velocity back to 0
+    SetWheelTargetVelocities {
+        velocities: [i16; 4],
+    },
+}
+
+impl PiToStm32Command {
+    fn id(&self) -> u8 {
+        match self {
+            PiToStm32Command::SetYawServoAngle { .. } => 0x01,
+            PiToStm32Command::SetClawServoAngle { .. } => 0x02,
+            PiToStm32Command::SetDisplayText { .. } => 0x03,
+            PiToStm32Command::CalibrateVerticalArm { .. } => 0x04,
+            PiToStm32Command::CalibrateHorizontalArm { .. } => 0x05,
+            PiToStm32Command::SetVerticalArmPosition { .. } => 0x06,
+            PiToStm32Command::SetHorizontalArmPosition { .. } => 0x07,
+            PiToStm32Command::Beep { .. } => 0x08,
+            PiToStm32Command::SetWheelTargetVelocities { .. } => 0x09,
+        }
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = Vec::new();
+
+        buf.push(START_BYTE);
+
+        let id = self.id();
+        buf.push(id);
+
+        // reserve space for length (we fill later)
+        buf.push(0);
+
+        match self {
+            PiToStm32Command::SetYawServoAngle { angle } => {
+                buf.push(*angle);
+            }
+
+            PiToStm32Command::SetDisplayText { text } => {
+                let bytes = text.as_bytes();
+
+                // ⚠ enforce max length
+                let len = bytes.len().min(32);
+                buf.extend(&bytes[..len]);
+            }
+
+            PiToStm32Command::SetWheelTargetVelocities { velocities } => {
+                velocities.iter().for_each(|v| buf.extend(v.to_le_bytes()));
+            }
+
+            _ => {}
+        }
+
+        // fill in length (data only)
+        let data_len = buf.len() - 3;
+        buf[2] = data_len as u8;
+
+        // checksum (XOR)
+        let checksum = buf.iter().fold(0u8, |acc, x| acc ^ x);
+        buf.push(checksum);
+
+        buf
+    }
+}
+
+#[derive(Debug)]
+pub enum Stm32ToPiCommand {
+    /// Actual wheel velocities from motor encoders
+    SendActualWheelVelocities { velocities: [i16; 4] },
+    /// running: 0x00 for false, 0x01 for true. Will set to 1 when button on STM32 is clicked
+    SetRunningFlag { running: u8 },
+}
+
+impl Stm32ToPiCommand {
+    pub fn from_id(id: u8) -> Option<Self> {
+        match id {
+            0x51 => Some(Stm32ToPiCommand::SendActualWheelVelocities { velocities: [0; 4] }),
+            0x52 => Some(Stm32ToPiCommand::SetRunningFlag { running: 0x0 }),
+            _ => None,
+        }
+    }
+
+    pub fn from_frame(frame: Vec<u8>) -> Result<Self, String> {
+        if frame.len() < 4 {
+            return Err("Frame too short".into());
+        }
+
+        let id = frame[1];
+        let len = frame[2] as usize;
+
+        let data = &frame[3..3 + len];
+
+        match id {
+            0x51 => {
+                if data.len() != 8 {
+                    return Err("Invalid velocity data length".into());
+                }
+
+                let mut velocities = [0i16; 4];
+                for i in 0..4 {
+                    velocities[i] = i16::from_le_bytes([data[i * 2], data[i * 2 + 1]]);
+                }
+
+                Ok(Stm32ToPiCommand::SendActualWheelVelocities { velocities })
+            }
+
+            0x52 => {
+                if data.len() != 1 {
+                    return Err("Invalid running flag length".into());
+                }
+
+                Ok(Stm32ToPiCommand::SetRunningFlag { running: data[0] })
+            }
+
+            _ => Err(format!("Unknown command ID: {}", id)),
+        }
+    }
+}
+

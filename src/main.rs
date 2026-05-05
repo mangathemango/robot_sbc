@@ -1,6 +1,6 @@
+mod debug;
 mod devices;
 mod robot;
-mod debug;
 use crate::devices::gyro::{GyroDriver, GyroState};
 use crate::devices::stm32::{PiToStm32Command, Stm32Controller, Stm32Driver, Stm32State};
 use once_cell::sync::Lazy;
@@ -13,14 +13,12 @@ static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());
 
 fn main() {
     let (tx, rx) = mpsc::channel();
-    let stm32= Stm32Controller::new(tx);
+    let stm32 = Stm32Controller::new(tx);
 
     // spawn_gyro_thread();
     spawn_gyro_thread();
     debug::display::start();
-    loop {
-        
-    }
+    loop {}
 }
 
 fn spawn_gyro_thread() {
@@ -29,7 +27,7 @@ fn spawn_gyro_thread() {
         let mut state = GyroState::new();
 
         loop {
-            match driver.get_sample() {
+            match driver.try_read_frame() {
                 Ok(sample) => {
                     state.update(sample);
                     state.set_activity(true);
@@ -63,7 +61,7 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
             // 🔵 2. Handle incoming data
             match driver.try_read_frame() {
                 Ok(Some(command)) => {
-                    state.update( command);
+                    state.update(command);
                 }
                 Ok(None) => {}
                 Err(e) => {
