@@ -113,7 +113,7 @@ fn draw_gyro(f: &mut Frame, area: Rect, g: &GyroState, history: &Vec<(f64, f64)>
 }
 
 fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
-    let color = if !g.active {
+    let color = if !g.driver_is_active {
         Color::Red
     } else if g.relative_yaw.abs() > 45.0 {
         Color::Yellow
@@ -128,7 +128,7 @@ fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
         g.initial_yaw,
         g.gy,
         g.gz,
-        bool_icon(g.active),
+        bool_icon(g.driver_is_active),
     );
 
     let block = Block::default()
@@ -249,9 +249,10 @@ fn draw_compass(f: &mut Frame, area: Rect, yaw_deg: f32, size_x: usize, size_y: 
 
 fn draw_stm32(f: &mut Frame, area: Rect, s: &Stm32State) {
     let text = format!(
-        "Running: {}\nWheels: {:?}",
-        bool_icon(s.running),
+        "Running: {}\nWheels: {:?}\nActive: {}",
+        bool_icon(s.start_flag),
         s.actual_wheel_velocities,
+        bool_icon(s.driver_is_active)
     );
 
     paragraph(f, area, "STM32", text);

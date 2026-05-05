@@ -92,6 +92,9 @@ pub struct GyroSample {
 /// Current gyroscope state
 #[derive(Debug, Default, Clone, Copy)]
 pub struct GyroState {
+    /// flag to indicate activity
+    pub driver_is_active: bool,
+    
     /// The first recorded yaw for relative yaw calculation for 0 point
     pub initial_yaw: f32,
     /// Current yaw recorded from gyro
@@ -102,15 +105,13 @@ pub struct GyroState {
     pub gy: f32,
     /// z angular acceleration
     pub gz: f32,
-    /// flag to indicate activity
-    pub active: bool,
 }
 
 impl GyroState {
     pub fn new() -> Self {
         GyroState {
             initial_yaw: f32::NAN,
-            active: true,
+            driver_is_active: true,
             ..Default::default()
         }
     }
@@ -120,11 +121,11 @@ impl GyroState {
     }
 
     pub fn is_active(&self) -> bool {
-        self.active
+        self.driver_is_active
     }
 
     pub fn set_activity(&mut self, active: bool) {
-        self.active = active
+        self.driver_is_active = active
     }
 
     pub fn update(&mut self, sample: GyroSample) {

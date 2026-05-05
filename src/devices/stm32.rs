@@ -9,18 +9,20 @@ const STM32_DOTENV_KEY: &str = "STM32_PATH";
 /// (CHK = Checksum for data integrity validation, XOR all the bytes from [START] to the end of [...DATA...])
 const START_BYTE: u8 = 0x67;
 
-
 #[derive(Debug)]
 pub struct Stm32Driver {
     port: DriverPort,
 }
-
 
 impl Stm32Driver {
     pub fn new() -> Self {
         Stm32Driver {
             port: DriverPort::from_dotenv_key(STM32_DOTENV_KEY),
         }
+    }
+
+    pub fn reconnect(&mut self) {
+        self.port = DriverPort::from_dotenv_key(STM32_DOTENV_KEY);
     }
 
     pub fn send_command(&mut self, command: PiToStm32Command) -> Result<usize, String> {
@@ -113,7 +115,6 @@ pub struct Stm32Controller {
     tx: Sender<PiToStm32Command>,
 }
 
-
 impl Stm32Controller {
     pub fn new(tx: Sender<PiToStm32Command>) -> Self {
         Self { tx }
@@ -133,9 +134,7 @@ impl Stm32Controller {
     }
 
     pub fn set_wheel_velocities(&self, v: [i16; 4]) {
-        self.send(PiToStm32Command::SetWheelTargetVelocities {
-            velocities: v,
-        });
+        self.send(PiToStm32Command::SetWheelTargetVelocities { velocities: v });
     }
     pub fn set_velocity(&self, v: Vec2, omega: f32) {
         let [v1, v2, v3, v4] = self.body_to_wheels(v, omega);
@@ -147,24 +146,20 @@ impl Stm32Controller {
         let vx = v.x;
         let vy = v.y;
 
-        let v1 = vx - vy -  omega;
-        let v2 = vx + vy +  omega;
-        let v3 = vx + vy -  omega;
-        let v4 = vx - vy +  omega;
+        let v1 = vx - vy - omega;
+        let v2 = vx + vy + omega;
+        let v3 = vx + vy - omega;
+        let v4 = vx - vy + omega;
 
-        [
-            v1 as i16,
-            v2 as i16,
-            v3 as i16,
-            v4 as i16,
-        ]
+        [v1 as i16, v2 as i16, v3 as i16, v4 as i16]
     }
 }
 
 /// A struct representing the current states polled from the Stm32
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Stm32State {
-    pub running: bool,
+    pub driver_is_active: bool,
+    pub start_flag: bool,
     // Movements
     pub actual_wheel_velocities: [i16; 4],
     pub actual_velocity: Vec2,
@@ -172,7 +167,6 @@ pub struct Stm32State {
 
     pub estimated_position: Vec2, // Estimated position based on accumulated actual velocities
 }
-
 
 impl Stm32State {
     pub fn new() -> Stm32State {
@@ -184,17 +178,16 @@ impl Stm32State {
             Stm32ToPiCommand::SendActualWheelVelocities { velocities } => {
                 self.actual_wheel_velocities = velocities;
                 let v = velocities;
-                self.actual_velocity.x =    ( v[0] + v[1] + v[2] + v[3]) as f32 / 4.0;
-                self.actual_velocity.y =    (-v[0] + v[1] + v[2] - v[3]) as f32 / 4.0;
-                self.actual_omega =         (-v[0] + v[1] - v[2] + v[3]) as f32 / 4.0;
-            },
+                self.actual_velocity.x = (v[0] + v[1] + v[2] + v[3]) as f32 / 4.0;
+                self.actual_velocity.y = (-v[0] + v[1] + v[2] - v[3]) as f32 / 4.0;
+                self.actual_omega = (-v[0] + v[1] - v[2] + v[3]) as f32 / 4.0;
+            }
             Stm32ToPiCommand::SetRunningFlag { running } => {
-                self.running = running != 0;
+                self.start_flag = running != 0;
             }
         };
     }
 }
-
 
 #[derive(Debug)]
 pub enum PiToStm32Command {
@@ -341,4 +334,3 @@ impl Stm32ToPiCommand {
         }
     }
 }
-

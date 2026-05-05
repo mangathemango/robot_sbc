@@ -30,12 +30,11 @@ fn spawn_gyro_thread() {
             match driver.try_read_frame() {
                 Ok(sample) => {
                     state.update(sample);
-                    state.set_activity(true);
+                    state.driver_is_active = true;
                 }
                 Err(_) => {
-                    state.set_activity(false);
+                    state.driver_is_active = false;
                     driver.reconnect();
-                    thread::sleep(Duration::from_millis(200));
                 }
             };
             ROBOT.gyro_state.store(Arc::new(state.clone()))
@@ -62,11 +61,12 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
             match driver.try_read_frame() {
                 Ok(Some(command)) => {
                     state.update(command);
+                    state.driver_is_active = true;
                 }
                 Ok(None) => {}
-                Err(e) => {
-                    eprintln!("STM32 error: {}", e);
-                    // maybe reconnect
+                Err(_) => {
+                    state.driver_is_active = false;
+                    driver.reconnect();
                 }
             }
             ROBOT.stm32_state.store(Arc::new(state.clone()))
