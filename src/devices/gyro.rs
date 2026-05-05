@@ -1,9 +1,17 @@
-use std::default;
+use serialport::Error;
+
+use crate::devices::DriverPort;
+
+#[derive(Debug)]
+pub struct Gyro {
+    driver: GyroDriver,
+    state: GyroState,
+}
 
 /// Driver struct to read + parse data sent from the gyro
 #[derive(Debug)]
 pub struct GyroDriver {
-    port: Box<dyn serialport::SerialPort>,
+    port: DriverPort,
 }
 
 /// A data sample read from the gyroscope
@@ -30,14 +38,29 @@ pub struct GyroState {
 }
 
 impl GyroDriver {
-    pub fn new() -> Result<Self, String> {
-        let gyro_port = dotenv::var("GYRO_PORT")
-            .map_err(|e| format!("GYRO_PORT not detected in .env: {}", e))?;
-        let port = serialport::new(&gyro_port, 115200)
-            .open()
-            .map_err(|e| format!("Failed to open GYRO_PORT ({}): {}", gyro_port, e))?;
+    pub fn new() -> Self {
+        let gyro_path = match dotenv::var("GYRO_PORT") {
+            Ok(path) => path,
+            Err(e) => {
+                println!("GYRO_PORT not detected in .env: {}", e);
+                return GyroDriver {
+                    port: DriverPort::Inactive,
+                };
+            }
+        };
+        let port = match serialport::new(&gyro_path, 115200).open() {
+            Ok(port) => port,
+            Err(e) => {
+                println!("Failed to open GYRO_PORT ({}): {}", gyro_path, e);
+                return GyroDriver {
+                    port: DriverPort::Inactive,
+                };
+            }
+        };
 
-        Ok(GyroDriver { port })
+        GyroDriver {
+            port: DriverPort::Active(port),
+        }
     }
 
     fn parse_frame(frame: &[u8]) -> GyroSample {
@@ -49,49 +72,54 @@ impl GyroDriver {
     }
 
     /// Reads serial bytes coming from self.port until a valid frame of bytes can be parsed into a GyroSample
-    /// 
+    ///
     /// A valid frame of bytes coming from the HWT101CT has this structure:
     /// [0x55] [0x53] [...] [yaw] [...] [gy] [gz]
     pub fn get_sample(&mut self) -> Result<GyroSample, String> {
-        let mut buffer = [0; 1];
-        let mut frame = Vec::new();
-        loop {
-            match self.port.read_exact(&mut buffer) {
-                Ok(_) => {}
-                Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => {
-                    continue;
+        match &mut self.port {
+            DriverPort::Inactive => Err("Gyro driver not active, cannot get sample".into()),
+            DriverPort::Active(port) => {
+                let mut buffer = [0; 1];
+                let mut frame = Vec::new();
+                loop {
+                    match port.read_exact(&mut buffer) {
+                        Ok(_) => {}
+                        Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => {
+                            continue;
+                        }
+                        Err(e) => {
+                            return Err(format!("Gyro get sample: {}", e));
+                        }
+                    }
+
+                    let byte = buffer[0];
+
+                    // Always push
+                    frame.push(byte);
+
+                    // Keep frame from growing infinitely
+                    if frame.len() > 22 {
+                        frame.remove(0);
+                    }
+
+                    // Try to detect valid frame
+                    if frame.len() >= 2 {
+                        // Check header alignment
+                        if frame[0] != 0x55 {
+                            frame.remove(0);
+                            continue;
+                        }
+
+                        if frame[1] != 0x53 {
+                            frame.remove(0);
+                            continue;
+                        }
+                    }
+
+                    if frame.len() == 22 {
+                        return Ok(Self::parse_frame(&frame));
+                    }
                 }
-                Err(e) => {
-                    return Err(format!("Gyro get sample: {}", e));
-                }
-            }
-
-            let byte = buffer[0];
-
-            // Always push
-            frame.push(byte);
-
-            // Keep frame from growing infinitely
-            if frame.len() > 22 {
-                frame.remove(0);
-            }
-
-            // Try to detect valid frame
-            if frame.len() >= 2 {
-                // Check header alignment
-                if frame[0] != 0x55 {
-                    frame.remove(0);
-                    continue;
-                }
-
-                if frame[1] != 0x53 {
-                    frame.remove(0);
-                    continue;
-                }
-            }
-
-            if frame.len() == 22 {
-                return Ok(Self::parse_frame(&frame));
             }
         }
     }
