@@ -26,33 +26,18 @@ pub struct GyroState {
     gy: f32,
     /// z angular acceleration
     gz: f32,
+    /// flag to indicate activity
+    active: bool
 }
 
 impl GyroDriver {
     pub fn new() -> Self {
-        let gyro_path = match dotenv::var("GYRO_PORT") {
-            Ok(path) => path,
-            Err(e) => {
-                println!("GYRO_PORT not detected in .env: {}", e);
-                return GyroDriver {
-                    port: DriverPort::Inactive,
-                };
-            }
-        };
-        let port = match serialport::new(&gyro_path, 115200).open() {
-            Ok(port) => port,
-            Err(e) => {
-                println!("Failed to open GYRO_PORT ({}): {}", gyro_path, e);
-                return GyroDriver {
-                    port: DriverPort::Inactive,
-                };
-            }
-        };
-
         GyroDriver {
-            port: DriverPort::Active(port),
+            port: DriverPort::from_dotenv_key("GYRO_PORT"),
         }
     }
+
+
 
     fn parse_frame(frame: &[u8]) -> GyroSample {
         let yaw = i16::from_le_bytes([frame[6], frame[7]]) as f32 / 32768.0 * 180.0;
@@ -68,7 +53,10 @@ impl GyroDriver {
     /// [0x55] [0x53] [...] [yaw] [...] [gy] [gz]
     pub fn get_sample(&mut self) -> Result<GyroSample, String> {
         match &mut self.port {
-            DriverPort::Inactive => Err("Gyro driver not active, cannot get sample".into()),
+            DriverPort::Inactive => {
+                self.port = DriverPort::from_dotenv_key("GYRO_PORT");
+                Err("Gyro driver not active, cannot get sample\t Attempting to reconnect...".into())
+            },
             DriverPort::Active(port) => {
                 let mut buffer = [0; 1];
                 let mut frame = Vec::new();
@@ -79,7 +67,8 @@ impl GyroDriver {
                             continue;
                         }
                         Err(e) => {
-                            return Err(format!("Gyro get sample: {}", e));
+                            self.port = DriverPort::Inactive;
+                            return Err(format!("Gyro get_sample error: {}\nAttempting to reconnect...", e));
                         }
                     }
 
@@ -116,7 +105,16 @@ impl GyroDriver {
     }
 
     pub fn update_state(&mut self, state: &mut GyroState) -> Result<(), String> {
-        let sample = self.get_sample()?;
+        let sample = match self.get_sample() {
+            Ok(sample) => {
+                state.active = true;
+                sample
+            },
+            Err(e) => {
+                state.active = false;
+                return Err(e);
+            } 
+        };
         state.current_yaw = sample.yaw;
         state.gy = sample.gy;
         state.gz = sample.gz;
@@ -138,11 +136,16 @@ impl GyroState {
     pub fn new() -> Self {
         GyroState {
             initial_yaw: f32::NAN,
+            active: true,
             ..Default::default()
         }
     }
 
     pub fn read(&self) -> f32 {
         self.relative_yaw
+    }
+
+    pub fn is_active(&self) -> bool {
+        self.active
     }
 }
