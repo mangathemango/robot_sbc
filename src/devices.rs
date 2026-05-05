@@ -1,4 +1,5 @@
 pub mod gyro;
+pub mod stm32;
 
 #[derive(Debug)]
 pub enum DriverPort {
