@@ -48,6 +48,10 @@ impl GyroDriver {
         GyroSample { yaw, gy, gz }
     }
 
+    /// Reads serial bytes coming from self.port until a valid frame of bytes can be parsed into a GyroSample
+    /// 
+    /// A valid frame of bytes coming from the HWT101CT has this structure:
+    /// [0x55] [0x53] [...] [yaw] [...] [gy] [gz]
     pub fn get_sample(&mut self) -> Result<GyroSample, String> {
         let mut buffer = [0; 1];
         let mut frame = Vec::new();
@@ -58,7 +62,7 @@ impl GyroDriver {
                     continue;
                 }
                 Err(e) => {
-                    return Err(format!("Gyro poll error: {}", e));
+                    return Err(format!("Gyro get sample: {}", e));
                 }
             }
 
