@@ -1,25 +1,35 @@
+use std::default;
+
+/// Driver struct to read + parse data sent from the gyro
+#[derive(Debug)]
+pub struct GyroDriver {
+    port: Box<dyn serialport::SerialPort>,
+}
+
+/// A data sample read from the gyroscope
+#[derive(Debug, Default)]
+pub struct GyroSample {
+    yaw: f32,
+    gy: f32,
+    gz: f32,
+}
+
+/// Current gyroscope state
 #[derive(Debug, Default)]
 pub struct GyroState {
-    port: Option<Box<dyn serialport::SerialPort>>,
-    buffer: [u8; 1],
-    frame: Vec<u8>,
-    /// The first recorded yaw for relative yaw calculation
+    /// The first recorded yaw for relative yaw calculation for 0 point
     initial_yaw: f32,
-
-    /// Current yaw
+    /// Current yaw recorded from gyro
     current_yaw: f32,
-
     /// Relative yaw (with respect to initial_yaw)
     relative_yaw: f32,
-
     /// y angular acceleration
     gy: f32,
-
     /// z angular acceleration
     gz: f32,
 }
 
-impl GyroState {
+impl GyroDriver {
     pub fn new() -> Result<Self, String> {
         let gyro_port = dotenv::var("GYRO_PORT")
             .map_err(|e| format!("GYRO_PORT not detected in .env: {}", e))?;
@@ -27,19 +37,23 @@ impl GyroState {
             .open()
             .map_err(|e| format!("Failed to open GYRO_PORT ({}): {}", gyro_port, e))?;
 
-        Ok(GyroState {
-            port: Some(port),
-            initial_yaw: f32::MAX,
-            ..Default::default()
-        })
+        Ok(GyroDriver { port })
     }
 
-    pub fn update(&mut self) -> Result<(), String> {
-        let port = self.port.as_mut().ok_or("Gyro port not initialized")?;
+    fn parse_frame(frame: &[u8]) -> GyroSample {
+        let yaw = i16::from_le_bytes([frame[6], frame[7]]) as f32 / 32768.0 * 180.0;
+        let gy = i16::from_le_bytes([frame[15], frame[16]]) as f32 / 32768.0 * 2000.0;
+        let gz = i16::from_le_bytes([frame[17], frame[18]]) as f32 / 32768.0 * 2000.0;
 
+        GyroSample { yaw, gy, gz }
+    }
+
+    pub fn get_sample(&mut self) -> Result<GyroSample, String> {
+        let mut buffer = [0; 1];
+        let mut frame = Vec::new();
         loop {
-            match port.read_exact(&mut self.buffer) {
-                Ok(n) => {}
+            match self.port.read_exact(&mut buffer) {
+                Ok(_) => {}
                 Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => {
                     continue;
                 }
@@ -48,72 +62,64 @@ impl GyroState {
                 }
             }
 
-            let byte = self.buffer[0];
+            let byte = buffer[0];
 
             // Always push
-            self.frame.push(byte);
+            frame.push(byte);
 
             // Keep frame from growing infinitely
-            if self.frame.len() > 22 {
-                self.frame.remove(0);
+            if frame.len() > 22 {
+                frame.remove(0);
             }
 
             // Try to detect valid frame
-            if self.frame.len() >= 2 {
+            if frame.len() >= 2 {
                 // Check header alignment
-                if self.frame[0] != 0x55 {
-                    self.frame.remove(0);
+                if frame[0] != 0x55 {
+                    frame.remove(0);
                     continue;
                 }
 
-                if self.frame[1] != 0x53 {
-                    self.frame.remove(0);
+                if frame[1] != 0x53 {
+                    frame.remove(0);
                     continue;
                 }
             }
 
-            if self.frame.len() == 22 {
-                let (yaw, gy, gz) = Self::parse_frame(&self.frame);
-
-                self.current_yaw = yaw;
-                self.gy = gy;
-                self.gz = gz;
-
-                if self.initial_yaw == f32::MAX {
-                    self.initial_yaw = yaw;
-                }
-
-                self.relative_yaw = yaw - self.initial_yaw;
-
-                // Normalize to [-180, 180]
-                if self.relative_yaw > 180.0 {
-                    self.relative_yaw -= 360.0;
-                }
-                if self.relative_yaw < -180.0 {
-                    self.relative_yaw += 360.0;
-                }
-
-                // Reset for next frame
-                self.frame.clear();
-                return Ok(());
+            if frame.len() == 22 {
+                return Ok(Self::parse_frame(&frame));
             }
         }
     }
 
-    pub fn update_and_read(&mut self) -> Result<(f32, f32, f32), String> {
-        self.update()?;
-        Ok((self.relative_yaw, self.gy, self.gz))
+    pub fn update_state(&mut self, state: &mut GyroState) -> Result<(), String> {
+        let sample = self.get_sample()?;
+        state.current_yaw = sample.yaw;
+        state.gy = sample.gy;
+        state.gz = sample.gz;
+        if state.initial_yaw.is_nan() {
+            state.initial_yaw = sample.yaw
+        }
+        state.relative_yaw = state.current_yaw - state.initial_yaw;
+        if state.relative_yaw > 180.0 {
+            state.relative_yaw -= 360.0;
+        }
+        if state.relative_yaw < -180.0 {
+            state.relative_yaw += 360.0;
+        }
+        Ok(())
+    }
+}
+
+impl GyroState {
+    pub fn new() -> Self {
+        GyroState {
+            initial_yaw: f32::NAN,
+            ..Default::default()
+        }
     }
 
-    pub fn read(&self) -> (f32, f32, f32) {
-        (self.relative_yaw, self.gy, self.gz)
-    }
-
-    fn parse_frame(frame: &[u8]) -> (f32, f32, f32) {
-        let yaw = i16::from_le_bytes([frame[6], frame[7]]) as f32 / 32768.0 * 180.0;
-        let gy = i16::from_le_bytes([frame[15], frame[16]]) as f32 / 32768.0 * 2000.0;
-        let gz = i16::from_le_bytes([frame[17], frame[18]]) as f32 / 32768.0 * 2000.0;
-
-        (yaw, gy, gz)
+    pub fn read(&self) -> f32 {
+        self.relative_yaw
     }
 }

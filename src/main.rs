@@ -1,10 +1,11 @@
 mod devices;
 
-use crate::devices::gyro::GyroState;
-fn main() {
-    let mut gyro = GyroState::new().expect("Penis");
+use crate::devices::gyro::*;
+fn main() -> Result<(), String>{
+    let mut gyro_driver = GyroDriver::new()?;
+    let mut gyro_state = GyroState::new();
     loop {
-        let (yaw, gy, gz) = gyro.update_and_read().expect("poll error");
-        println!("yaw: {:.2}\tgy: {:.2}\tgz: {:.2}", yaw, gy, gz);
+        gyro_driver.update_state(&mut gyro_state)?;
+        println!("Yaw: {}", gyro_state.read());
     }
-}
+}   
