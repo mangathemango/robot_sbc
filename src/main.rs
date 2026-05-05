@@ -31,9 +31,13 @@ fn gyro_fetcher() {
     let mut state = GyroState::new();
 
     loop {
-        match driver.update_state(&mut state) {
-            Ok(_) => (),
+        match driver.get_sample() {
+            Ok(sample) => {
+                state.update(sample);
+                state.set_activity(true);
+            },
             Err(_) => {
+                state.set_activity(false);
                 driver.reconnect();
                 thread::sleep(Duration::from_millis(200));
             }

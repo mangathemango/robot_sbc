@@ -59,7 +59,7 @@ impl GyroDriver {
     ///
     /// A valid frame of bytes coming from the HWT101CT has this structure:
     /// [0x55] [0x53] [...] [yaw] [...] [gy] [gz]
-    fn get_sample(&mut self) -> Result<GyroSample, String> {
+    pub fn get_sample(&mut self) -> Result<GyroSample, String> {
         match &mut self.port {
             DriverPort::Inactive => {
                 Err("Gyro driver not active, cannot get sample".into())
@@ -110,33 +110,6 @@ impl GyroDriver {
             }
         }
     }
-
-    pub fn update_state(&mut self, state: &mut GyroState) -> Result<(), String> {
-        let sample = match self.get_sample() {
-            Ok(sample) => {
-                state.active = true;
-                sample
-            },
-            Err(e) => {
-                state.active = false;
-                return Err(e);
-            } 
-        };
-        state.current_yaw = sample.yaw;
-        state.gy = sample.gy;
-        state.gz = sample.gz;
-        if state.initial_yaw.is_nan() {
-            state.initial_yaw = sample.yaw
-        }
-        state.relative_yaw = state.current_yaw - state.initial_yaw;
-        if state.relative_yaw > 180.0 {
-            state.relative_yaw -= 360.0;
-        }
-        if state.relative_yaw < -180.0 {
-            state.relative_yaw += 360.0;
-        }
-        Ok(())
-    }
 }
 
 impl GyroState {
@@ -154,5 +127,25 @@ impl GyroState {
 
     pub fn is_active(&self) -> bool {
         self.active
+    }
+
+    pub fn set_activity(&mut self, active: bool) {
+        self.active = active
+    }
+
+    pub fn update(&mut self, sample: GyroSample) {
+        self.current_yaw = sample.yaw;
+        self.gy = sample.gy;
+        self.gz = sample.gz;
+        if self.initial_yaw.is_nan() {
+            self.initial_yaw = sample.yaw
+        }
+        self.relative_yaw = self.current_yaw - self.initial_yaw;
+        if self.relative_yaw > 180.0 {
+            self.relative_yaw -= 360.0;
+        }
+        if self.relative_yaw < -180.0 {
+            self.relative_yaw += 360.0;
+        }
     }
 }
