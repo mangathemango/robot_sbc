@@ -1,6 +1,6 @@
 use crate::devices::DriverPort;
 
-const GYRO_DOTENV_PATH: &str = "GYRO_PATH";
+const GYRO_DOTENV_KEY: &str = "GYRO_PATH";
 
 /// Driver struct to read + parse data sent from the gyro
 #[derive(Debug)]
@@ -36,13 +36,13 @@ pub struct GyroState {
 impl GyroDriver {
     pub fn new() -> Self {
         GyroDriver {
-            port: DriverPort::from_dotenv_key(GYRO_DOTENV_PATH),
+            port: DriverPort::from_dotenv_key(GYRO_DOTENV_KEY),
         }
     }
 
 
     pub fn reconnect(&mut self) {
-        self.port = DriverPort::from_dotenv_key(GYRO_DOTENV_PATH);
+        self.port = DriverPort::from_dotenv_key(GYRO_DOTENV_KEY);
     }
 
     fn parse_frame(frame: &[u8]) -> GyroSample {
