@@ -8,6 +8,8 @@ const STM32_DOTENV_KEY: &str = "STM32_PATH";
 ///     [[START] [COMMAND_ID] [LEN] [...DATA...] [CHK]]
 /// (CHK = Checksum for data integrity validation, XOR all the bytes from [START] to the end of [...DATA...])
 const START_BYTE: u8 = 0x67;
+
+#[derive(Debug)]
 pub enum PiToStm32Command {
     /// angle: 0-180
     SetYawServoAngle {
@@ -41,6 +43,7 @@ pub enum PiToStm32Command {
     },
 }
 
+#[derive(Debug)]
 pub enum Stm32ToPiCommand {
     /// Actual wheel velocities from motor encoders
     SendActualWheelVelocities { velocities: [i16; 4] },
@@ -48,22 +51,21 @@ pub enum Stm32ToPiCommand {
     SetRunningFlag { running: u8 },
 }
 
+#[derive(Debug)]
 pub struct Stm32Driver {
     port: DriverPort,
 }
 
+#[derive(Debug)]
 pub struct Stm32Controller {
     tx: Sender<PiToStm32Command>,
 }
 
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Stm32State {
     running: bool,
     // Movements
-    target_wheel_velocities: [i16; 4],
     actual_wheel_velocities: [i16; 4],
-
-    target_velocity: Vec2,
-    target_omega: f32,
     actual_velocity: Vec2,
     actual_omega: f32,
 
@@ -180,7 +182,7 @@ impl Stm32Driver {
             port: DriverPort::from_dotenv_key(STM32_DOTENV_KEY),
         }
     }
-    
+
     pub fn send_command(&mut self, command: PiToStm32Command) -> Result<usize, String> {
         let port = match &mut self.port {
             DriverPort::Inactive => {
@@ -262,5 +264,73 @@ impl Stm32Driver {
                 return Ok(Some(parsed));
             }
         }
+    }
+}
+
+impl Stm32State {
+    pub fn new() -> Stm32State {
+        Stm32State::default()
+    }
+
+    pub fn update(&mut self, command: Stm32ToPiCommand) {
+        match command {
+            Stm32ToPiCommand::SendActualWheelVelocities { velocities } => {
+                self.actual_wheel_velocities = velocities;
+                let v = velocities;
+                self.actual_velocity.x =    ( v[0] + v[1] + v[2] + v[3]) as f32 / 4.0;
+                self.actual_velocity.y =    (-v[0] + v[1] + v[2] - v[3]) as f32 / 4.0;
+                self.actual_omega =         (-v[0] + v[1] - v[2] + v[3]) as f32 / 4.0;
+            },
+            Stm32ToPiCommand::SetRunningFlag { running } => {
+                self.running = running != 0;
+            }
+        };
+    }
+}
+
+impl Stm32Controller {
+    pub fn new(tx: Sender<PiToStm32Command>) -> Self {
+        Self { tx }
+    }
+    pub fn send(&self, cmd: PiToStm32Command) {
+        let _ = self.tx.send(cmd);
+    }
+    pub fn beep(&self) {
+        self.send(PiToStm32Command::Beep {});
+    }
+    pub fn set_yaw_servo(&self, angle: u8) {
+        self.send(PiToStm32Command::SetYawServoAngle { angle });
+    }
+
+    pub fn set_claw_servo(&self, angle: u8) {
+        self.send(PiToStm32Command::SetClawServoAngle { angle });
+    }
+
+    pub fn set_wheel_velocities(&self, v: [i16; 4]) {
+        self.send(PiToStm32Command::SetWheelTargetVelocities {
+            velocities: v,
+        });
+    }
+    pub fn set_velocity(&self, v: Vec2, omega: f32) {
+        let [v1, v2, v3, v4] = self.body_to_wheels(v, omega);
+
+        self.set_wheel_velocities([v1, v2, v3, v4]);
+    }
+
+    fn body_to_wheels(&self, v: Vec2, omega: f32) -> [i16; 4] {
+        let vx = v.x;
+        let vy = v.y;
+
+        let v1 = vx - vy -  omega;
+        let v2 = vx + vy +  omega;
+        let v3 = vx + vy -  omega;
+        let v4 = vx - vy +  omega;
+
+        [
+            v1 as i16,
+            v2 as i16,
+            v3 as i16,
+            v4 as i16,
+        ]
     }
 }
