@@ -1,5 +1,6 @@
 mod devices;
 mod robot;
+mod debug;
 use crate::devices::gyro::{GyroDriver, GyroState};
 use crate::devices::stm32::{PiToStm32Command, Stm32Controller, Stm32Driver, Stm32State};
 use once_cell::sync::Lazy;
@@ -15,17 +16,11 @@ fn main() {
     let stm32= Stm32Controller::new(tx);
 
     // spawn_gyro_thread();
-    spawn_stm32_thread(rx);
+    spawn_gyro_thread();
+    debug::display::start();
     loop {
-        let gyro = ROBOT.gyro_state.load();
-        stm32.set_claw_servo(10);
-        thread::sleep(Duration::from_millis(1000));
-        // if gyro.is_active() {
-        //     println!("Yaw: {}", gyro.read());
-        // }
+        
     }
-
-
 }
 
 fn spawn_gyro_thread() {

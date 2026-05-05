@@ -63,13 +63,13 @@ pub struct Stm32Controller {
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Stm32State {
-    running: bool,
+    pub running: bool,
     // Movements
-    actual_wheel_velocities: [i16; 4],
-    actual_velocity: Vec2,
-    actual_omega: f32,
+    pub actual_wheel_velocities: [i16; 4],
+    pub actual_velocity: Vec2,
+    pub actual_omega: f32,
 
-    estimated_position: Vec2, // Estimated position based on accumulated actual velocities
+    pub estimated_position: Vec2, // Estimated position based on accumulated actual velocities
 }
 
 impl PiToStm32Command {

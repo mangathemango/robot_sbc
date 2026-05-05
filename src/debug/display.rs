@@ -1,0 +1,256 @@
+use std::{
+    io, thread,
+    time::{Duration, Instant},
+};
+
+use crossterm::{
+    event::{self, Event, KeyCode},
+    execute,
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
+};
+
+use ratatui::{
+    prelude::*,
+    style::{Color, Style},
+    widgets::{Axis, Block, Borders, Chart, Dataset, GraphType, Paragraph},
+};
+
+use once_cell::sync::Lazy;
+use std::sync::Arc;
+
+// 👇 IMPORT YOUR GLOBAL ROBOT
+use crate::ROBOT;
+use crate::devices::gyro::GyroState;
+use crate::devices::stm32::Stm32State;
+
+// ====== PUBLIC ENTRY ======
+
+pub fn start() {
+    thread::spawn(|| {
+        if let Err(e) = run() {
+            eprintln!("TUI error: {}", e);
+        }
+    });
+}
+
+// ====== MAIN LOOP ======
+
+fn run() -> Result<(), io::Error> {
+    enable_raw_mode()?;
+    let mut stdout = io::stdout();
+    execute!(stdout, EnterAlternateScreen)?;
+
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+
+    let tick_rate = Duration::from_millis(100);
+    let mut last_tick = Instant::now();
+    let mut yaw_history: Vec<(f64, f64)> = Vec::new();
+    let mut t: f64 = 0.0;
+
+    loop {
+        // 🧠 Load latest states
+        let gyro = ROBOT.gyro_state.load();
+        let stm32 = ROBOT.stm32_state.load();
+
+        terminal.draw(|f| ui(f, &gyro, &stm32, &yaw_history))?;
+
+        // exit key (optional)
+        if event::poll(Duration::from_millis(10))? {
+            if let Event::Key(key) = event::read()? {
+                if key.code == KeyCode::Char('q') {
+                    break;
+                }
+            }
+        }
+
+        if last_tick.elapsed() >= tick_rate {
+            let yaw = gyro.relative_yaw as f64;
+
+            yaw_history.push((t, yaw));
+
+            if yaw_history.len() > 100 {
+                yaw_history.remove(0);
+            }
+
+            t += 1.0;
+            last_tick = Instant::now();
+        }
+    }
+
+    disable_raw_mode()?;
+    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+    Ok(())
+}
+
+// ====== UI ======
+
+fn ui(f: &mut Frame, gyro: &Arc<GyroState>, stm32: &Arc<Stm32State>, history: &Vec<(f64, f64)>) {
+    let layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+        .split(f.size());
+
+    draw_gyro(f, layout[0], gyro, history);
+    draw_stm32(f, layout[1], stm32);
+}
+
+// ====== PANELS ======
+
+fn draw_gyro(f: &mut Frame, area: Rect, g: &GyroState, history: &Vec<(f64, f64)>) {
+    let chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(20),
+            Constraint::Percentage(20),
+            Constraint::Percentage(60),
+        ])
+        .split(area);
+
+    draw_gyro_text(f, chunks[0], g);
+    draw_compass(f, chunks[1], g.relative_yaw, 25, 11);
+    draw_yaw_graph(f, chunks[2], history, g);
+}
+
+fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
+    let color = if !g.active {
+        Color::Red
+    } else if g.relative_yaw.abs() > 45.0 {
+        Color::Yellow
+    } else {
+        Color::Green
+    };
+
+    let text = format!(
+        "Relative yaw: {:.2}\nRaw yaw: {:.2}\nInitial yaw: {:.2}\nGY: {:.2}\nGZ: {:.2}\nActive: {}",
+        g.relative_yaw,
+        g.current_yaw,
+        g.initial_yaw,
+        g.gy,
+        g.gz,
+        bool_icon(g.active),
+    );
+
+    let block = Block::default()
+        .title("GYRO")
+        .borders(Borders::ALL)
+        .style(Style::default().fg(color));
+
+    let p = Paragraph::new(text).block(block);
+
+    f.render_widget(p, area);
+}
+
+fn draw_yaw_graph(f: &mut Frame, area: Rect, history: &Vec<(f64, f64)>, g: &GyroState) {
+    let dataset = Dataset::default()
+        .name("Yaw")
+        .marker(symbols::Marker::Braille)
+        .graph_type(GraphType::Line)
+        .style(Style::default().fg(Color::Cyan))
+        .data(history);
+
+    let x_bounds = if history.is_empty() {
+        [0.0, 100.0]
+    } else {
+        let min_x = history.first().unwrap().0;
+        let max_x = history.last().unwrap().0;
+        [min_x, max_x]
+    };
+
+    let y_bounds = [-180.0, 180.0];
+
+    let chart = Chart::new(vec![dataset])
+        .block(Block::default().title("Yaw Graph").borders(Borders::ALL))
+        .x_axis(Axis::default().title("t").bounds(x_bounds))
+        .y_axis(Axis::default().title("deg").bounds(y_bounds));
+
+    f.render_widget(chart, area);
+}
+
+fn draw_compass(f: &mut Frame, area: Rect, yaw_deg: f32, size_x: usize, size_y: usize) {
+    let mut grid = vec![vec![' '; size_x]; size_y];
+
+    let cx = (size_x / 2) as f32;
+    let cy = (size_y / 2) as f32;
+
+    let rx = cx; // horizontal radius
+    let ry = cy; // vertical radius
+
+    // 🟣 draw circle (normalized)
+    for y in 0..size_y {
+        for x in 0..size_x {
+            let dx = (x as f32 - cx) / rx;
+            let dy = (y as f32 - cy) / ry;
+
+            let dist = (dx * dx + dy * dy).sqrt();
+
+            if (dist - 1.0).abs() < 0.08 {
+                grid[y][x] = '•';
+            }
+        }
+    }
+
+    // 🟢 direction line
+    let angle = yaw_deg.to_radians();
+
+    let steps = size_x.max(size_y);
+
+    for i in 0..steps {
+        let t = i as f32 / steps as f32;
+
+        let x = cx - t * rx * angle.sin();
+        let y = cy - t * ry * angle.cos();
+
+        let xi = x.round() as usize;
+        let yi = y.round() as usize;
+
+        if xi < size_x && yi < size_y {
+            grid[yi][xi] = '│';
+        }
+    }
+
+    // 🔴 center
+    grid[cy as usize][cx as usize] = 'O';
+
+    // 🧭 cardinal directions
+    if cy >= 1.0 {
+        grid[0][cx as usize] = 'N';
+        grid[size_y - 1][cx as usize] = 'S';
+    }
+    if cx >= 1.0 {
+        grid[cy as usize][0] = 'W';
+        grid[cy as usize][size_x - 1] = 'E';
+    }
+
+    let text: String = grid
+        .into_iter()
+        .map(|row| row.into_iter().collect::<String>())
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let p = Paragraph::new(text).block(Block::default().title("COMPASS").borders(Borders::ALL));
+
+    f.render_widget(p, area);
+}
+
+fn draw_stm32(f: &mut Frame, area: Rect, s: &Stm32State) {
+    let text = format!(
+        "Running: {}\nWheels: {:?}",
+        bool_icon(s.running),
+        s.actual_wheel_velocities,
+    );
+
+    paragraph(f, area, "STM32", text);
+}
+
+// ====== HELPERS ======
+
+fn paragraph(f: &mut Frame, area: Rect, title: &str, text: String) {
+    let block = Block::default().title(title).borders(Borders::ALL);
+    let p = Paragraph::new(text).block(block);
+    f.render_widget(p, area);
+}
+
+fn bool_icon(b: bool) -> &'static str {
+    if b { "✅" } else { "❌" }
+}

@@ -20,17 +20,17 @@ pub struct GyroSample {
 #[derive(Debug, Default, Clone, Copy)]
 pub struct GyroState {
     /// The first recorded yaw for relative yaw calculation for 0 point
-    initial_yaw: f32,
+    pub initial_yaw: f32,
     /// Current yaw recorded from gyro
-    current_yaw: f32,
+    pub current_yaw: f32,
     /// Relative yaw (with respect to initial_yaw)
-    relative_yaw: f32,
+    pub relative_yaw: f32,
     /// y angular acceleration
-    gy: f32,
+    pub gy: f32,
     /// z angular acceleration
-    gz: f32,
+    pub gz: f32,
     /// flag to indicate activity
-    active: bool
+    pub active: bool
 }
 
 impl GyroDriver {

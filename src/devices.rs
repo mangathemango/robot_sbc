@@ -11,15 +11,13 @@ impl DriverPort {
     pub fn from_dotenv_key(dotenv_key: &str) -> Self {
         let gyro_path = match dotenv::var(dotenv_key) {
             Ok(path) => path,
-            Err(e) => {
-                println!("GYRO_PORT not detected in .env: {}", e);
+            Err(_) => {
                 return DriverPort::Inactive;
             }
         };
         let port = match serialport::new(&gyro_path, 115200).open() {
             Ok(port) => port,
-            Err(e) => {
-                println!("Failed to open GYRO_PORT ({}): {}", gyro_path, e);
+            Err(_) => {
                 return  DriverPort::Inactive;
             }
         };
