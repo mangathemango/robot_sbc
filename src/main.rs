@@ -36,11 +36,11 @@ fn spawn_gyro_thread() {
                 Err(msg) => {
                     state.error_msg = Some(msg);
                     driver.reconnect();
+                    std::thread::sleep(std::time::Duration::from_millis(200));
                 }
             };
             state.driver_is_active = driver.is_active();
             ROBOT.gyro_state.store(Arc::new(state.clone()));
-            std::thread::sleep(std::time::Duration::from_millis(10));
         }
     });
 }
@@ -68,11 +68,11 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
                 Ok(None) => {}
                 Err(_) => {
                     driver.reconnect();
+                    std::thread::sleep(std::time::Duration::from_millis(200));
                 }
             }
             state.driver_is_active = driver.is_active();
             ROBOT.stm32_state.store(Arc::new(state.clone()));
-            std::thread::sleep(std::time::Duration::from_millis(10));
         }
     });
 }
@@ -89,11 +89,11 @@ pub fn spawn_maixcam_thread() {
                 }
                 Err(_) => {
                     driver.reconnect();
+                    std::thread::sleep(std::time::Duration::from_millis(200));
                 }
             }
             state.driver_is_active = driver.is_active();
             ROBOT.maixcam_state.store(Arc::new(state.clone()));
-            std::thread::sleep(std::time::Duration::from_millis(10));
         }
     });
 }
