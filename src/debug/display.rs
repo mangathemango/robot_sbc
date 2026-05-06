@@ -149,7 +149,8 @@ pub fn draw_system(f: &mut Frame, area: Rect) {
     let mem_usage = (used_mem / total_mem) * 100.0;
 
     let text = format!(
-        "SYSTEM\n\nCPU: {:.1}%\nRAM: {:.1}%\nTEMP: {}\n\nPROCS: {}",
+        "SYSTEM\n\nRAW: {:#?}\n\nCPU: {:.1}%\nRAM: {:.1}%\nTEMP: {}\n\nPROCS: {}",
+        sys,
         cpu_usage,
         mem_usage,
         read_temperature().unwrap_or(0.0),
@@ -165,7 +166,7 @@ pub fn draw_system(f: &mut Frame, area: Rect) {
             Style::default().fg(Color::Green)
         });
 
-    let p = Paragraph::new(text).block(block);
+    let p = Paragraph::new(text).wrap(Wrap { trim: true }).block(block);
 
     f.render_widget(p, area);
 }
