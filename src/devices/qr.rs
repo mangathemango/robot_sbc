@@ -5,7 +5,7 @@ pub fn try_read() -> Result<(), String> {
     let mut device = Device::open(path)
         .map_err(|e| format!("{}", e))?;
 
-    let mut buffer = String::new();
+    let mut buffer = Vec::new();
 
     loop {
         for ev in device.fetch_events().map_err(|e| format!("{}", e))? {
