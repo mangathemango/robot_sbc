@@ -18,8 +18,8 @@ pub fn try_read() -> Result<(), String> {
                                 buffer.clear();
                             }
                             _ => {
+                                buffer.push(keycode);
                                 if let Some(char) = keycode_to_ascii(keycode, false) {
-                                    buffer.push(char);
                                 }
                             }
                         }
