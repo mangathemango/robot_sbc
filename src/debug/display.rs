@@ -1,7 +1,7 @@
 use std::{
-    io, thread,
-    time::{Duration, Instant},
+    io, thread, time::{Duration, Instant}
 };
+
 
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -85,16 +85,67 @@ fn run() -> Result<(), io::Error> {
 // ====== UI ======
 
 fn ui(f: &mut Frame, gyro: &Arc<GyroState>, stm32: &Arc<Stm32State>, history: &Vec<(f64, f64)>) {
-    let layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Length(13), Constraint::Percentage(50)])
+    let chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(20), // system
+            Constraint::Percentage(80), // robot
+        ])
         .split(f.size());
 
-    draw_gyro(f, layout[0], gyro, history);
-    draw_stm32(f, layout[1], stm32);
+    let right_chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage(50), // gyro
+            Constraint::Percentage(50), // stm32
+        ])
+        .split(chunks[1]);
+
+    draw_system(f, chunks[0]); // 👈 you’ll add this
+    draw_gyro(f, right_chunks[0], gyro, history);
+    draw_stm32(f, right_chunks[1], stm32);
 }
 
 // ====== PANELS ======
+
+pub fn draw_system(f: &mut Frame, area: Rect) {
+    let mut sys = sysinfo::System::new_all();
+    sys.refresh_all();
+
+    // CPU usage (avg of all cores)
+    let cpu_usage = sys
+        .cpus()
+        .iter()
+        .map(|c| c.cpu_usage())
+        .sum::<f32>()
+        / sys.cpus().len() as f32;
+
+    // RAM usage
+    let total_mem = sys.total_memory() as f64;
+    let used_mem = sys.used_memory() as f64;
+    let mem_usage = (used_mem / total_mem) * 100.0;
+
+    let text = format!(
+        "SYSTEM\n\nCPU: {:.1}%\nRAM: {:.1}%\nTEMP: {}\n\nPROCS: {}",
+        cpu_usage,
+        mem_usage,
+        "TODO",
+        sys.processes().len()
+    );
+
+    let block = Block::default()
+        .title("SYSTEM")
+        .borders(Borders::ALL)
+        .border_style(if cpu_usage > 80.0 {
+            Style::default().fg(Color::Red)
+        } else {
+            Style::default().fg(Color::Green)
+        });
+
+    let p = Paragraph::new(text).block(block);
+
+    f.render_widget(p, area);
+}
 
 fn draw_gyro(f: &mut Frame, area: Rect, g: &GyroState, history: &Vec<(f64, f64)>) {
     let chunks = Layout::default()
