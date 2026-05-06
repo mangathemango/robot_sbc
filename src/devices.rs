@@ -10,16 +10,16 @@ pub enum DriverPort {
 
 impl DriverPort {
     pub fn from_dotenv_key(dotenv_key: &str) -> Self {
-        let gyro_path = match dotenv::var(dotenv_key) {
+        let path = match dotenv::var(dotenv_key) {
             Ok(path) => path,
             Err(e) => {
                 return DriverPort::Inactive(format!("Dotenv key {} fetch failed: {}", dotenv_key, e));
             }
         };
-        let port = match serialport::new(&gyro_path, 115200).open() {
+        let port = match serialport::new(&path, 115200).open() {
             Ok(port) => port,
             Err(e) => {
-                return  DriverPort::Inactive(format!("Open driver port {} failed: {}", dotenv_key, e));
+                return  DriverPort::Inactive(format!("Open driver port {} ({}) failed: {}", dotenv_key, path, e));
             }
         };
         DriverPort::Active(port)
