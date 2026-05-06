@@ -18,7 +18,7 @@ pub fn try_read() -> Result<(), String> {
                                 buffer.clear();
                             }
                             _ => {
-                                buffer.push(keycode);
+                                buffer.push(keycode.code());
                             }
                         }
                     }
