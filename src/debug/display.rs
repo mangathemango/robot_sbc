@@ -89,7 +89,7 @@ fn ui(f: &mut Frame, gyro: &Arc<GyroState>, stm32: &Arc<Stm32State>, history: &V
         .direction(Direction::Horizontal)
         .constraints([
             Constraint::Percentage(20), // system
-            Constraint::Percentage(0), // robot
+            Constraint::Percentage(80), // robot
         ])
         .split(f.size());
 
