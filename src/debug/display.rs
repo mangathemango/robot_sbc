@@ -124,7 +124,7 @@ fn ui(
 }
 
 fn draw_qr(f: &mut Frame, area: Rect, qr: &Arc<QrState>) {
-    let error_text = if qr.error_msg.is_empty() {
+    let error_text = if qr.error_msg.is_empty() || qr.driver_is_active {
         ""
     } else {
         &qr.error_msg
