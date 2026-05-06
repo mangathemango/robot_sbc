@@ -1,8 +1,6 @@
 pub mod gyro;
 pub mod maixcam;
 pub mod stm32;
-
-#[cfg(target_os = "linux")]
 pub mod qr;
 
 #[derive(Debug)]

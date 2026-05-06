@@ -5,14 +5,11 @@ use crate::devices::gyro::{GyroDriver, GyroState};
 use crate::devices::maixcam::{MaixcamDriver, MaixcamState};
 use crate::devices::qr::{DriverHIDDevice, QrDriver, QrState};
 use crate::devices::stm32::{PiToStm32Command, Stm32Controller, Stm32Driver, Stm32State};
+
 use once_cell::sync::Lazy;
 use robot::Robot;
 use std::sync::Arc;
 use std::sync::mpsc::{self, Receiver};
-
-#[cfg(target_os = "linux")]
-use crate::devices::qr;
-
 static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());
 
 fn main() {
@@ -23,7 +20,6 @@ fn main() {
     spawn_gyro_thread();
     spawn_maixcam_thread();
     spawn_qr_thread();
-    #[cfg(target_os = "linux")]
     debug::display::start();
     loop {}
 }
