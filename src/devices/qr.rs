@@ -19,7 +19,7 @@ pub fn try_read() -> Result<(), String> {
                             }
                             _ => {
                                 if let Some(char) = keycode_to_ascii(keycode, false) {
-                                    buffer.push(keycode);
+                                    buffer.push(char);
                                 }
                             }
                         }
