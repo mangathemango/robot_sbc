@@ -141,7 +141,7 @@ pub fn draw_system(f: &mut Frame, area: Rect) {
     let mem_usage = (used_mem / total_mem) * 100.0;
 
     let text = format!(
-        "SYSTEM\n\nRAW: {:#?}\n\nCPU: {:.1}%\nRAM: {:.1}%\nTEMP: {}\n\nPROCS: {}",
+        "SYSTEM\n\nRAW: {:#?}\n\nCPU: {:.1}%\nRAM: {:.1}%\nTEMP: {}°C\n\nPROCS: {}",
         sys,
         sys.global_cpu_usage(),
         mem_usage,
