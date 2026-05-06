@@ -135,14 +135,6 @@ pub fn draw_system(f: &mut Frame, area: Rect) {
     let mut sys = sysinfo::System::new_all();
     sys.refresh_all();
 
-    // CPU usage (avg of all cores)
-    let cpu_usage = sys
-        .cpus()
-        .iter()
-        .map(|c| c.cpu_usage())
-        .sum::<f32>()
-        / sys.cpus().len() as f32;
-
     // RAM usage
     let total_mem = sys.total_memory() as f64;
     let used_mem = sys.used_memory() as f64;
@@ -151,7 +143,7 @@ pub fn draw_system(f: &mut Frame, area: Rect) {
     let text = format!(
         "SYSTEM\n\nRAW: {:#?}\n\nCPU: {:.1}%\nRAM: {:.1}%\nTEMP: {}\n\nPROCS: {}",
         sys,
-        cpu_usage,
+        sys.global_cpu_usage(),
         mem_usage,
         read_temperature().unwrap_or(0.0),
         sys.processes().len()
@@ -160,7 +152,7 @@ pub fn draw_system(f: &mut Frame, area: Rect) {
     let block = Block::default()
         .title("SYSTEM")
         .borders(Borders::ALL)
-        .border_style(if cpu_usage > 80.0 {
+        .border_style(if sys.global_cpu_usage() > 80.0 {
             Style::default().fg(Color::Red)
         } else {
             Style::default().fg(Color::Green)
