@@ -5,12 +5,6 @@ pub enum DriverHIDDevice {
     Disconnected(String),
 }
 
-impl DriverHIDDevice {
-    pub fn is_connected(&self) -> bool {
-        false
-    }
-}
-
 #[derive(Debug)]
 pub struct QrDriver {
     pub device: DriverHIDDevice,
