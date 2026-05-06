@@ -19,6 +19,10 @@ impl GyroDriver {
         self.port = DriverPort::from_dotenv_key(GYRO_DOTENV_KEY);
     }
 
+    pub fn is_active(&self) -> bool {
+        self.port.is_active()
+    }
+    
     /// Reads serial bytes coming from self.port until a valid frame of bytes can be parsed into a GyroSample
     ///
     /// A valid frame of bytes coming from the HWT101CT has this structure:

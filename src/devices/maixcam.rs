@@ -27,6 +27,10 @@ impl MaixcamDriver {
     pub fn reconnect(&mut self) {
         self.port = DriverPort::from_dotenv_key(MAIXCAM_DOTENV_KEY);
     }
+    
+    pub fn is_active(&self) -> bool {
+        self.port.is_active()
+    }
 
     pub fn try_read_frame(&mut self) -> Result<MaixcamSample, String> {
         match &mut self.port {

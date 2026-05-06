@@ -17,6 +17,7 @@ fn main() {
 
     spawn_stm32_thread(rx);
     spawn_gyro_thread();
+    spawn_maixcam_thread();
     debug::display::start();
     loop {}
 }
@@ -30,13 +31,13 @@ fn spawn_gyro_thread() {
             match driver.try_read_frame() {
                 Ok(sample) => {
                     state.update(sample);
-                    state.driver_is_active = true;
+                    
                 }
                 Err(_) => {
-                    state.driver_is_active = false;
                     driver.reconnect();
                 }
             };
+            state.driver_is_active = driver.is_active();
             ROBOT.gyro_state.store(Arc::new(state.clone()))
         }
     });
@@ -61,14 +62,13 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
             match driver.try_read_frame() {
                 Ok(Some(command)) => {
                     state.update(command);
-                    state.driver_is_active = true;
                 }
                 Ok(None) => {}
                 Err(_) => {
-                    state.driver_is_active = false;
                     driver.reconnect();
                 }
             }
+            state.driver_is_active = driver.is_active();
             ROBOT.stm32_state.store(Arc::new(state.clone()))
         }
     });
@@ -80,17 +80,15 @@ pub fn spawn_maixcam_thread() {
         let mut state = MaixcamState::new();
 
         loop {
-            // 🔵 2. Handle incoming data
             match driver.try_read_frame() {
                 Ok(sample) => {
                     state.update(sample);
-                    state.driver_is_active = true;
                 },
                 Err(_) => {
-                    state.driver_is_active = false;
                     driver.reconnect();
                 }
             }
+            state.driver_is_active = driver.is_active();
             ROBOT.maixcam_state.store(Arc::new(state.clone()))
         }
     });

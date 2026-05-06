@@ -25,6 +25,10 @@ impl Stm32Driver {
         self.port = DriverPort::from_dotenv_key(STM32_DOTENV_KEY);
     }
 
+    pub fn is_active(&self) -> bool {
+        self.port.is_active()
+    }
+
     pub fn send_command(&mut self, command: PiToStm32Command) -> Result<usize, String> {
         let port = match &mut self.port {
             DriverPort::Inactive => {

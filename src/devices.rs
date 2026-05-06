@@ -24,4 +24,11 @@ impl DriverPort {
         };
         DriverPort::Active(port)
     }
+
+    pub fn is_active(&self) -> bool {
+        match self {
+            DriverPort::Active(_) => true,
+            _ => false
+        }
+    }
 }
