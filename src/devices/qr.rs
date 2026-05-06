@@ -67,7 +67,7 @@ impl QrDriver {
     pub fn try_read(&mut self) -> Result<Option<String>, String> {
         let mut buffer = String::new();
 
-        for _ in 0..100 {
+        for _ in 0..10 {
             let evs = match &mut self.device {
                 DriverHIDDevice::Active(device) => {
                     match device.fetch_events() {
