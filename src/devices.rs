@@ -5,21 +5,21 @@ pub mod maixcam;
 #[derive(Debug)]
 pub enum DriverPort {
     Active(Box<dyn serialport::SerialPort>),
-    Inactive
+    Inactive(String)
 }
 
 impl DriverPort {
     pub fn from_dotenv_key(dotenv_key: &str) -> Self {
         let gyro_path = match dotenv::var(dotenv_key) {
             Ok(path) => path,
-            Err(_) => {
-                return DriverPort::Inactive;
+            Err(e) => {
+                return DriverPort::Inactive(format!("Dotenv key {} fetch failed: {}", dotenv_key, e));
             }
         };
         let port = match serialport::new(&gyro_path, 115200).open() {
             Ok(port) => port,
-            Err(_) => {
-                return  DriverPort::Inactive;
+            Err(e) => {
+                return  DriverPort::Inactive(format!("Open driver port {} failed: {}", dotenv_key, e));
             }
         };
         DriverPort::Active(port)

@@ -12,7 +12,7 @@ use crossterm::{
 use ratatui::{
     prelude::*,
     style::{Color, Style},
-    widgets::{Axis, Block, Borders, Chart, Dataset, GraphType, Paragraph},
+    widgets::{Axis, Block, Borders, Chart, Dataset, GraphType, Paragraph, Wrap},
 };
 
 use std::sync::Arc;
@@ -100,7 +100,7 @@ fn draw_gyro(f: &mut Frame, area: Rect, g: &GyroState, history: &Vec<(f64, f64)>
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Length(23),
+            Constraint::Length(35),
             Constraint::Length(27),
             Constraint::Fill(1),
         ])
@@ -121,13 +121,17 @@ fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
     };
 
     let text = format!(
-        "Relative yaw: {:.2}\nRaw yaw: {:.2}\nInitial yaw: {:.2}\nGY: {:.2}\nGZ: {:.2}\nActive: {}",
+        "Relative yaw: {:.2}\nRaw yaw: {:.2}\nInitial yaw: {:.2}\nGY: {:.2}\nGZ: {:.2}\nActive: {}\n{:?}",
         g.relative_yaw,
         g.current_yaw,
         g.initial_yaw,
         g.gy,
         g.gz,
         bool_icon(g.driver_is_active),
+        match &g.error_msg {
+            Some(msg) => msg,
+            None => "",
+        }
     );
 
     let block = Block::default()
@@ -135,7 +139,7 @@ fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
         .borders(Borders::ALL)
         .style(Style::default().fg(color));
 
-    let p = Paragraph::new(text).block(block);
+    let p = Paragraph::new(text).wrap(Wrap { trim: true }).block(block);
 
     f.render_widget(p, area);
 }

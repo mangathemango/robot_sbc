@@ -27,14 +27,14 @@ impl MaixcamDriver {
     pub fn reconnect(&mut self) {
         self.port = DriverPort::from_dotenv_key(MAIXCAM_DOTENV_KEY);
     }
-    
+
     pub fn is_active(&self) -> bool {
         self.port.is_active()
     }
 
     pub fn try_read_frame(&mut self) -> Result<MaixcamSample, String> {
         match &mut self.port {
-            DriverPort::Inactive => Err("Gyro driver not active, cannot get sample".into()),
+            DriverPort::Inactive(msg) => Err(format!("Maixcam driver not active: {}",msg)),
             DriverPort::Active(port) => {
                 let mut buffer = [0; 1];
                 let mut frame = Vec::<u8>::new();
@@ -46,6 +46,7 @@ impl MaixcamDriver {
                             if e.kind() == std::io::ErrorKind::TimedOut {
                                 continue;
                             } else {
+                                self.port = DriverPort::Inactive(format!("Maixcam read frame error: {}", e).into());
                                 return Err(format!("Read from Maixcam failed: {}", e));
                             }
                         }

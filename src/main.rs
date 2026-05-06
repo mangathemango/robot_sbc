@@ -30,10 +30,12 @@ fn spawn_gyro_thread() {
         loop {
             match driver.try_read_frame() {
                 Ok(sample) => {
+                    state.error_msg = None;
                     state.update(sample);
                     
                 }
-                Err(_) => {
+                Err(msg) => {
+                    state.error_msg = Some(msg);
                     driver.reconnect();
                 }
             };

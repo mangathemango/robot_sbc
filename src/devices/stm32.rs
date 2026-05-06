@@ -31,8 +31,8 @@ impl Stm32Driver {
 
     pub fn send_command(&mut self, command: PiToStm32Command) -> Result<usize, String> {
         let port = match &mut self.port {
-            DriverPort::Inactive => {
-                return Err("Send command to STM32 failed: STM32 driver not active".into());
+            DriverPort::Inactive(msg) => {
+                return Err(format!("Send command to STM32 failed: {}", msg).into());
             }
             DriverPort::Active(port) => port,
         };
@@ -42,8 +42,8 @@ impl Stm32Driver {
 
     pub fn try_read_frame(&mut self) -> Result<Option<Stm32ToPiCommand>, String> {
         let port = match &mut self.port {
-            DriverPort::Inactive => {
-                return Err("Read from STM32 failed: STM32 driver not active".into());
+            DriverPort::Inactive(msg) => {
+                return Err(format!("Read from STM32 failed: {}", msg).into());
             }
             DriverPort::Active(port) => port,
         };
@@ -60,6 +60,7 @@ impl Stm32Driver {
                     if e.kind() == std::io::ErrorKind::TimedOut {
                         return Ok(None);
                     } else {
+                        self.port = DriverPort::Inactive(format!("Read from STM32 failed: {}", e));
                         return Err(format!("Read from STM32 failed: {}", e));
                     }
                 }
