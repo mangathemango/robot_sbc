@@ -21,6 +21,7 @@ use std::sync::Arc;
 use crate::ROBOT;
 use crate::devices::gyro::GyroState;
 use crate::devices::stm32::Stm32State;
+use crate::devices::qr::QrState;
 
 // ====== PUBLIC ENTRY ======
 
