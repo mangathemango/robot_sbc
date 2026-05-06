@@ -5,7 +5,7 @@ pub fn try_read() -> Result<(), String> {
     let mut device = Device::open(path)
         .map_err(|e| format!("{}", e))?;
 
-    let mut buffer = Vec::new();
+    let mut buffer = String::new();
 
     loop {
         for ev in device.fetch_events().map_err(|e| format!("{}", e))? {
@@ -18,8 +18,8 @@ pub fn try_read() -> Result<(), String> {
                                 buffer.clear();
                             }
                             _ => {
-                                buffer.push(keycode);
                                 if let Some(char) = keycode_to_ascii(keycode, false) {
+                                    buffer.push(keycode);
                                 }
                             }
                         }
@@ -44,11 +44,10 @@ pub fn keycode_to_ascii(key: KeyCode, shift: bool) -> Option<char> {
         KeyCode::KEY_8 => '8',
         KeyCode::KEY_9 => '9',
         KeyCode::KEY_0 => '0',
-        KeyCode::KEY_KPPLUS => '+',
-        KeyCode::KEY_MINUS => '-',
-        KeyCode::KEY_SLASH => '/',
-        KeyCode::KEY_DOT => '.',
-        KeyCode::KEY_SPACE => ' ',
+
+        // The Qr reader inputs a "+" by doing KeyCode::Shift THEN a Keycode::Equal. 
+        // It's alr I'm just gonna hard code it
+        KeyCode::KEY_EQUAL => '+',
 
         _ => return None,
     };
