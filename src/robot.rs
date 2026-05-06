@@ -17,7 +17,7 @@ impl Robot {
             gyro_state: ArcSwap::from_pointee(GyroState::new()),
             stm32_state: ArcSwap::from_pointee(Stm32State::new()),
             maixcam_state: ArcSwap::from_pointee(MaixcamState::new()),
-            qr_state: ArcSwap::from_pointee(qr::new())
+            qr_state: ArcSwap::from_pointee(QrState::new())
         }
     }
 }

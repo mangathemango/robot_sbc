@@ -3,7 +3,7 @@ mod devices;
 mod robot;
 use crate::devices::gyro::{GyroDriver, GyroState};
 use crate::devices::maixcam::{MaixcamDriver, MaixcamState};
-use crate::devices::qr::{QrDriver, QrState};
+use crate::devices::qr::{DriverHIDDevice, QrDriver, QrState};
 use crate::devices::stm32::{PiToStm32Command, Stm32Controller, Stm32Driver, Stm32State};
 use once_cell::sync::Lazy;
 use robot::Robot;
@@ -118,6 +118,7 @@ pub fn spawn_qr_thread() {
 
                 }
                 Err(msg) => {
+                    driver.device = DriverHIDDevice::Inactive(msg.clone());
                     state.error_msg = msg.clone();
                     driver.reconnect();
                     std::thread::sleep(std::time::Duration::from_millis(200));

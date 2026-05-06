@@ -2,8 +2,9 @@
 use std::{thread, time::Duration};
 
 use evdev::{Device, EventSummary, KeyCode};
-const QR_READER_DOTENV_KEY = "QR_READER_PATH";
+const QR_READER_DOTENV_KEY: &str = "QR_READER_PATH";
 
+#[derive(Debug)]
 pub enum DriverHIDDevice {
     Active(Device),
     Inactive(String),
@@ -18,9 +19,9 @@ impl DriverHIDDevice {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct QrDriver {
-    device: DriverHIDDevice,
+    pub device: DriverHIDDevice,
 }
 
 impl QrDriver {
@@ -72,7 +73,6 @@ impl QrDriver {
                     match device.fetch_events() {
                         Ok(evs) => evs,
                         Err(e) => {
-                            self.device = DriverHIDDevice::Inactive(format!("{}", e));
                             return Err(format!("Fetch event from Qr code error: {}", e));
                         }
                     }
@@ -134,4 +134,10 @@ pub struct QrState {
     pub driver_is_active: bool,
     pub code: String,
     pub error_msg: String
+}
+
+impl QrState {
+    pub fn new() -> Self {
+        QrState::default()
+    }
 }
