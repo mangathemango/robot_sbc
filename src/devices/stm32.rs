@@ -25,16 +25,16 @@ impl Stm32Driver {
         self.port = DriverPort::from_dotenv_key(STM32_DOTENV_KEY);
     }
 
-    pub fn is_active(&self) -> bool {
-        self.port.is_active()
+    pub fn is_connected(&self) -> bool {
+        self.port.is_connected()
     }
 
     pub fn send_command(&mut self, command: PiToStm32Command) -> Result<usize, String> {
         let port = match &mut self.port {
-            DriverPort::Inactive(msg) => {
+            DriverPort::Disconnected(msg) => {
                 return Err(format!("Send command to STM32 failed: {}", msg).into());
             }
-            DriverPort::Active(port) => port,
+            DriverPort::Connected(port) => port,
         };
         port.write(&command.to_bytes())
             .map_err(|e| format!("Send command to STM32 failed: {}", e))
@@ -42,10 +42,10 @@ impl Stm32Driver {
 
     pub fn try_read_frame(&mut self) -> Result<Option<Stm32ToPiCommand>, String> {
         let port = match &mut self.port {
-            DriverPort::Inactive(msg) => {
+            DriverPort::Disconnected(msg) => {
                 return Err(format!("Read from STM32 failed: {}", msg).into());
             }
-            DriverPort::Active(port) => port,
+            DriverPort::Connected(port) => port,
         };
 
         let mut buffer = [0u8; 1];
@@ -60,7 +60,8 @@ impl Stm32Driver {
                     if e.kind() == std::io::ErrorKind::TimedOut {
                         return Ok(None);
                     } else {
-                        self.port = DriverPort::Inactive(format!("Read from STM32 failed: {}", e));
+                        self.port =
+                            DriverPort::Disconnected(format!("Read from STM32 failed: {}", e));
                         return Err(format!("Read from STM32 failed: {}", e));
                     }
                 }
@@ -165,7 +166,7 @@ impl Stm32Controller {
 /// A struct representing the current states polled from the Stm32
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Stm32State {
-    pub driver_is_active: bool,
+    pub driver_is_connected: bool,
     pub start_flag: bool,
     // Movements
     pub actual_wheel_velocities: [i16; 4],

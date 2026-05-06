@@ -15,12 +15,12 @@ impl GyroDriver {
         }
     }
 
-    pub fn reconnect(&mut self)  {
+    pub fn reconnect(&mut self) {
         self.port = DriverPort::from_dotenv_key(GYRO_DOTENV_KEY);
     }
 
-    pub fn is_active(&self) -> bool {
-        self.port.is_active()
+    pub fn is_connected(&self) -> bool {
+        self.port.is_connected()
     }
 
     /// Reads serial bytes coming from self.port until a valid frame of bytes can be parsed into a GyroSample
@@ -29,8 +29,8 @@ impl GyroDriver {
     /// [0x55] [0x53] [...] [yaw] [...] [gy] [gz]
     pub fn try_read_frame(&mut self) -> Result<GyroSample, String> {
         match &mut self.port {
-            DriverPort::Inactive(msg) => Err(format!("Gyro driver not active: {}",msg)),
-            DriverPort::Active(port) => {
+            DriverPort::Disconnected(msg) => Err(format!("Gyro driver not active: {}", msg)),
+            DriverPort::Connected(port) => {
                 let mut buffer = [0; 1];
                 let mut frame = Vec::new();
                 loop {
@@ -40,7 +40,9 @@ impl GyroDriver {
                             continue;
                         }
                         Err(e) => {
-                            self.port = DriverPort::Inactive(format!("Gyro read frame error: {}", e).into());
+                            self.port = DriverPort::Disconnected(
+                                format!("Gyro read frame error: {}", e).into(),
+                            );
                             return Err(format!("Gyro read frame error: {}", e));
                         }
                     }
@@ -97,7 +99,7 @@ pub struct GyroSample {
 #[derive(Debug, Default, Clone)]
 pub struct GyroState {
     /// flag to indicate activity
-    pub driver_is_active: bool,
+    pub driver_is_connected: bool,
     pub error_msg: Option<String>,
 
     /// The first recorded yaw for relative yaw calculation for 0 point
@@ -116,7 +118,7 @@ impl GyroState {
     pub fn new() -> Self {
         GyroState {
             initial_yaw: f32::NAN,
-            driver_is_active: true,
+            driver_is_connected: true,
             ..Default::default()
         }
     }

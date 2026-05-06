@@ -1,4 +1,3 @@
-
 use std::{thread, time::Duration};
 
 use evdev::{Device, EventSummary, KeyCode};
@@ -6,15 +5,15 @@ const QR_READER_DOTENV_KEY: &str = "QR_READER_PATH";
 
 #[derive(Debug)]
 pub enum DriverHIDDevice {
-    Active(Device),
-    Inactive(String),
+    Connected(Device),
+    Disconnected(String),
 }
 
 impl DriverHIDDevice {
-    pub fn is_active(&self) -> bool {
+    pub fn is_connected(&self) -> bool {
         match self {
-            DriverHIDDevice::Active(_) => true,
-            _ => false
+            DriverHIDDevice::Connected(_) => true,
+            _ => false,
         }
     }
 }
@@ -28,40 +27,48 @@ impl QrDriver {
     pub fn new() -> Self {
         let path = match dotenv::var(QR_READER_DOTENV_KEY) {
             Ok(path) => path,
-            Err(e) => return QrDriver { 
-                device: DriverHIDDevice::Inactive(format!("Env error: {}", e).into()) 
+            Err(e) => {
+                return QrDriver {
+                    device: DriverHIDDevice::Disconnected(format!("Env error: {}", e).into()),
+                };
             }
         };
         let device = match Device::open(path) {
             Ok(device) => device,
-            Err(e) => return QrDriver { 
-                device: DriverHIDDevice::Inactive(format!("Open Qrcode device error: {}", e).into())
+            Err(e) => {
+                return QrDriver {
+                    device: DriverHIDDevice::Disconnected(
+                        format!("Open Qrcode device error: {}", e).into(),
+                    ),
+                };
             }
         };
 
-        QrDriver { device: DriverHIDDevice::Active(device) }
+        QrDriver {
+            device: DriverHIDDevice::Connected(device),
+        }
     }
     pub fn reconnect(&mut self) {
         let path = match dotenv::var(QR_READER_DOTENV_KEY) {
             Ok(path) => path,
             Err(e) => {
-                self.device = DriverHIDDevice::Inactive(format!("Env error: {}", e));
+                self.device = DriverHIDDevice::Disconnected(format!("Env error: {}", e));
                 return;
             }
         };
 
         match Device::open(path) {
             Ok(device) => {
-                self.device = DriverHIDDevice::Active(device);
+                self.device = DriverHIDDevice::Connected(device);
             }
             Err(e) => {
-                self.device = DriverHIDDevice::Inactive(format!("Open error: {}", e));
+                self.device = DriverHIDDevice::Disconnected(format!("Open error: {}", e));
             }
         }
     }
 
-    pub fn is_active(&self) -> bool{
-        self.device.is_active()
+    pub fn is_connected(&self) -> bool {
+        self.device.is_connected()
     }
 
     pub fn try_read(&mut self) -> Result<Option<String>, String> {
@@ -69,15 +76,13 @@ impl QrDriver {
 
         for _ in 0..100 {
             let evs = match &mut self.device {
-                DriverHIDDevice::Active(device) => {
-                    match device.fetch_events() {
-                        Ok(evs) => evs,
-                        Err(e) => {
-                            return Err(format!("Fetch event from Qr code error: {}", e));
-                        }
+                DriverHIDDevice::Connected(device) => match device.fetch_events() {
+                    Ok(evs) => evs,
+                    Err(e) => {
+                        return Err(format!("Fetch event from Qr code error: {}", e));
                     }
-                }
-                DriverHIDDevice::Inactive(msg) => {
+                },
+                DriverHIDDevice::Disconnected(msg) => {
                     return Err(msg.clone());
                 }
             };
@@ -102,9 +107,7 @@ impl QrDriver {
         Ok(None)
     }
 
-
     pub fn keycode_to_ascii(key: KeyCode) -> Option<char> {
-
         let c = match key {
             KeyCode::KEY_1 => '1',
             KeyCode::KEY_2 => '2',
@@ -117,7 +120,7 @@ impl QrDriver {
             KeyCode::KEY_9 => '9',
             KeyCode::KEY_0 => '0',
 
-            // The Qr reader inputs a "+" by doing KeyCode::Shift THEN a Keycode::Equal. 
+            // The Qr reader inputs a "+" by doing KeyCode::Shift THEN a Keycode::Equal.
             // It's alr I'm just gonna hard code it
             KeyCode::KEY_EQUAL => '+',
 
@@ -131,9 +134,9 @@ impl QrDriver {
 
 #[derive(Debug, Clone, Default)]
 pub struct QrState {
-    pub driver_is_active: bool,
+    pub driver_is_connected: bool,
     pub code: String,
-    pub error_msg: String
+    pub error_msg: String,
 }
 
 impl QrState {

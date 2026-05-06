@@ -3,7 +3,7 @@ use glam::Vec2;
 
 const MAIXCAM_DOTENV_KEY: &str = "MAIXCAM_PATH";
 const MAIXCAM_START_BYTE: u8 = 0x69;
-const MAIXCAM_CAMERA_RESOLUTION_WIDTH:  f32 = 360.0;
+const MAIXCAM_CAMERA_RESOLUTION_WIDTH: f32 = 360.0;
 const MAIXCAM_CAMERA_RESOLUTION_HEIGHT: f32 = 240.0;
 
 /// The Maixcam does nothing but send circle coordinates, so it doesn't really need to scale for the time being
@@ -27,14 +27,14 @@ impl MaixcamDriver {
         self.port = DriverPort::from_dotenv_key(MAIXCAM_DOTENV_KEY);
     }
 
-    pub fn is_active(&self) -> bool {
-        self.port.is_active()
+    pub fn is_connected(&self) -> bool {
+        self.port.is_connected()
     }
 
     pub fn try_read_frame(&mut self) -> Result<MaixcamSample, String> {
         match &mut self.port {
-            DriverPort::Inactive(msg) => Err(format!("Maixcam driver not active: {}",msg)),
-            DriverPort::Active(port) => {
+            DriverPort::Disconnected(msg) => Err(format!("Maixcam driver not active: {}", msg)),
+            DriverPort::Connected(port) => {
                 let mut buffer = [0; 1];
                 let mut frame = Vec::<u8>::new();
                 let mut idx = 0;
@@ -45,7 +45,9 @@ impl MaixcamDriver {
                             if e.kind() == std::io::ErrorKind::TimedOut {
                                 continue;
                             } else {
-                                self.port = DriverPort::Inactive(format!("Maixcam read frame error: {}", e).into());
+                                self.port = DriverPort::Disconnected(
+                                    format!("Maixcam read frame error: {}", e).into(),
+                                );
                                 return Err(format!("Read from Maixcam failed: {}", e));
                             }
                         }
@@ -58,13 +60,12 @@ impl MaixcamDriver {
                     frame.push(byte);
                     idx += 1;
                     if idx == 6 {
-                        return Ok(MaixcamSample { 
-                            circle_position_x: u16::from_le_bytes([frame[1], frame[2]]), 
-                            circle_position_y: u16::from_le_bytes([frame[3], frame[4]]), 
-                            circle_color_id: frame[5] 
-                        })
+                        return Ok(MaixcamSample {
+                            circle_position_x: u16::from_le_bytes([frame[1], frame[2]]),
+                            circle_position_y: u16::from_le_bytes([frame[3], frame[4]]),
+                            circle_color_id: frame[5],
+                        });
                     }
-
                 }
             }
         }
@@ -79,14 +80,13 @@ pub enum MaixcamCircleColor {
     Blue,
 }
 
-
 impl MaixcamCircleColor {
-    pub fn from_id(id:u8) -> Self {
+    pub fn from_id(id: u8) -> Self {
         match id {
             1 => MaixcamCircleColor::Red,
             2 => MaixcamCircleColor::Green,
             3 => MaixcamCircleColor::Blue,
-            _ => MaixcamCircleColor::Unknown
+            _ => MaixcamCircleColor::Unknown,
         }
     }
 }
@@ -100,12 +100,12 @@ impl Default for MaixcamCircleColor {
 pub struct MaixcamSample {
     circle_position_x: u16,
     circle_position_y: u16,
-    circle_color_id:   u8,
+    circle_color_id: u8,
 }
 
 #[derive(Debug, Default, Clone)]
 pub struct MaixcamState {
-    pub driver_is_active: bool,
+    pub driver_is_connected: bool,
     pub circle_position: Vec2,
     pub circle_color: MaixcamCircleColor,
 }
@@ -123,4 +123,3 @@ impl MaixcamState {
         self.circle_color = MaixcamCircleColor::from_id(sample.circle_color_id);
     }
 }
-

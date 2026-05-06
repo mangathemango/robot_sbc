@@ -1,7 +1,7 @@
 use std::{
-    io, thread, time::{Duration, Instant}
+    io, thread,
+    time::{Duration, Instant},
 };
-
 
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -20,8 +20,8 @@ use std::sync::Arc;
 // 👇 IMPORT YOUR GLOBAL ROBOT
 use crate::ROBOT;
 use crate::devices::gyro::GyroState;
-use crate::devices::stm32::Stm32State;
 use crate::devices::qr::QrState;
+use crate::devices::stm32::Stm32State;
 
 // ====== PUBLIC ENTRY ======
 
@@ -87,11 +87,11 @@ fn run() -> Result<(), io::Error> {
 // ====== UI ======
 
 fn ui(
-    f: &mut Frame, 
-    gyro: &Arc<GyroState>, 
-    stm32: &Arc<Stm32State>, 
-    qr: &Arc<QrState>, 
-    history: &Vec<(f64, f64)>
+    f: &mut Frame,
+    gyro: &Arc<GyroState>,
+    stm32: &Arc<Stm32State>,
+    qr: &Arc<QrState>,
+    history: &Vec<(f64, f64)>,
 ) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
@@ -111,10 +111,7 @@ fn ui(
 
     let bottom_right_chunks = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Fill(1),
-            Constraint::Length(21)
-        ])
+        .constraints([Constraint::Fill(1), Constraint::Length(21)])
         .split(right_chunks[1]);
 
     draw_gyro(f, right_chunks[0], gyro, history);
@@ -124,26 +121,22 @@ fn ui(
 }
 
 fn draw_qr(f: &mut Frame, area: Rect, qr: &Arc<QrState>) {
-    let error_text = if qr.error_msg.is_empty() || qr.driver_is_active {
+    let error_text = if qr.error_msg.is_empty() || qr.driver_is_connected {
         ""
     } else {
         &qr.error_msg
     };
 
     let text = format!(
-        "Qr Code: {}\nActive: {}\n{}",
+        "Qr Code: {}\nConnected: {}\n{}",
         qr.code,
-        bool_icon(qr.driver_is_active),
+        bool_icon(qr.driver_is_connected),
         error_text
     );
 
-    let block = Block::default()
-        .title("QR")
-        .borders(Borders::ALL);
+    let block = Block::default().title("QR").borders(Borders::ALL);
 
-    let p = Paragraph::new(text)
-        .wrap(Wrap { trim: true })
-        .block(block);
+    let p = Paragraph::new(text).wrap(Wrap { trim: true }).block(block);
 
     f.render_widget(p, area);
 }
@@ -219,7 +212,7 @@ fn draw_gyro(f: &mut Frame, area: Rect, g: &GyroState, history: &Vec<(f64, f64)>
 }
 
 fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
-    let color = if !g.driver_is_active {
+    let color = if !g.driver_is_connected {
         Color::Red
     } else if g.relative_yaw.abs() > 45.0 {
         Color::Yellow
@@ -228,13 +221,13 @@ fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
     };
 
     let text = format!(
-        "Relative yaw: {:.2}\nRaw yaw: {:.2}\nInitial yaw: {:.2}\nGY: {:.2}\nGZ: {:.2}\nActive: {}\n{:?}",
+        "Relative yaw: {:.2}\nRaw yaw: {:.2}\nInitial yaw: {:.2}\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\n{:?}",
         g.relative_yaw,
         g.current_yaw,
         g.initial_yaw,
         g.gy,
         g.gz,
-        bool_icon(g.driver_is_active),
+        bool_icon(g.driver_is_connected),
         match &g.error_msg {
             Some(msg) => msg,
             None => "",
@@ -359,10 +352,10 @@ fn draw_compass(f: &mut Frame, area: Rect, yaw_deg: f32, size_x: usize, size_y: 
 
 fn draw_stm32(f: &mut Frame, area: Rect, s: &Stm32State) {
     let text = format!(
-        "Running: {}\nWheels: {:?}\nActive: {}",
+        "Running: {}\nWheels: {:?}\nConnected: {}",
         bool_icon(s.start_flag),
         s.actual_wheel_velocities,
-        bool_icon(s.driver_is_active)
+        bool_icon(s.driver_is_connected)
     );
 
     paragraph(f, area, "STM32", text);

@@ -1,14 +1,14 @@
 pub mod gyro;
-pub mod stm32;
 pub mod maixcam;
+pub mod stm32;
 
 #[cfg(target_os = "linux")]
 pub mod qr;
 
 #[derive(Debug)]
 pub enum DriverPort {
-    Active(Box<dyn serialport::SerialPort>),
-    Inactive(String)
+    Connected(Box<dyn serialport::SerialPort>),
+    Disconnected(String),
 }
 
 impl DriverPort {
@@ -16,22 +16,28 @@ impl DriverPort {
         let path = match dotenv::var(dotenv_key) {
             Ok(path) => path,
             Err(e) => {
-                return DriverPort::Inactive(format!("Dotenv key {} fetch failed: {}", dotenv_key, e));
+                return DriverPort::Disconnected(format!(
+                    "Dotenv key {} fetch failed: {}",
+                    dotenv_key, e
+                ));
             }
         };
         let port = match serialport::new(&path, 115200).open() {
             Ok(port) => port,
             Err(e) => {
-                return  DriverPort::Inactive(format!("Open driver port {} ({}) failed: {}", dotenv_key, path, e));
+                return DriverPort::Disconnected(format!(
+                    "Open driver port {} ({}) failed: {}",
+                    dotenv_key, path, e
+                ));
             }
         };
-        DriverPort::Active(port)
+        DriverPort::Connected(port)
     }
 
-    pub fn is_active(&self) -> bool {
+    pub fn is_connected(&self) -> bool {
         match self {
-            DriverPort::Active(_) => true,
-            _ => false
+            DriverPort::Connected(_) => true,
+            _ => false,
         }
     }
 }

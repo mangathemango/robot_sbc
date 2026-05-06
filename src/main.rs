@@ -45,7 +45,7 @@ fn spawn_gyro_thread() {
                     std::thread::sleep(std::time::Duration::from_millis(200));
                 }
             };
-            state.driver_is_active = driver.is_active();
+            state.driver_is_connected = driver.is_connected();
             ROBOT.gyro_state.store(Arc::new(state.clone()));
         }
     });
@@ -77,7 +77,7 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
                     std::thread::sleep(std::time::Duration::from_millis(200));
                 }
             }
-            state.driver_is_active = driver.is_active();
+            state.driver_is_connected = driver.is_connected();
             ROBOT.stm32_state.store(Arc::new(state.clone()));
         }
     });
@@ -98,7 +98,7 @@ pub fn spawn_maixcam_thread() {
                     std::thread::sleep(std::time::Duration::from_millis(200));
                 }
             }
-            state.driver_is_active = driver.is_active();
+            state.driver_is_connected = driver.is_connected();
             ROBOT.maixcam_state.store(Arc::new(state.clone()));
         }
     });
@@ -108,24 +108,22 @@ pub fn spawn_qr_thread() {
     std::thread::spawn(move || {
         let mut driver = QrDriver::new();
         let mut state = QrState::new();
-        state.driver_is_active = driver.is_active();
+        state.driver_is_connected = driver.is_connected();
         ROBOT.qr_state.store(Arc::new(state.clone()));
         loop {
             match driver.try_read() {
                 Ok(Some(code)) => {
                     state.code = code.clone();
-                },
-                Ok(None) => {
-
                 }
+                Ok(None) => {}
                 Err(msg) => {
-                    driver.device = DriverHIDDevice::Inactive(msg.clone());
+                    driver.device = DriverHIDDevice::Disconnected(msg.clone());
                     state.error_msg = msg.clone();
                     driver.reconnect();
                     std::thread::sleep(std::time::Duration::from_millis(200));
                 }
             }
-            state.driver_is_active = driver.is_active();
+            state.driver_is_connected = driver.is_connected();
             ROBOT.qr_state.store(Arc::new(state.clone()));
         }
     });
