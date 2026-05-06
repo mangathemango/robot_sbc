@@ -1,4 +1,4 @@
-use evdev::{Device, EventSummary, KeyCode};
+use evdev::{Device, EventSummary, KeyCode, EvdevEnum};
 
 pub fn try_read() -> Result<(), String> {
     let path = "/dev/input/by-id/usb-USBKey_Chip_USBKey_Module_202730041341-event-kbd";
