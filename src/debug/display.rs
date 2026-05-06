@@ -89,7 +89,7 @@ fn ui(f: &mut Frame, gyro: &Arc<GyroState>, stm32: &Arc<Stm32State>, history: &V
         .direction(Direction::Horizontal)
         .constraints([
             Constraint::Percentage(20), // system
-            Constraint::Percentage(80), // robot
+            Constraint::Percentage(0), // robot
         ])
         .split(f.size());
 
@@ -104,6 +104,29 @@ fn ui(f: &mut Frame, gyro: &Arc<GyroState>, stm32: &Arc<Stm32State>, history: &V
     draw_system(f, chunks[0]); // 👈 you’ll add this
     draw_gyro(f, right_chunks[0], gyro, history);
     draw_stm32(f, right_chunks[1], stm32);
+}
+
+
+fn read_temperature() -> Option<f32> {
+    #[cfg(target_os = "linux")]
+    {
+        std::fs::read_to_string("/sys/class/thermal/thermal_zone0/temp")
+            .ok()?
+            .trim()
+            .parse::<f32>()
+            .ok()
+            .map(|v| v / 1000.0)
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        None // Windows is cursed for temps without extra APIs
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        None // same story unless using IOKit bindings
+    }
 }
 
 // ====== PANELS ======
@@ -129,7 +152,7 @@ pub fn draw_system(f: &mut Frame, area: Rect) {
         "SYSTEM\n\nCPU: {:.1}%\nRAM: {:.1}%\nTEMP: {}\n\nPROCS: {}",
         cpu_usage,
         mem_usage,
-        "TODO",
+        read_temperature().unwrap_or(0.0),
         sys.processes().len()
     );
 
