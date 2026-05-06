@@ -51,8 +51,9 @@ fn run() -> Result<(), io::Error> {
         // 🧠 Load latest states
         let gyro = ROBOT.gyro_state.load();
         let stm32 = ROBOT.stm32_state.load();
+        let qr = ROBOT.qr_state.load();
 
-        terminal.draw(|f| ui(f, &gyro, &stm32, &yaw_history))?;
+        terminal.draw(|f| ui(f, &gyro, &stm32, &qr, &yaw_history))?;
 
         // exit key (optional)
         if event::poll(Duration::from_millis(10))? {
@@ -84,7 +85,13 @@ fn run() -> Result<(), io::Error> {
 
 // ====== UI ======
 
-fn ui(f: &mut Frame, gyro: &Arc<GyroState>, stm32: &Arc<Stm32State>, history: &Vec<(f64, f64)>) {
+fn ui(
+    f: &mut Frame, 
+    gyro: &Arc<GyroState>, 
+    stm32: &Arc<Stm32State>, 
+    qr: &Arc<QrState>, 
+    history: &Vec<(f64, f64)>
+) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
@@ -101,11 +108,44 @@ fn ui(f: &mut Frame, gyro: &Arc<GyroState>, stm32: &Arc<Stm32State>, history: &V
         ])
         .split(chunks[1]);
 
+    let bottom_right_chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Fill(1),
+            Constraint::Length(21)
+        ])
+        .split(right_chunks[1]);
+
     draw_gyro(f, right_chunks[0], gyro, history);
-    draw_stm32(f, right_chunks[1], stm32);
+    draw_stm32(f, bottom_right_chunks[0], stm32);
+    draw_qr(f, bottom_right_chunks[1], qr);
     draw_system(f, chunks[0]); // 👈 you’ll add this
 }
 
+fn draw_qr(f: &mut Frame, area: Rect, qr: &Arc<QrState>) {
+    let error_text = if qr.error_msg.is_empty() {
+        ""
+    } else {
+        &qr.error_msg
+    };
+
+    let text = format!(
+        "Qr Code: {}\nActive: {}\n{}",
+        qr.code,
+        bool_icon(qr.driver_is_active),
+        error_text
+    );
+
+    let block = Block::default()
+        .title("QR")
+        .borders(Borders::ALL);
+
+    let p = Paragraph::new(text)
+        .wrap(Wrap { trim: true })
+        .block(block);
+
+    f.render_widget(p, area);
+}
 
 fn read_temperature() -> Option<f32> {
     #[cfg(target_os = "linux")]
