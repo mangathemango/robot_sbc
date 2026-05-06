@@ -3,6 +3,7 @@ mod devices;
 mod robot;
 use crate::devices::gyro::{GyroDriver, GyroState};
 use crate::devices::maixcam::{MaixcamDriver, MaixcamState};
+use crate::devices::qr::{QrDriver, QrState};
 use crate::devices::stm32::{PiToStm32Command, Stm32Controller, Stm32Driver, Stm32State};
 use once_cell::sync::Lazy;
 use robot::Robot;
@@ -15,13 +16,14 @@ use crate::devices::qr;
 static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());
 
 fn main() {
-    qr::try_read();
     let (tx, rx) = mpsc::channel();
     let stm32 = Stm32Controller::new(tx);
 
     spawn_stm32_thread(rx);
     spawn_gyro_thread();
     spawn_maixcam_thread();
+    spawn_qr_thread();
+    #[cfg(target_os = "linux")]
     debug::display::start();
     loop {}
 }
@@ -98,6 +100,31 @@ pub fn spawn_maixcam_thread() {
             }
             state.driver_is_active = driver.is_active();
             ROBOT.maixcam_state.store(Arc::new(state.clone()));
+        }
+    });
+}
+
+pub fn spawn_qr_thread() {
+    std::thread::spawn(move || {
+        let mut driver = QrDriver::new();
+        let mut state = QrState::new();
+
+        loop {
+            match driver.try_read() {
+                Ok(Some(code)) => {
+                    state.code = code.clone();
+                },
+                Ok(None) => {
+
+                }
+                Err(msg) => {
+                    state.error_msg = msg.clone();
+                    driver.reconnect();
+                    std::thread::sleep(std::time::Duration::from_millis(200));
+                }
+            }
+            state.driver_is_active = driver.is_active();
+            ROBOT.qr_state.store(Arc::new(state.clone()));
         }
     });
 }

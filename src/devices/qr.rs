@@ -1,57 +1,106 @@
 
+use std::{thread, time::Duration};
+
 use evdev::{Device, EventSummary, KeyCode};
 const QR_READER_DOTENV_KEY = "QR_READER_PATH";
 
+pub enum DriverHIDDevice {
+    Active(Device),
+    Inactive(String),
+}
+
+impl DriverHIDDevice {
+    pub fn is_active(&self) -> bool {
+        match self {
+            DriverHIDDevice::Active(_) => true,
+            _ => false
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct QrDriver {
-    device: Device
+    device: DriverHIDDevice,
 }
 
 impl QrDriver {
-    pub fn new() -> Result<Self, String> {
-        let path = dotenv::var(QR_READER_DOTENV_KEY)
-            .map_err(|e| format!("Env error: {}", e))?;
-        let device = Device::open(path)
-            .map_err(|e| format!("Open Qrcode device error: {}", e))?;
+    pub fn new() -> Self {
+        let path = match dotenv::var(QR_READER_DOTENV_KEY) {
+            Ok(path) => path,
+            Err(e) => return QrDriver { 
+                device: DriverHIDDevice::Inactive(format!("Env error: {}", e).into()) 
+            }
+        };
+        let device = match Device::open(path) {
+            Ok(device) => device,
+            Err(e) => return QrDriver { 
+                device: DriverHIDDevice::Inactive(format!("Open Qrcode device error: {}", e).into())
+            }
+        };
 
-        Ok(QrDriver { device })
+        QrDriver { device: DriverHIDDevice::Active(device) }
     }
-    pub fn reconnect(&mut self) -> Result<(), String> {
-        let path = dotenv::var(QR_READER_DOTENV_KEY)
-            .map_err(|e| format!("Env error: {}", e))?;
-        let device = Device::open(path)
-            .map_err(|e| format!("Open Qrcode device error: {}", e))?;
+    pub fn reconnect(&mut self) {
+        let path = match dotenv::var(QR_READER_DOTENV_KEY) {
+            Ok(path) => path,
+            Err(e) => {
+                self.device = DriverHIDDevice::Inactive(format!("Env error: {}", e));
+                return;
+            }
+        };
 
-        self.device = device;
-        Ok(())
-    }
-
-    pub fn try_read(&mut self) -> Result<String, String> {
-        let mut buffer = String::new();
-
-        loop {
-            for ev in self.device.fetch_events().map_err(|e| format!("Fetch event from Qr code error: {}", e))? {
-                match ev.destructure() {
-                    EventSummary::Key(_, keycode, value) => {
-                        if value == 1 {
-                            match keycode {
-                                evdev::KeyCode::KEY_ENTER => {
-                                    return Ok(buffer);
-                                }
-                                _ => {
-                                    if let Some(c) = Self::keycode_to_ascii(keycode) {
-                                        buffer.push(char);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    _ => {}
-                }
+        match Device::open(path) {
+            Ok(device) => {
+                self.device = DriverHIDDevice::Active(device);
+            }
+            Err(e) => {
+                self.device = DriverHIDDevice::Inactive(format!("Open error: {}", e));
             }
         }
     }
 
+    pub fn is_active(&self) -> bool{
+        self.device.is_active()
+    }
+
+    pub fn try_read(&mut self) -> Result<Option<String>, String> {
+        let mut buffer = String::new();
+
+        for _ in 0..100 {
+            let evs = match &mut self.device {
+                DriverHIDDevice::Active(device) => {
+                    match device.fetch_events() {
+                        Ok(evs) => evs,
+                        Err(e) => {
+                            self.device = DriverHIDDevice::Inactive(format!("{}", e));
+                            return Err(format!("Fetch event from Qr code error: {}", e));
+                        }
+                    }
+                }
+                DriverHIDDevice::Inactive(msg) => {
+                    return Err(msg.clone());
+                }
+            };
+
+            for ev in evs {
+                if let EventSummary::Key(_, keycode, value) = ev.destructure() {
+                    if value == 1 {
+                        if keycode == KeyCode::KEY_ENTER {
+                            return Ok(Some(buffer));
+                        }
+
+                        if let Some(c) = Self::keycode_to_ascii(keycode) {
+                            buffer.push(c);
+                        }
+                    }
+                }
+            }
+
+            thread::sleep(Duration::from_millis(10));
+        }
+
+        Ok(None)
+    }
 
 
     pub fn keycode_to_ascii(key: KeyCode) -> Option<char> {
