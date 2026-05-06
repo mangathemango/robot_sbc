@@ -42,7 +42,7 @@ pub fn keycode_to_ascii(key: KeyCode, shift: bool) -> Option<char> {
         KeyCode::KEY_8 => '8',
         KeyCode::KEY_9 => '9',
         KeyCode::KEY_0 => '0',
-        KeyCode::KPPLUS => '+',
+        KeyCode::KEY_KPPLUS => '+',
         KeyCode::KEY_MINUS => '-',
         KeyCode::KEY_SLASH => '/',
         KeyCode::KEY_DOT => '.',
