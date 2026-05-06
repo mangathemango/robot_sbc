@@ -101,9 +101,9 @@ fn ui(f: &mut Frame, gyro: &Arc<GyroState>, stm32: &Arc<Stm32State>, history: &V
         ])
         .split(chunks[1]);
 
-    draw_system(f, chunks[0]); // 👈 you’ll add this
     draw_gyro(f, right_chunks[0], gyro, history);
     draw_stm32(f, right_chunks[1], stm32);
+    draw_system(f, chunks[0]); // 👈 you’ll add this
 }
 
 
