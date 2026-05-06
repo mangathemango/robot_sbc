@@ -2,6 +2,9 @@ pub mod gyro;
 pub mod stm32;
 pub mod maixcam;
 
+#[cfg(target_os = "linux")]
+pub mod qr;
+
 #[derive(Debug)]
 pub enum DriverPort {
     Active(Box<dyn serialport::SerialPort>),

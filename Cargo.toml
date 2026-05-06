@@ -3,6 +3,9 @@ name = "robot-sbc"
 version = "0.1.0"
 edition = "2024"
 
+[target.aarch64-unknown-linux-gnu]
+linker = "aarch64-linux-gnu-gcc"
+
 [dependencies]
 arc-swap = "1.9.1"
 dotenv = "0.15.0"
@@ -12,3 +15,4 @@ serialport = "4.9.0"
 ratatui = "0.26"
 crossterm = "0.27"
 sysinfo = "0.33"
+evdev = "0.13.2"

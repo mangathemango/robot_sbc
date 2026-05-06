@@ -9,9 +9,13 @@ use robot::Robot;
 use std::sync::Arc;
 use std::sync::mpsc::{self, Receiver};
 
+#[cfg(target_os = "linux")]
+use crate::devices::qr;
+
 static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());
 
 fn main() {
+    qr::try_read();
     let (tx, rx) = mpsc::channel();
     let stm32 = Stm32Controller::new(tx);
 

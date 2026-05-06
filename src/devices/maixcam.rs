@@ -1,5 +1,4 @@
 use crate::devices::DriverPort;
-use dotenv::dotenv;
 use glam::Vec2;
 
 const MAIXCAM_DOTENV_KEY: &str = "MAIXCAM_PATH";
