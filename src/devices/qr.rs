@@ -4,7 +4,7 @@ use std::{thread, time::Duration};
 use evdev::{Device, EventSummary, KeyCode};
 const QR_READER_DOTENV_KEY: &str = "QR_READER_PATH";
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum DriverHIDDevice {
     Active(Device),
     Inactive(String),
