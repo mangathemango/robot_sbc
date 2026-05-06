@@ -108,7 +108,8 @@ pub fn spawn_qr_thread() {
     std::thread::spawn(move || {
         let mut driver = QrDriver::new();
         let mut state = QrState::new();
-
+        state.driver_is_active = driver.is_active();
+        ROBOT.qr_state.store(Arc::new(state.clone()));
         loop {
             match driver.try_read() {
                 Ok(Some(code)) => {
