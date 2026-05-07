@@ -3,8 +3,8 @@ use glam::Vec2;
 /// A struct representing where an object is and where it's facing
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Pose {
-    position: Vec2,
-    rotation: f32 // in radians
+    pub position: Vec2,
+    pub rotation: f32 // in radians
 }
 
 impl Pose {
