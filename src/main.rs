@@ -25,7 +25,9 @@ fn main() {
     spawn_gyro_thread();
     spawn_maixcam_thread();
     spawn_qr_thread();
-    spawn_debug_thread();    
     spawn_control_thread();
+
+    // The Debug thread has to be the last thread spawned
+    spawn_debug_thread();    
 }
 
