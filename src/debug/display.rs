@@ -259,7 +259,7 @@ fn draw_yaw_graph(f: &mut Frame, area: Rect, history: &Vec<(f64, f64)>) {
         [min_x, max_x]
     };
 
-    let y_bounds = [-180.0, 180.0];
+    let y_bounds = [-PI as f64, PI as f64];
 
     let chart = Chart::new(vec![dataset])
         .block(Block::default().title("Yaw Graph").borders(Borders::ALL))
