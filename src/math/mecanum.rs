@@ -8,6 +8,16 @@ pub struct MecanumVelocities {
     pub vrr: f32,
 }
 
+impl std::fmt::Display for MecanumVelocities {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "(vfl: {:.3}, vfr: {:.3}\nvrl: {:.3}, vrr: {:.3})",
+            self.vfl, self.vfr, self.vrl, self.vrr
+        )
+    }
+}
+
 impl MecanumVelocities {
     pub fn new(vfl: f32, vfr: f32, vrl: f32, vrr: f32) -> Self {
         MecanumVelocities { vfl, vfr, vrl, vrr }
@@ -15,7 +25,9 @@ impl MecanumVelocities {
 
     /// Clamp all mecanum velocities to [-1.0, 1.0]
     pub fn normalize(&mut self) -> Self {
-        let max = self.vfl.abs()
+        let max = self
+            .vfl
+            .abs()
             .max(self.vfr.abs())
             .max(self.vrl.abs())
             .max(self.vrr.abs())
@@ -47,5 +59,4 @@ impl MecanumVelocities {
     pub fn to_array(&self) -> [f32; 4] {
         [self.vfl, self.vfr, self.vrl, self.vrr]
     }
-
 }

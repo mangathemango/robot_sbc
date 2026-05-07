@@ -11,7 +11,6 @@ use crossterm::{
 
 use ratatui::{Terminal, backend::CrosstermBackend};
 
-use crate::ROBOT;
 use crate::debug::layout::ui;
 
 pub fn start() {
@@ -34,14 +33,9 @@ fn run() -> Result<(), io::Error> {
 
     let tick_rate = Duration::from_millis(100);
     let mut last_tick = Instant::now();
-    let mut yaw_history: Vec<(f64, f64)> = Vec::new();
-    let mut t: f64 = 0.0;
 
     loop {
-        // 🧠 Load latest gyro state for history
-        let gyro = ROBOT.gyro_state.load();
-
-        terminal.draw(|f| ui(f, &yaw_history))?;
+        terminal.draw(|f| ui(f))?;
 
         // exit key (optional)
         if event::poll(Duration::from_millis(10))? {
@@ -53,15 +47,6 @@ fn run() -> Result<(), io::Error> {
         }
 
         if last_tick.elapsed() >= tick_rate {
-            let yaw = gyro.relative_yaw as f64;
-
-            yaw_history.push((t, yaw));
-
-            if yaw_history.len() > 100 {
-                yaw_history.remove(0);
-            }
-
-            t += 1.0;
             last_tick = Instant::now();
         }
     }

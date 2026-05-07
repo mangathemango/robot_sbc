@@ -3,32 +3,48 @@ use std::time::Duration;
 /// A PID (Proportional Integral Derivative) controller is a feedback mechanism that calculates
 /// the error between the desired target and the actual measured value, and adjusting the output
 /// to minimize this difference.
-/// 
+///
 /// The tuning of this model
 #[derive(Debug, Default, Clone, Copy)]
 pub struct PidController {
     // Controller configuration variables
-    kp: f32,            // How much current error contribute to correction
-    ki: f32,            // How much accumulated error over time contribute to correction
-    kd: f32,            // How much the change in error over time contribute to correction
-    tolerance: f32,     // The range in which errors are ignored
-    max_integral: f32,  // Maximum accumulated integral
+    kp: f32,           // How much current error contribute to correction
+    ki: f32,           // How much accumulated error over time contribute to correction
+    kd: f32,           // How much the change in error over time contribute to correction
+    tolerance: f32,    // The range in which errors are ignored
+    max_integral: f32, // Maximum accumulated integral
 
     // Controller states
     last_error: f32,
     integral: f32,
 }
 
+impl std::fmt::Display for PidController {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "PidController {{ kp: {:.3}, ki: {:.3}, kd: {:.3}, tolerance: {:.3}, max_integral: {:.3}, last_error: {:.3}, integral: {:.3} }}",
+            self.kp,
+            self.ki,
+            self.kd,
+            self.tolerance,
+            self.max_integral,
+            self.last_error,
+            self.integral
+        )
+    }
+}
+
 impl PidController {
     pub fn new(kp: f32, ki: f32, kd: f32, tolerance: f32, max_integral: f32) -> Self {
-        PidController { 
-            kp, 
-            ki, 
-            kd, 
-            max_integral, 
+        PidController {
+            kp,
+            ki,
+            kd,
+            max_integral,
             tolerance,
 
-            last_error: f32::NAN, 
+            last_error: f32::NAN,
             ..Default::default()
         }
     }
@@ -49,10 +65,7 @@ impl PidController {
         self.integral += current_error * dt.as_secs_f32();
         self.integral = self.integral.clamp(-self.max_integral, self.max_integral);
 
-        let correction = 
-            current_error * self.kp +
-            self.integral * self.ki +
-            error_diff    * self.kd;
+        let correction = current_error * self.kp + self.integral * self.ki + error_diff * self.kd;
 
         correction
     }

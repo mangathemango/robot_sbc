@@ -1,9 +1,19 @@
-use glam::Vec2;
 use crate::math::MecanumVelocities;
+use glam::Vec2;
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Twist {
     pub linear: Vec2, // (vx, vy)
     pub omega: f32,
+}
+
+impl std::fmt::Display for Twist {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "((vx: {:.3}, vy: {:.3}), ω: {:.3})",
+            self.linear.x, self.linear.y, self.omega
+        )
+    }
 }
 
 impl Twist {
@@ -25,7 +35,7 @@ impl Twist {
     pub fn linear_speed(&self) -> f32 {
         self.linear.length()
     }
-    
+
     pub fn clamp_linear(mut self, max: f32) -> Self {
         let len = self.linear.length();
 
@@ -36,14 +46,11 @@ impl Twist {
         self
     }
     pub fn from_mecanum_velocities(v: MecanumVelocities) -> Self {
-        let vx =
-            (v.vfl + v.vfr + v.vrl + v.vrr) / 4.0;
+        let vx = (v.vfl + v.vfr + v.vrl + v.vrr) / 4.0;
 
-        let vy =
-            (-v.vfl + v.vfr + v.vrl - v.vrr) / 4.0;
+        let vy = (-v.vfl + v.vfr + v.vrl - v.vrr) / 4.0;
 
-        let omega =
-            (-v.vfl + v.vfr - v.vrl + v.vrr) / 4.0;
+        let omega = (-v.vfl + v.vfr - v.vrl + v.vrr) / 4.0;
 
         Self {
             linear: Vec2::new(vx, vy),
