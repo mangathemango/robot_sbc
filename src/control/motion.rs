@@ -38,7 +38,7 @@ impl MotionState {
             .actual_wheel_velocities
             .map(|v| v as f32 / 10000.0);
 
-        self.current_pose.rotation = gyro_state.yaw - self.initial_rotation + PI / 2.0;
+        self.current_pose.rotation = gyro_state.yaw - self.initial_rotation - PI / 2.0;
         loop {
             if self.current_pose.rotation > PI {
                 self.current_pose.rotation -= PI * 2.0;
