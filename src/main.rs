@@ -5,7 +5,7 @@ mod math;
 use crate::devices::gyro::spawn_gyro_thread;
 use crate::devices::maixcam::spawn_maixcam_thread;
 use crate::devices::qr::spawn_qr_thread;
-use crate::devices::stm32::{PiToStm32Command, Stm32Controller, spawn_stm32_thread};
+use crate::devices::stm32::{Stm32Controller, spawn_stm32_thread};
 use crate::debug::spawn_debug_thread;
 
 use std::sync::mpsc;

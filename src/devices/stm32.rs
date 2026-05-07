@@ -4,8 +4,8 @@ use std::sync::mpsc::Sender;
 use crate::ROBOT;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
-use crate::math::twist::Twist;
-use crate::math::mecanum::MecanumVelocities;
+use crate::math::Twist;
+use crate::math::MecanumVelocities;
 
 const STM32_DOTENV_KEY: &str = "STM32_PATH";
 

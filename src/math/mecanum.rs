@@ -1,4 +1,4 @@
-use crate::math::twist::Twist;
+use crate::math::Twist;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct MecanumVelocities {
