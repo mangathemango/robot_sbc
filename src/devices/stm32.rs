@@ -1,6 +1,9 @@
 use crate::devices::DriverPort;
 use glam::Vec2;
 use std::sync::mpsc::Sender;
+use crate::ROBOT;
+use std::sync::Arc;
+use std::sync::mpsc::Receiver;
 
 const STM32_DOTENV_KEY: &str = "STM32_PATH";
 
@@ -8,6 +11,40 @@ const STM32_DOTENV_KEY: &str = "STM32_PATH";
 ///     [[START] [COMMAND_ID] [LEN] [...DATA...] [CHK]]
 /// (CHK = Checksum for data integrity validation, XOR all the bytes from [START] to the end of [...DATA...])
 const STM32_START_BYTE: u8 = 0x67;
+
+
+pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
+    std::thread::spawn(move || {
+        let mut driver = Stm32Driver::new();
+        let mut state = Stm32State::new();
+
+        loop {
+            // 🟣 1. Handle outgoing commands
+            match rx.try_recv() {
+                Ok(cmd) => {
+                    let _ = driver.send_command(cmd);
+                }
+                Err(std::sync::mpsc::TryRecvError::Empty) => {}
+                Err(std::sync::mpsc::TryRecvError::Disconnected) => break,
+            }
+
+            // 🔵 2. Handle incoming data
+            match driver.try_read_frame() {
+                Ok(Some(command)) => {
+                    state.update(command);
+                }
+                Ok(None) => {}
+                Err(_) => {
+                    driver.reconnect();
+                    std::thread::sleep(std::time::Duration::from_millis(200));
+                }
+            }
+            state.driver_is_connected = driver.is_connected();
+            ROBOT.stm32_state.store(Arc::new(state.clone()));
+        }
+    });
+}
+
 
 #[derive(Debug)]
 pub struct Stm32Driver {
@@ -213,8 +250,8 @@ pub enum PiToStm32Command {
     },
 
     /// Motor drivers will (hopefully) handle these two
-    CalibrateVerticalArm {},
-    CalibrateHorizontalArm {},
+    CalibrateVerticalArm,
+    CalibrateHorizontalArm,
 
     /// position: values mapped from 0 (bottom/backwards) - 10000 (top/forwards)
     SetVerticalArmPosition {
@@ -224,7 +261,7 @@ pub enum PiToStm32Command {
         position: u16,
     },
 
-    Beep {},
+    Beep,
     /// velocities: values mapped from -10000 (-max) - 10000 (max)
     /// Note: Only set wheel velocity to target velocity, do not auto ramp velocity back to 0
     SetWheelTargetVelocities {

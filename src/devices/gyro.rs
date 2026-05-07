@@ -1,6 +1,32 @@
 use crate::devices::DriverPort;
+use crate::ROBOT;
+use std::sync::Arc;
 
 const GYRO_DOTENV_KEY: &str = "GYRO_PATH";
+
+
+pub fn spawn_gyro_thread() {
+    std::thread::spawn(move || {
+        let mut driver = GyroDriver::new();
+        let mut state = GyroState::new();
+
+        loop {
+            match driver.try_read_frame() {
+                Ok(sample) => {
+                    state.error_msg = None;
+                    state.update(sample);
+                }
+                Err(msg) => {
+                    state.error_msg = Some(msg);
+                    driver.reconnect();
+                    std::thread::sleep(std::time::Duration::from_millis(200));
+                }
+            };
+            state.driver_is_connected = driver.is_connected();
+            ROBOT.gyro_state.store(Arc::new(state.clone()));
+        }
+    });
+}
 
 /// Driver struct to read + parse data sent from the gyro
 #[derive(Debug)]
@@ -139,3 +165,5 @@ impl GyroState {
         }
     }
 }
+
+
