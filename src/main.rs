@@ -3,6 +3,7 @@ mod devices;
 mod robot;
 mod math;
 mod control;
+use crate::control::spawn_control_thread;
 use crate::devices::gyro::spawn_gyro_thread;
 use crate::devices::maixcam::spawn_maixcam_thread;
 use crate::devices::qr::spawn_qr_thread;
@@ -25,6 +26,7 @@ fn main() {
     spawn_maixcam_thread();
     spawn_qr_thread();
     spawn_debug_thread();    
+    spawn_control_thread();
     loop{}
 }
 

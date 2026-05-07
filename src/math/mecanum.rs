@@ -9,8 +9,8 @@ pub struct MecanumVelocities {
 }
 
 impl MecanumVelocities {
-    pub fn new() -> Self {
-        MecanumVelocities::default()
+    pub fn new(vfl: f32, vfr: f32, vrl: f32, vrr: f32) -> Self {
+        MecanumVelocities { vfl, vfr, vrl, vrr }
     }
 
     /// Clamp all mecanum velocities to [-1.0, 1.0]
@@ -38,6 +38,10 @@ impl MecanumVelocities {
         let vrr = vx - vy + omega;
 
         MecanumVelocities { vfl, vfr, vrl, vrr }
+    }
+
+    pub fn to_twist(&self) -> Twist {
+        Twist::from_mecanum_velocities(*self)
     }
 
     pub fn to_array(&self) -> [f32; 4] {

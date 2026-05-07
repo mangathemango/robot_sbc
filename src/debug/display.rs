@@ -220,7 +220,7 @@ fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
     };
 
     let text = format!(
-        "Relative yaw: {:.2}π ({:.2}°)\nRaw yaw: {:.2}π ({:.2}°)\nInitial yaw: {:.2}π ({:.2}°)\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\n{:?}",
+        "Relative yaw: {:.2}π rad ({:.2}°)\nRaw yaw: {:.2}π rad ({:.2}°)\nInitial yaw: {:.2}π rad ({:.2}°)\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\n{:?}",
         g.relative_yaw / PI, g.relative_yaw.to_degrees(),
         g.current_yaw  / PI, g.current_yaw .to_degrees(),
         g.initial_yaw  / PI, g.initial_yaw .to_degrees(),
@@ -350,11 +350,13 @@ fn draw_compass(f: &mut Frame, area: Rect, yaw_deg: f32, size_x: usize, size_y: 
 }
 
 fn draw_stm32(f: &mut Frame, area: Rect, s: &Stm32State) {
+    let motion_state = ROBOT.motion_state.load();
     let text = format!(
-        "Running: {}\nWheels: {:?}\nConnected: {}",
+        "Running: {}\nWheels: {:?}\nConnected: {}\n{:#?} ",
         bool_icon(s.start_flag),
         s.actual_wheel_velocities,
-        bool_icon(s.driver_is_connected)
+        bool_icon(s.driver_is_connected),
+        motion_state.current_pose
     );
 
     paragraph(f, area, "STM32", text);

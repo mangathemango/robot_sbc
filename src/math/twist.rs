@@ -1,5 +1,5 @@
 use glam::Vec2;
-
+use crate::math::MecanumVelocities;
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Twist {
     pub linear: Vec2, // (vx, vy)
@@ -34,6 +34,25 @@ impl Twist {
         }
 
         self
+    }
+    pub fn from_mecanum_velocities(v: MecanumVelocities) -> Self {
+        let vx =
+            (v.vfl + v.vfr + v.vrl + v.vrr) / 4.0;
+
+        let vy =
+            (-v.vfl + v.vfr + v.vrl - v.vrr) / 4.0;
+
+        let omega =
+            (-v.vfl + v.vfr - v.vrl + v.vrr) / 4.0;
+
+        Self {
+            linear: Vec2::new(vx, vy),
+            omega,
+        }
+    }
+
+    pub fn to_mecanum_velocities(&self) -> MecanumVelocities {
+        MecanumVelocities::from_twist(*self)
     }
 
     pub fn clamp_omega(mut self, max: f32) -> Self {
