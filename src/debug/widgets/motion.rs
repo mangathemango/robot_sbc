@@ -11,7 +11,7 @@ pub fn draw_motion(f: &mut Frame, area: Rect) {
         motion_state.current_twist,
         motion_state.target_twist,
         motion_state.current_pose,
-        motion_state.initial_yaw
+        motion_state.initial_rotation
     );
 
     paragraph(f, area, "MOTION", text);
