@@ -1,6 +1,5 @@
 use std::{
-    io, thread,
-    time::{Duration, Instant},
+    f32::consts::PI, io, thread, time::{Duration, Instant}
 };
 
 use crossterm::{
@@ -221,10 +220,10 @@ fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
     };
 
     let text = format!(
-        "Relative yaw: {:.2}\nRaw yaw: {:.2}\nInitial yaw: {:.2}\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\n{:?}",
-        g.relative_yaw,
-        g.current_yaw,
-        g.initial_yaw,
+        "Relative yaw: {:.2}π ({:.2}°)\nRaw yaw: {:.2}π ({:.2}°)\nInitial yaw: {:.2}π ({:.2}°)\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\n{:?}",
+        g.relative_yaw / PI, g.relative_yaw.to_degrees(),
+        g.current_yaw  / PI, g.current_yaw .to_degrees(),
+        g.initial_yaw  / PI, g.initial_yaw .to_degrees(),
         g.gy,
         g.gz,
         bool_icon(g.driver_is_connected),
@@ -294,7 +293,7 @@ fn draw_compass(f: &mut Frame, area: Rect, yaw_deg: f32, size_x: usize, size_y: 
     }
 
     // 🟢 direction line
-    let angle = yaw_deg.to_radians();
+    let angle = yaw_deg;
 
     let steps = size_x.max(size_y);
 

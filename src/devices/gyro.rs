@@ -1,5 +1,6 @@
 use crate::devices::DriverPort;
 use crate::ROBOT;
+use std::f32::consts::PI;
 use std::sync::Arc;
 
 const GYRO_DOTENV_KEY: &str = "GYRO_PATH";
@@ -19,10 +20,12 @@ pub fn spawn_gyro_thread() {
                 Err(msg) => {
                     state.error_msg = Some(msg);
                     driver.reconnect();
-                    std::thread::sleep(std::time::Duration::from_millis(200));
                 }
             };
             state.driver_is_connected = driver.is_connected();
+            if !driver.is_connected() {
+                std::thread::sleep(std::time::Duration::from_millis(200));
+            }
             ROBOT.gyro_state.store(Arc::new(state.clone()));
         }
     });
@@ -98,7 +101,7 @@ impl GyroDriver {
                     }
 
                     if frame.len() == 22 {
-                        let yaw = i16::from_le_bytes([frame[6], frame[7]]) as f32 / 32768.0 * 180.0;
+                        let yaw = i16::from_le_bytes([frame[6], frame[7]]) as f32 / 32768.0 * PI;
                         let gy =
                             i16::from_le_bytes([frame[15], frame[16]]) as f32 / 32768.0 * 2000.0;
                         let gz =
@@ -157,11 +160,11 @@ impl GyroState {
             self.initial_yaw = sample.yaw
         }
         self.relative_yaw = self.current_yaw - self.initial_yaw;
-        if self.relative_yaw > 180.0 {
-            self.relative_yaw -= 360.0;
+        if self.relative_yaw > PI {
+            self.relative_yaw -= PI * 2.0;
         }
-        if self.relative_yaw < -180.0 {
-            self.relative_yaw += 360.0;
+        if self.relative_yaw < -PI {
+            self.relative_yaw += PI * 2.0;
         }
     }
 }
