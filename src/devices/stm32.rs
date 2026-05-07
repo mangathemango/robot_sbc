@@ -4,6 +4,8 @@ use std::sync::mpsc::Sender;
 use crate::ROBOT;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
+use crate::math::twist::Twist;
+use crate::math::mecanum::MecanumVelocities;
 
 const STM32_DOTENV_KEY: &str = "STM32_PATH";
 
@@ -181,34 +183,14 @@ impl Stm32Controller {
     pub fn set_wheel_velocities(&self, v: [i16; 4]) {
         self.send(PiToStm32Command::SetWheelTargetVelocities { velocities: v });
     }
-    pub fn set_velocity(&self, v: Vec2, omega: f32) {
-        let [vfl, vfr, vrl, vrr] = self.body_to_wheels(v, omega);
 
-        self.set_wheel_velocities([vfl, vfr, vrl, vrr]);
-    }
-
-    /// Where vx, vy and omega is in the range [-1.0, 1.0]
-    fn body_to_wheels(&self, v: Vec2, omega: f32) -> [i16; 4] {
-        let vx = v.x;
-        let vy = v.y;
-
-        let vfl = vx - vy - omega;
-        let vfr = vx + vy + omega;
-        let vrl = vx + vy - omega;
-        let vrr = vx - vy + omega;
-
-        let max = vfl.abs()
-            .max(vfr.abs())
-            .max(vrl.abs())
-            .max(vrr.abs())
-            .max(1.0);
-
-        let vfl = ((vfl / max) * 10000.0) as i16;
-        let vfr = ((vfr / max) * 10000.0) as i16;
-        let vrl = ((vrl / max) * 10000.0) as i16;
-        let vrr = ((vrr / max) * 10000.0) as i16;
-
-        [vfl, vfr, vrr, vrl]
+    pub fn set_twist(&self, t: Twist) {
+        self.set_wheel_velocities(
+            MecanumVelocities::from_twist(t)
+                .normalize()
+                .to_array()
+                .map(|v| (v * 10000.0) as i16)
+        );
     }
 }
 
