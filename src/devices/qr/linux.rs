@@ -137,6 +137,8 @@ pub struct QrState {
     pub driver_is_connected: bool,
     pub code: String,
     pub error_msg: String,
+    /// Delta time for FPS calculation
+    pub dt: std::time::Duration,
 }
 
 impl QrState {

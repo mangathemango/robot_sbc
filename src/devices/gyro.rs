@@ -9,8 +9,13 @@ pub fn spawn_gyro_thread() {
     std::thread::spawn(move || {
         let mut driver = GyroDriver::new();
         let mut state = GyroState::new();
+        let mut last_update = std::time::Instant::now();
 
         loop {
+            let now = std::time::Instant::now();
+            state.dt = now.duration_since(last_update);
+            last_update = now;
+
             match driver.try_read_frame() {
                 Ok(sample) => {
                     state.error_msg = None;
@@ -136,6 +141,8 @@ pub struct GyroState {
     pub gy: f32,
     /// z angular acceleration
     pub gz: f32,
+    /// Delta time for FPS calculation
+    pub dt: std::time::Duration,
 }
 
 impl GyroState {

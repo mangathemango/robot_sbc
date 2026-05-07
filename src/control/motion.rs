@@ -9,6 +9,8 @@ pub struct MotionState {
     pub target_twist: Twist,
     pub current_pose: Pose,
     pub initial_rotation: f32,
+    /// Delta time for FPS calculation
+    pub dt: std::time::Duration,
 }
 
 impl MotionState {

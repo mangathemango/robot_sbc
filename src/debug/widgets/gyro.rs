@@ -25,12 +25,17 @@ fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
     };
 
     let text = format!(
-        "Raw yaw: {:.2}π rad ({:.2}°)\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\n{}",
+        "Raw yaw: {:.2}π rad ({:.2}°)\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\nFPS: {:.1}\n{}",
         g.yaw / PI,
         g.yaw.to_degrees(),
         g.gy,
         g.gz,
         bool_icon(g.driver_is_connected),
+        if g.dt.as_secs_f32() > 0.0 {
+            1.0 / g.dt.as_secs_f32()
+        } else {
+            0.0
+        } as i32,
         match &g.error_msg {
             Some(msg) => msg,
             None => "",

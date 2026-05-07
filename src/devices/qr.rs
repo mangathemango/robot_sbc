@@ -17,9 +17,14 @@ pub fn spawn_qr_thread() {
     std::thread::spawn(move || {
         let mut driver = QrDriver::new();
         let mut state = QrState::new();
+        let mut last_update = std::time::Instant::now();
         state.driver_is_connected = driver.is_connected();
         ROBOT.qr_state.store(Arc::new(state.clone()));
         loop {
+            let now = std::time::Instant::now();
+            state.dt = now.duration_since(last_update);
+            last_update = now;
+
             match driver.try_read() {
                 Ok(Some(code)) => {
                     state.code = code.clone();

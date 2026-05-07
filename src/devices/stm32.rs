@@ -1,11 +1,11 @@
-use crate::devices::DriverPort;
-use glam::Vec2;
-use std::sync::mpsc::Sender;
 use crate::ROBOT;
+use crate::devices::DriverPort;
+use crate::math::MecanumVelocities;
+use crate::math::Twist;
+use glam::Vec2;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
-use crate::math::Twist;
-use crate::math::MecanumVelocities;
+use std::sync::mpsc::Sender;
 
 const STM32_DOTENV_KEY: &str = "STM32_PATH";
 
@@ -14,13 +14,17 @@ const STM32_DOTENV_KEY: &str = "STM32_PATH";
 /// (CHK = Checksum for data integrity validation, XOR all the bytes from [START] to the end of [...DATA...])
 const STM32_START_BYTE: u8 = 0x67;
 
-
 pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
     std::thread::spawn(move || {
         let mut driver = Stm32Driver::new();
         let mut state = Stm32State::new();
+        let mut last_update = std::time::Instant::now();
 
         loop {
+            let now = std::time::Instant::now();
+            state.dt = now.duration_since(last_update);
+            last_update = now;
+
             // 🟣 1. Handle outgoing commands
             match rx.try_recv() {
                 Ok(cmd) => {
@@ -46,7 +50,6 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
         }
     });
 }
-
 
 #[derive(Debug)]
 pub struct Stm32Driver {
@@ -189,7 +192,7 @@ impl Stm32Controller {
             MecanumVelocities::from_twist(t)
                 .normalize()
                 .to_array()
-                .map(|v| (v * 10000.0) as i16)
+                .map(|v| (v * 10000.0) as i16),
         );
     }
 }
@@ -201,6 +204,8 @@ pub struct Stm32State {
     pub start_flag: bool,
     // Movement
     pub actual_wheel_velocities: [i16; 4],
+    /// Delta time for FPS calculation
+    pub dt: std::time::Duration,
 }
 
 impl Stm32State {

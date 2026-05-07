@@ -18,8 +18,13 @@ pub fn spawn_maixcam_thread() {
     std::thread::spawn(move || {
         let mut driver = MaixcamDriver::new();
         let mut state = MaixcamState::new();
+        let mut last_update = std::time::Instant::now();
 
         loop {
+            let now = std::time::Instant::now();
+            state.dt = now.duration_since(last_update);
+            last_update = now;
+
             match driver.try_read_frame() {
                 Ok(sample) => {
                     state.update(sample);
@@ -132,6 +137,8 @@ pub struct MaixcamState {
     pub driver_is_connected: bool,
     pub circle_position: Vec2,
     pub circle_color: MaixcamCircleColor,
+    /// Delta time for FPS calculation
+    pub dt: std::time::Duration,
 }
 
 impl MaixcamState {
