@@ -2,7 +2,7 @@ use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
 
-use crate::debug::helpers::paragraph;
+use crate::debug::helpers::{paragraph,format_radian};
 
 pub fn draw_motion(f: &mut Frame, area: Rect) {
     let motion_state = ROBOT.motion_state.load();
@@ -11,7 +11,7 @@ pub fn draw_motion(f: &mut Frame, area: Rect) {
         motion_state.current_twist,
         motion_state.target_twist,
         motion_state.current_pose,
-        motion_state.initial_rotation,
+        format_radian(motion_state.initial_rotation),
         if motion_state.dt.as_secs_f32() > 0.0 { 1.0 / motion_state.dt.as_secs_f32() } else { 0.0 } as i32
     );
 

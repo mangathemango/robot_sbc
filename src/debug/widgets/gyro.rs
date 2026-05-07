@@ -7,7 +7,7 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Wrap},
 };
 
-use crate::ROBOT;
+use crate::{ROBOT, debug::helpers::format_radian};
 use crate::devices::gyro::GyroState;
 
 use crate::debug::helpers::bool_icon;
@@ -25,9 +25,8 @@ fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
     };
 
     let text = format!(
-        "Raw yaw: {:.2}π rad ({:.2}°)\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\nFPS: {:.1}\n{}",
-        g.yaw / PI,
-        g.yaw.to_degrees(),
+        "Raw yaw: {}\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\nFPS: {:.1}\n{}",
+        format_radian(g.yaw),
         g.gy,
         g.gz,
         bool_icon(g.driver_is_connected),

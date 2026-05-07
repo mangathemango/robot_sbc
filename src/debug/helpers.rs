@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use ratatui::{
     Frame, layout::Rect, widgets::{Block, Borders, Paragraph, Wrap}
 };
@@ -10,6 +12,10 @@ pub fn paragraph(f: &mut Frame, area: Rect, title: &str, text: String) {
 
 pub fn bool_icon(b: bool) -> &'static str {
     if b { "✅" } else { "❌" }
+}
+
+pub fn format_radian(rad: f32) -> String {
+    format!("{:.2}π rad ({:.2}°)", rad / PI, rad.to_degrees())
 }
 
 pub fn read_temperature() -> Option<f32> {
