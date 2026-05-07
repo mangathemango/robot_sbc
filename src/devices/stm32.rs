@@ -187,6 +187,7 @@ impl Stm32Controller {
         self.set_wheel_velocities([v1, v2, v3, v4]);
     }
 
+    /// Where vx, vy and omega is in the range [-1.0, 1.0]
     fn body_to_wheels(&self, v: Vec2, omega: f32) -> [i16; 4] {
         let vx = v.x;
         let vy = v.y;
@@ -196,7 +197,18 @@ impl Stm32Controller {
         let v3 = vx + vy - omega;
         let v4 = vx - vy + omega;
 
-        [v1 as i16, v2 as i16, v3 as i16, v4 as i16]
+        let max = v1.abs()
+            .max(v2.abs())
+            .max(v3.abs())
+            .max(v4.abs())
+            .max(1.0);
+
+        let v1 = ((v1 / max) * 10000.0) as i16;
+        let v2 = ((v2 / max) * 10000.0) as i16;
+        let v3 = ((v3 / max) * 10000.0) as i16;
+        let v4 = ((v4 / max) * 10000.0) as i16;
+
+        [v1, v2, v3, v4]
     }
 }
 
@@ -205,12 +217,8 @@ impl Stm32Controller {
 pub struct Stm32State {
     pub driver_is_connected: bool,
     pub start_flag: bool,
-    // Movements
+    // Movement
     pub actual_wheel_velocities: [i16; 4],
-    pub actual_velocity: Vec2,
-    pub actual_omega: f32,
-
-    pub estimated_position: Vec2, // Estimated position based on accumulated actual velocities
 }
 
 impl Stm32State {
@@ -222,11 +230,6 @@ impl Stm32State {
         match command {
             Stm32ToPiCommand::SendActualWheelVelocities { velocities } => {
                 self.actual_wheel_velocities = velocities;
-                let v = velocities;
-                self.actual_velocity.x = (v[0] + v[1] + v[2] + v[3]) as f32 / 4.0;
-                self.actual_velocity.y = (-v[0] + v[1] + v[2] - v[3]) as f32 / 4.0;
-                self.actual_omega = (-v[0] + v[1] - v[2] + v[3]) as f32 / 4.0;
-                self.estimated_position += self.actual_velocity;
             }
             Stm32ToPiCommand::SetRunningFlag { running } => {
                 self.start_flag = running != 0;
