@@ -16,6 +16,7 @@ pub fn spawn_control_thread() {
 
             motion_state.update();
             ROBOT.motion_state.store(Arc::new(motion_state));
+            std::thread::sleep(Duration::from_millis(10));
         }
     });
 }

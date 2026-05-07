@@ -13,10 +13,9 @@ pub fn draw_qr(f: &mut Frame, area: Rect) {
     };
 
     let text = format!(
-        "Qr Code: {}\nConnected: {}\nFPS: {:.1}\n{}",
-        qr.code,
+        "Qr Code: {}\nConnected: {}\n{}",
+        if qr.code.len() == 0 {"Waiting..."} else {&qr.code},
         bool_icon(qr.driver_is_connected),
-        if qr.dt.as_secs_f32() > 0.0 { 1.0 / qr.dt.as_secs_f32() } else { 0.0 } as i32,
         error_text
     );
 
