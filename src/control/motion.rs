@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use crate::math::{MecanumVelocities, Pose, Twist, mecanum};
 use crate::ROBOT;
 
@@ -36,6 +38,11 @@ impl MotionState {
             .map(|v| v as f32 / 10000.0);
 
         self.current_pose.rotation = gyro_state.current_yaw - self.initial_yaw;
+        if self.current_pose.rotation > PI {
+            self.current_pose.rotation -= PI * 2.0;
+        } else if self.current_pose.rotation < -PI {
+            self.current_pose.rotation += PI * 2.0;
+        }
         self.current_twist = Twist::from_mecanum_velocities(MecanumVelocities::new(vfl, vfr, vrl, vrr));
     }
 }
