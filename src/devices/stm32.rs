@@ -182,9 +182,9 @@ impl Stm32Controller {
         self.send(PiToStm32Command::SetWheelTargetVelocities { velocities: v });
     }
     pub fn set_velocity(&self, v: Vec2, omega: f32) {
-        let [v1, v2, v3, v4] = self.body_to_wheels(v, omega);
+        let [vfl, vfr, vrl, vrr] = self.body_to_wheels(v, omega);
 
-        self.set_wheel_velocities([v1, v2, v3, v4]);
+        self.set_wheel_velocities([vfl, vfr, vrl, vrr]);
     }
 
     /// Where vx, vy and omega is in the range [-1.0, 1.0]
@@ -192,23 +192,23 @@ impl Stm32Controller {
         let vx = v.x;
         let vy = v.y;
 
-        let v1 = vx - vy - omega;
-        let v2 = vx + vy + omega;
-        let v3 = vx + vy - omega;
-        let v4 = vx - vy + omega;
+        let vfl = vx - vy - omega;
+        let vfr = vx + vy + omega;
+        let vrl = vx + vy - omega;
+        let vrr = vx - vy + omega;
 
-        let max = v1.abs()
-            .max(v2.abs())
-            .max(v3.abs())
-            .max(v4.abs())
+        let max = vfl.abs()
+            .max(vfr.abs())
+            .max(vrl.abs())
+            .max(vrr.abs())
             .max(1.0);
 
-        let v1 = ((v1 / max) * 10000.0) as i16;
-        let v2 = ((v2 / max) * 10000.0) as i16;
-        let v3 = ((v3 / max) * 10000.0) as i16;
-        let v4 = ((v4 / max) * 10000.0) as i16;
+        let vfl = ((vfl / max) * 10000.0) as i16;
+        let vfr = ((vfr / max) * 10000.0) as i16;
+        let vrl = ((vrl / max) * 10000.0) as i16;
+        let vrr = ((vrr / max) * 10000.0) as i16;
 
-        [v1, v2, v3, v4]
+        [vfl, vfr, vrr, vrl]
     }
 }
 
