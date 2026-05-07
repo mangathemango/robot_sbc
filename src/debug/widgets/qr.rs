@@ -1,12 +1,11 @@
 use ratatui::{Frame, layout::Rect};
 
-use std::sync::Arc;
-
-use crate::devices::qr::QrState;
+use crate::ROBOT;
 
 use crate::debug::helpers::{paragraph, bool_icon};
 
-pub fn draw_qr(f: &mut Frame, area: Rect, qr: &Arc<QrState>) {
+pub fn draw_qr(f: &mut Frame, area: Rect) {
+    let qr = ROBOT.qr_state.load();
     let error_text = if qr.error_msg.is_empty() || qr.driver_is_connected {
         ""
     } else {

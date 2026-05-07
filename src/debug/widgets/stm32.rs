@@ -1,11 +1,12 @@
 use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
-use crate::devices::stm32::Stm32State;
 
 use crate::debug::helpers::{paragraph, bool_icon};
 
-pub fn draw_stm32(f: &mut Frame, area: Rect, s: &Stm32State) {
+pub fn draw_stm32(f: &mut Frame, area: Rect) {
+    let s = ROBOT.stm32_state.load();
+    let motion_state = ROBOT.motion_state.load();
     let motion_state = ROBOT.motion_state.load();
     let text = format!(
         "Running: {}\nWheels: {:?}\nConnected: {}\n{:#?} ",

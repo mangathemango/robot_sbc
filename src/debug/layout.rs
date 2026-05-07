@@ -1,23 +1,11 @@
 use ratatui::{
-    layout::{Constraint, Direction, Layout},
     Frame,
+    layout::{Constraint, Direction, Layout},
 };
 
-use std::sync::Arc;
+use crate::debug::widgets::{gyro::draw_gyro, qr::draw_qr, stm32::draw_stm32, system::draw_system};
 
-use crate::devices::gyro::GyroState;
-use crate::devices::qr::QrState;
-use crate::devices::stm32::Stm32State;
-
-use crate::debug::widgets::{gyro::draw_gyro, stm32::draw_stm32, qr::draw_qr, system::draw_system};
-
-pub fn ui(
-    f: &mut Frame,
-    gyro: &Arc<GyroState>,
-    stm32: &Arc<Stm32State>,
-    qr: &Arc<QrState>,
-    history: &Vec<(f64, f64)>,
-) {
+pub fn ui(f: &mut Frame, history: &Vec<(f64, f64)>) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
@@ -39,8 +27,8 @@ pub fn ui(
         .constraints([Constraint::Fill(1), Constraint::Length(21)])
         .split(right_chunks[1]);
 
-    draw_gyro(f, right_chunks[0], gyro, history);
-    draw_stm32(f, bottom_right_chunks[0], stm32);
-    draw_qr(f, bottom_right_chunks[1], qr);
+    draw_gyro(f, right_chunks[0], history);
+    draw_stm32(f, bottom_right_chunks[0]);
+    draw_qr(f, bottom_right_chunks[1]);
     draw_system(f, chunks[0]);
 }

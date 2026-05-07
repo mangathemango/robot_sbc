@@ -27,6 +27,5 @@ fn main() {
     spawn_qr_thread();
     spawn_debug_thread();    
     spawn_control_thread();
-    loop{}
 }
 

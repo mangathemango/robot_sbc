@@ -7,12 +7,14 @@ use ratatui::{
     Frame,
 };
 
+use crate::ROBOT;
 use crate::devices::gyro::GyroState;
 
 use crate::debug::helpers::bool_icon;
 use crate::debug::widgets::compass::draw_compass;
 
-pub fn draw_gyro(f: &mut Frame, area: Rect, g: &GyroState, history: &Vec<(f64, f64)>) {
+pub fn draw_gyro(f: &mut Frame, area: Rect, history: &Vec<(f64, f64)>) {
+    let g = ROBOT.gyro_state.load();
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
@@ -22,7 +24,7 @@ pub fn draw_gyro(f: &mut Frame, area: Rect, g: &GyroState, history: &Vec<(f64, f
         ])
         .split(area);
 
-    draw_gyro_text(f, chunks[0], g);
+    draw_gyro_text(f, chunks[0], &*g);
     draw_compass(f, chunks[1], g.relative_yaw, 25, 11);
     draw_yaw_graph(f, chunks[2], history);
 }

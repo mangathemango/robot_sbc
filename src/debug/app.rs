@@ -1,5 +1,6 @@
 use std::{
-    io, thread, time::{Duration, Instant}
+    io, thread,
+    time::{Duration, Instant},
 };
 
 use crossterm::{
@@ -8,10 +9,7 @@ use crossterm::{
     terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 
-use ratatui::{
-    backend::CrosstermBackend,
-    Terminal,
-};
+use ratatui::{Terminal, backend::CrosstermBackend};
 
 use crate::ROBOT;
 use crate::debug::layout::ui;
@@ -21,7 +19,9 @@ pub fn start() {
         if let Err(e) = run() {
             eprintln!("TUI error: {}", e);
         }
-    });
+    })
+    .join()
+    .unwrap();
 }
 
 fn run() -> Result<(), io::Error> {
@@ -38,12 +38,10 @@ fn run() -> Result<(), io::Error> {
     let mut t: f64 = 0.0;
 
     loop {
-        // 🧠 Load latest states
+        // 🧠 Load latest gyro state for history
         let gyro = ROBOT.gyro_state.load();
-        let stm32 = ROBOT.stm32_state.load();
-        let qr = ROBOT.qr_state.load();
 
-        terminal.draw(|f| ui(f, &gyro, &stm32, &qr, &yaw_history))?;
+        terminal.draw(|f| ui(f, &yaw_history))?;
 
         // exit key (optional)
         if event::poll(Duration::from_millis(10))? {
