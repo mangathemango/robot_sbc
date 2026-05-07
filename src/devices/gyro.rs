@@ -1,10 +1,9 @@
-use crate::devices::DriverPort;
 use crate::ROBOT;
+use crate::devices::DriverPort;
 use std::f32::consts::PI;
 use std::sync::Arc;
 
 const GYRO_DOTENV_KEY: &str = "GYRO_PATH";
-
 
 pub fn spawn_gyro_thread() {
     std::thread::spawn(move || {
@@ -131,12 +130,8 @@ pub struct GyroState {
     pub driver_is_connected: bool,
     pub error_msg: Option<String>,
 
-    /// The first recorded yaw for relative yaw calculation for 0 point
-    pub initial_yaw: f32,
     /// Current yaw recorded from gyro
-    pub current_yaw: f32,
-    /// Relative yaw (with respect to initial_yaw)
-    pub relative_yaw: f32,
+    pub yaw: f32,
     /// y angular acceleration
     pub gy: f32,
     /// z angular acceleration
@@ -146,27 +141,14 @@ pub struct GyroState {
 impl GyroState {
     pub fn new() -> Self {
         GyroState {
-            initial_yaw: f32::NAN,
-            driver_is_connected: true,
+            driver_is_connected: false,
             ..Default::default()
         }
     }
 
     pub fn update(&mut self, sample: GyroSample) {
-        self.current_yaw = sample.yaw;
+        self.yaw = sample.yaw;
         self.gy = sample.gy;
         self.gz = sample.gz;
-        if self.initial_yaw.is_nan() {
-            self.initial_yaw = sample.yaw
-        }
-        self.relative_yaw = self.current_yaw - self.initial_yaw;
-        if self.relative_yaw > PI {
-            self.relative_yaw -= PI * 2.0;
-        }
-        if self.relative_yaw < -PI {
-            self.relative_yaw += PI * 2.0;
-        }
     }
 }
-
-

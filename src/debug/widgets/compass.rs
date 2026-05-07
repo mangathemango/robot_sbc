@@ -9,12 +9,12 @@ use ratatui::{
 use crate::ROBOT;
 
 pub fn draw_compass(f: &mut Frame, area: Rect) {
-    let gyro = ROBOT.gyro_state.load();
+    let motion_state = ROBOT.motion_state.load();
 
-    draw_compass_inner(f, area, gyro.relative_yaw);
+    draw_compass_inner(f, area, motion_state.current_pose.rotation);
 }
 
-fn draw_compass_inner(f: &mut Frame, area: Rect, yaw_deg: f32) {
+fn draw_compass_inner(f: &mut Frame, area: Rect, yaw: f32) {
     let size_x = area.width as usize - 3;
     let size_y = area.height as usize - 2;
     let mut grid = vec![vec![' '; size_x]; size_y];
@@ -40,7 +40,7 @@ fn draw_compass_inner(f: &mut Frame, area: Rect, yaw_deg: f32) {
     }
 
     // 🟢 direction line
-    let angle = yaw_deg;
+    let angle = yaw;
 
     let steps = size_x.max(size_y);
 

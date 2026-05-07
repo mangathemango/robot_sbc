@@ -20,16 +20,14 @@ pub fn draw_gyro(f: &mut Frame, area: Rect) {
 fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
     let color = if !g.driver_is_connected {
         Color::Red
-    } else if g.relative_yaw.abs() > 45.0 {
-        Color::Yellow
     } else {
         Color::Green
     };
 
     let text = format!(
         "Raw yaw: {:.2}π rad ({:.2}°)\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\n{}",
-        g.current_yaw / PI,
-        g.current_yaw.to_degrees(),
+        g.yaw / PI,
+        g.yaw.to_degrees(),
         g.gy,
         g.gz,
         bool_icon(g.driver_is_connected),
