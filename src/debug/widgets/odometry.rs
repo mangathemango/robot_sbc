@@ -4,7 +4,7 @@ use crate::ROBOT;
 
 use crate::debug::helpers::{format_radian, paragraph};
 
-pub fn draw_motion(f: &mut Frame, area: Rect) {
+pub fn draw_odometry(f: &mut Frame, area: Rect) {
     let kinematic_state = ROBOT.odometry_state.load();
     let text = format!(
         "Current Twist: {}\nCurrent Pose: {}\nInitial Yaw: {}\nFPS: {:.1}",
@@ -18,5 +18,5 @@ pub fn draw_motion(f: &mut Frame, area: Rect) {
         } as i32
     );
 
-    paragraph(f, area, "MOTION", text);
+    paragraph(f, area, "ODOMETRY", text);
 }
