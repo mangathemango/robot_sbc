@@ -66,6 +66,6 @@ impl KinematicState {
             .rotate(Vec2::from_angle(self.current_pose.rotation));
 
         self.current_pose.position += translation;
-        self.current_pose.rotation = wrap_angle(gyro_state.yaw - self.initial_rotation - PI / 2.0);
+        self.current_pose.rotation = wrap_angle(gyro_state.yaw - self.initial_rotation);
     }
 }

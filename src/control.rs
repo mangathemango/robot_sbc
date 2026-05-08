@@ -5,9 +5,9 @@ use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use glam::Vec2;
 use crate::ROBOT;
 use crate::math::{PidController, Pose, Twist, wrap_angle};
+use glam::Vec2;
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
@@ -66,13 +66,13 @@ impl ControllerState {
         let angular_error = error_pose.rotation;
 
         let linear_correction_speed = self.linear_pid.update(linear_error, dt);
-        let linear_correction_vec = Vec2::from_angle(wrap_angle(kinematic_state.current_pose.rotation + PI)).rotate(
-            error_pose.position.normalize_or_zero() * linear_correction_speed
-        );
+        let linear_correction_vec = (error_pose.position.normalize_or_zero()
+            * linear_correction_speed)
+            .rotate(Vec2::from_angle(-kinematic_state.current_pose.rotation));
         let angular_correction = self.angular_pid.update(angular_error, dt);
 
         self.target_twist = Twist::new(linear_correction_vec, angular_correction);
-        
+
         stm32_controller.set_twist(self.target_twist);
         self.publish();
     }
@@ -89,7 +89,7 @@ impl ControllerState {
             }
             self.dt = dt;
             self.update(dt);
-            if self.linear_pid.is_settled()  {
+            if self.linear_pid.is_settled() {
                 settled_frames += 1;
             } else {
                 settled_frames = 0;
