@@ -1,3 +1,3 @@
-pub mod motion;
+pub mod kinematic;
 
 

@@ -4,16 +4,16 @@ use crate::ROBOT;
 use crate::debug::helpers::{format_radian, paragraph};
 
 pub fn draw_map(f: &mut Frame, area: Rect) {
-    let motion_state = ROBOT.motion_state.load();
-    let map_text = build_pose_map(&motion_state.current_pose, 11);
+    let kinematic_state = ROBOT.kinematic_state.load();
+    let map_text = build_pose_map(&kinematic_state.current_pose, 11);
     let text = format!(
         "{}\n\nPosition: {:.2}, {:.2}\nHeading: {}\nFPS: {:.1}",
         map_text,
-        motion_state.current_pose.position.x,
-        motion_state.current_pose.position.y,
-        format_radian(motion_state.current_pose.rotation),
-        if motion_state.dt.as_secs_f32() > 0.0 {
-            1.0 / motion_state.dt.as_secs_f32()
+        kinematic_state.current_pose.position.x,
+        kinematic_state.current_pose.position.y,
+        format_radian(kinematic_state.current_pose.rotation),
+        if kinematic_state.dt.as_secs_f32() > 0.0 {
+            1.0 / kinematic_state.dt.as_secs_f32()
         } else {
             0.0
         }

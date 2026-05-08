@@ -3,7 +3,7 @@ mod debug;
 mod devices;
 mod math;
 mod robot;
-use crate::control::motion::spawn_motion_thread;
+use crate::control::kinematic::spawn_motion_thread;
 use crate::debug::spawn_debug_thread;
 use crate::devices::gyro::spawn_gyro_thread;
 use crate::devices::maixcam::spawn_maixcam_thread;
