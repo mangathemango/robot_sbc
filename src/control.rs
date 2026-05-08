@@ -17,19 +17,19 @@ pub fn spawn_main_controller_thread() {
         controller_state.publish();
         loop {
             controller_state.move_to(Pose {
-                position: Vec2 { x: 0.1, y: 0.1 },
+                position: Vec2 { x: 0.2, y: 0.1 },
                 rotation: 0.0,
             });
             controller_state.move_to(Pose {
-                position: Vec2 { x: -0.1, y: -0.1 },
+                position: Vec2 { x: -0.1, y: -0.2 },
                 rotation: 0.0,
             });
             controller_state.move_to(Pose {
-                position: Vec2 { x: -0.1, y: 0.1 },
+                position: Vec2 { x: -0.2, y: 0.1 },
                 rotation: 0.0,
             });
             controller_state.move_to(Pose {
-                position: Vec2 { x: 0.1, y: -0.1 },
+                position: Vec2 { x: 0.1, y: -0.2 },
                 rotation: 0.0,
             });
         }
