@@ -2,6 +2,7 @@ pub mod kinematic;
 
 use std::f32::consts::PI;
 use std::sync::Arc;
+use std::thread;
 use std::time::{Duration, Instant};
 
 use glam::Vec2;
@@ -71,6 +72,7 @@ impl ControllerState {
         let angular_correction = self.angular_pid.update(angular_error, dt);
 
         self.target_twist = Twist::new(linear_correction_vec, angular_correction);
+        
         stm32_controller.set_twist(self.target_twist);
         self.publish();
     }
@@ -82,6 +84,9 @@ impl ControllerState {
         loop {
             let now = Instant::now();
             let dt = now.duration_since(last);
+            if dt.as_secs_f32() < 0.01 {
+                continue;
+            }
             self.dt = dt;
             self.update(dt);
             if self.linear_pid.is_settled()  {
@@ -91,10 +96,10 @@ impl ControllerState {
             }
             if settled_frames >= 10 {
                 self.stop();
+                thread::sleep(Duration::from_millis(50));
                 break;
             }
             last = now;
-            std::thread::sleep(Duration::from_millis(10));
         }
     }
 
@@ -102,5 +107,9 @@ impl ControllerState {
         ROBOT.controller_state.store(Arc::new(*self));
     }
 
-    pub fn stop(&mut self) {}
+    pub fn stop(&mut self) {
+        let stm32_controller = ROBOT.get_stm32_controller();
+        self.target_twist = Twist::ZERO;
+        stm32_controller.set_twist(Twist::ZERO);
+    }
 }

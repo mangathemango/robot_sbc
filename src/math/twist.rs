@@ -17,6 +17,8 @@ impl std::fmt::Display for Twist {
 }
 
 impl Twist {
+    pub const ZERO: Self = Twist {linear: Vec2::ZERO, omega: 0.0};
+
     pub fn new(linear: Vec2, omega: f32) -> Self {
         Self { linear, omega }
     }
