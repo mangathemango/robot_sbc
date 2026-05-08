@@ -1,4 +1,4 @@
-use crate::control::{kinematic::KinematicState, ControllerState};
+use crate::control::{ControllerState, odometry::OdometryState};
 use crate::devices::gyro::GyroState;
 use crate::devices::maixcam::MaixcamState;
 use crate::devices::qr::QrState;
@@ -11,7 +11,7 @@ pub struct Robot {
     pub stm32_state: ArcSwap<Stm32State>,
     pub maixcam_state: ArcSwap<MaixcamState>,
     pub qr_state: ArcSwap<QrState>,
-    pub kinematic_state: ArcSwap<KinematicState>,
+    pub odometry_state: ArcSwap<OdometryState>,
     pub controller_state: ArcSwap<ControllerState>,
 
     pub stm32_controller: OnceLock<Stm32Controller>,
@@ -24,7 +24,7 @@ impl Robot {
             stm32_state: ArcSwap::from_pointee(Stm32State::new()),
             maixcam_state: ArcSwap::from_pointee(MaixcamState::new()),
             qr_state: ArcSwap::from_pointee(QrState::new()),
-            kinematic_state: ArcSwap::from_pointee(KinematicState::default()),
+            odometry_state: ArcSwap::from_pointee(OdometryState::default()),
             controller_state: ArcSwap::from_pointee(ControllerState::default()),
 
             stm32_controller: OnceLock::new(),

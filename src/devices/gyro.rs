@@ -30,7 +30,7 @@ pub fn spawn_gyro_thread() {
             if !driver.is_connected() {
                 std::thread::sleep(std::time::Duration::from_millis(200));
             }
-            ROBOT.gyro_state.store(Arc::new(state.clone()));
+            state.publish();
         }
     });
 }
@@ -157,5 +157,9 @@ impl GyroState {
         self.yaw = sample.yaw;
         self.gy = sample.gy;
         self.gz = sample.gz;
+    }
+
+    pub fn publish(&self) {
+        ROBOT.gyro_state.store(Arc::new(self.clone()));
     }
 }

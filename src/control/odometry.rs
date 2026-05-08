@@ -6,12 +6,11 @@ use crate::ROBOT;
 use crate::math::{MecanumVelocities, Pose, Twist, wrap_angle};
 use std::{sync::Arc, time::Duration};
 
-pub fn spawn_motion_thread() {
+pub fn spawn_odometry_thread() {
     std::thread::spawn(|| {
         std::thread::sleep(Duration::from_millis(100));
-        let mut kinematic_state = KinematicState::new();
+        let mut kinematic_state = OdometryState::new();
         let mut last_update = std::time::Instant::now();
-        
 
         loop {
             let now = std::time::Instant::now();
@@ -19,14 +18,14 @@ pub fn spawn_motion_thread() {
             last_update = now;
 
             kinematic_state.update(kinematic_state.dt);
-            ROBOT.kinematic_state.store(Arc::new(kinematic_state));
+            ROBOT.odometry_state.store(Arc::new(kinematic_state));
             std::thread::sleep(Duration::from_millis(10));
         }
     });
 }
 
 #[derive(Debug, Clone, Copy, Default)]
-pub struct KinematicState {
+pub struct OdometryState {
     pub current_twist: Twist,
     pub current_pose: Pose,
     pub initial_rotation: f32,
@@ -34,7 +33,7 @@ pub struct KinematicState {
     pub dt: std::time::Duration,
 }
 
-impl KinematicState {
+impl OdometryState {
     pub fn new() -> Self {
         let gyro_state = ROBOT.gyro_state.load();
         let initial_rotation = if gyro_state.driver_is_connected {

@@ -19,7 +19,7 @@ pub fn spawn_qr_thread() {
         let mut state = QrState::new();
         let mut last_update = std::time::Instant::now();
         state.driver_is_connected = driver.is_connected();
-        ROBOT.qr_state.store(Arc::new(state.clone()));
+        state.publish();
         loop {
             let now = std::time::Instant::now();
             state.dt = now.duration_since(last_update);
@@ -38,7 +38,7 @@ pub fn spawn_qr_thread() {
                 }
             }
             state.driver_is_connected = driver.is_connected();
-            ROBOT.qr_state.store(Arc::new(state.clone()));
+            state.publish();
         }
     });
 }

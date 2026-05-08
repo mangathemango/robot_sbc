@@ -51,7 +51,7 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
                 }
             }
             state.driver_is_connected = driver.is_connected();
-            ROBOT.stm32_state.store(Arc::new(state.clone()));
+            state.publish();
         }
     });
 }
@@ -227,6 +227,10 @@ impl Stm32State {
                 self.start_flag = running != 0;
             }
         };
+    }
+
+    pub fn publish(&self) {
+        ROBOT.stm32_state.store(Arc::new(self.clone()));
     }
 }
 

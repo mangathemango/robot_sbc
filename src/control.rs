@@ -1,4 +1,4 @@
-pub mod kinematic;
+pub mod odometry;
 
 use std::f32::consts::PI;
 use std::sync::Arc;
@@ -59,7 +59,7 @@ impl ControllerState {
     pub fn update(&mut self, dt: Duration) {
         let stm32_controller = ROBOT.get_stm32_controller();
 
-        let kinematic_state = ROBOT.kinematic_state.load();
+        let kinematic_state = ROBOT.odometry_state.load();
 
         let error_pose = kinematic_state.current_pose.difference(self.target_pose);
         let linear_error = error_pose.position.length();

@@ -5,9 +5,13 @@ use crate::debug::helpers::{format_radian, paragraph};
 use crate::math::Pose;
 
 pub fn draw_map(f: &mut Frame, area: Rect) {
-    let kinematic_state = ROBOT.kinematic_state.load();
+    let kinematic_state = ROBOT.odometry_state.load();
     let controller_state = ROBOT.controller_state.load();
-    let map_text = build_pose_map(&kinematic_state.current_pose, &controller_state.target_pose, 15);
+    let map_text = build_pose_map(
+        &kinematic_state.current_pose,
+        &controller_state.target_pose,
+        15,
+    );
     let text = format!(
         "{}\n\nPosition: {:.2}, {:.2}\nHeading: {}\nFPS: {:.1}",
         map_text,
@@ -39,7 +43,6 @@ fn build_pose_map(pose: &Pose, target_pose: &Pose, size: usize) -> String {
     let mut target_y = (target_pose.position.y * 20.0).round() as isize;
     target_x = target_x.clamp(-half_w, half_w);
     target_y = target_y.clamp(-half_h, half_h);
-    
 
     let mut rows = Vec::with_capacity(height);
     for row in (0..height as isize).rev() {

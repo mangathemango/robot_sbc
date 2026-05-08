@@ -3,7 +3,7 @@ mod debug;
 mod devices;
 mod math;
 mod robot;
-use crate::control::kinematic::spawn_motion_thread;
+use crate::control::odometry::spawn_odometry_thread;
 use crate::control::spawn_main_controller_thread;
 use crate::debug::spawn_debug_thread;
 use crate::devices::gyro::spawn_gyro_thread;
@@ -18,12 +18,14 @@ use std::sync::mpsc;
 static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());
 
 fn main() {
-    // Create mpsc (Multi-Producer, Single-Consumer) channel for multiple different threads 
+    // Create mpsc (Multi-Producer, Single-Consumer) channel for multiple different threads
     // to send commands to the stm32 in the stm32_thread
     let (sender, receiver) = mpsc::channel();
 
     // Sender is set globally. Other threads can clone to control the STM32
-    ROBOT.stm32_controller.set(Stm32Controller::new(sender))
+    ROBOT
+        .stm32_controller
+        .set(Stm32Controller::new(sender))
         .expect("Unable to set STM32_CONTROLLER: {}");
 
     // Receiver is passed on to stm32 thread
@@ -31,7 +33,7 @@ fn main() {
     spawn_gyro_thread();
     spawn_maixcam_thread();
     spawn_qr_thread();
-    spawn_motion_thread();
+    spawn_odometry_thread();
     spawn_main_controller_thread();
 
     // The Debug thread has to be the last thread spawned

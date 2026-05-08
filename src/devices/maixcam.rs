@@ -35,7 +35,7 @@ pub fn spawn_maixcam_thread() {
                 }
             }
             state.driver_is_connected = driver.is_connected();
-            ROBOT.maixcam_state.store(Arc::new(state.clone()));
+            state.publish();
         }
     });
 }
@@ -152,5 +152,9 @@ impl MaixcamState {
             y: sample.circle_position_y as f32 / 10000.0 * MAIXCAM_CAMERA_RESOLUTION_HEIGHT,
         };
         self.circle_color = MaixcamCircleColor::from_id(sample.circle_color_id);
+    }
+
+    pub fn publish(&self) {
+        ROBOT.maixcam_state.store(Arc::new(self.clone()));
     }
 }
