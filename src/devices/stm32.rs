@@ -28,6 +28,12 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
             // 🟣 1. Handle outgoing commands
             match rx.try_recv() {
                 Ok(cmd) => {
+                    match cmd {
+                        PiToStm32Command::SetWheelTargetVelocities { velocities } => {
+                            state.actual_wheel_velocities = velocities;
+                        }
+                        _ => ()
+                    }
                     let _ = driver.send_command(cmd);
                 }
                 Err(std::sync::mpsc::TryRecvError::Empty) => {}
