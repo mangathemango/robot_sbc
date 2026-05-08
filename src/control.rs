@@ -11,7 +11,7 @@ use glam::Vec2;
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
-        let linear_pid = PidController::new(2.0, 0.0, 0.0, 0.01, 1.0);
+        let linear_pid = PidController::new(10.0, 0.1, 0.5, 0.01, 1.0);
         let angular_pid = PidController::new(0.001, 0.0, 0.0, 0.01, 1.0);
         let mut controller_state = ControllerState::new(linear_pid, angular_pid);
         controller_state.publish();
