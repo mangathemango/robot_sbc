@@ -164,7 +164,7 @@ impl Stm32Driver {
 }
 
 /// A controller struct used to send Pi to STM32 commands from other threads
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct Stm32Controller {
     tx: Sender<PiToStm32Command>,

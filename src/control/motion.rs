@@ -1,7 +1,31 @@
 use std::f32::consts::PI;
 
 use crate::ROBOT;
-use crate::math::{MecanumVelocities, Pose, Twist, mecanum};
+use crate::math::{MecanumVelocities, Pose, Twist};
+use std::{sync::Arc, time::Duration};
+
+
+pub fn spawn_motion_thread() {
+    std::thread::spawn(|| {
+        std::thread::sleep(Duration::from_millis(100));
+        let mut motion_state = MotionState::new();
+        let mut last_update = std::time::Instant::now();
+        let stm32_controller = ROBOT.get_stm32_controller();
+
+        loop {
+            let now = std::time::Instant::now();
+            motion_state.dt = now.duration_since(last_update);
+            last_update = now;
+
+            motion_state.update();
+
+            stm32_controller.set_wheel_velocities([100, 1000, 100, 1000]);
+            ROBOT.motion_state.store(Arc::new(motion_state));
+            std::thread::sleep(Duration::from_millis(10));
+        }
+    });
+}
+
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct MotionState {
@@ -50,7 +74,6 @@ impl MotionState {
                 break;
             }
         }
-        self.current_twist =
-            Twist::from_mecanum_velocities(MecanumVelocities::new(vfl, vfr, vrl, vrr));
+        self.current_twist = MecanumVelocities::new(vfl, vfr, vrl, vrr).to_twist();
     }
 }
