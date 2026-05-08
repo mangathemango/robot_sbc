@@ -1,5 +1,7 @@
 use std::f32::consts::PI;
 
+use glam::Vec2;
+
 use crate::ROBOT;
 use crate::math::{MecanumVelocities, Pose, Twist};
 use std::{sync::Arc, time::Duration};
@@ -17,9 +19,9 @@ pub fn spawn_motion_thread() {
             motion_state.dt = now.duration_since(last_update);
             last_update = now;
 
-            motion_state.update();
+            motion_state.update(motion_state.dt);
 
-            stm32_controller.set_wheel_velocities([100, 1000, 100, 1000]);
+            stm32_controller.set_wheel_velocities([1000, 1000, 1000, 1000]);
             ROBOT.motion_state.store(Arc::new(motion_state));
             std::thread::sleep(Duration::from_millis(10));
         }
@@ -52,7 +54,7 @@ impl MotionState {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, dt: Duration) {
         let stm32_state = ROBOT.stm32_state.load();
         let gyro_state = ROBOT.gyro_state.load();
 
@@ -64,6 +66,11 @@ impl MotionState {
             .actual_wheel_velocities
             .map(|v| v as f32 / 10000.0);
 
+        self.current_twist = MecanumVelocities::new(vfl, vfr, vrl, vrr).to_twist();
+        let translation = (self.current_twist.linear * dt.as_secs_f32())
+            .rotate(Vec2::from_angle(self.current_pose.rotation));
+        
+        self.current_pose.position += translation;
         self.current_pose.rotation = gyro_state.yaw - self.initial_rotation - PI / 2.0;
         loop {
             if self.current_pose.rotation > PI {
@@ -74,6 +81,5 @@ impl MotionState {
                 break;
             }
         }
-        self.current_twist = MecanumVelocities::new(vfl, vfr, vrl, vrr).to_twist();
     }
 }
