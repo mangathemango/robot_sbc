@@ -4,6 +4,8 @@ use std::f32::consts::PI;
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
+use rand::distr::uniform::SampleRange;
+use rand::prelude::*;
 
 use crate::ROBOT;
 use crate::math::{PidController, Pose, Twist, wrap_angle};
@@ -11,25 +13,15 @@ use glam::Vec2;
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
-        let linear_pid = PidController::new(10.0, 0.1, 0.5, 0.01, 1.0);
+        let linear_pid = PidController::new(3.0, 0.0, 0.3, 0.01, 1.0);
         let angular_pid = PidController::new(0.001, 0.0, 0.0, 0.01, 1.0);
         let mut controller_state = ControllerState::new(linear_pid, angular_pid);
+        // Get an RNG:
+        let mut rng = rand::rng();
         controller_state.publish();
         loop {
             controller_state.move_to(Pose {
-                position: Vec2 { x: 0.2, y: 0.1 },
-                rotation: 0.0,
-            });
-            controller_state.move_to(Pose {
-                position: Vec2 { x: -0.1, y: -0.2 },
-                rotation: 0.0,
-            });
-            controller_state.move_to(Pose {
-                position: Vec2 { x: -0.2, y: 0.1 },
-                rotation: 0.0,
-            });
-            controller_state.move_to(Pose {
-                position: Vec2 { x: 0.1, y: -0.2 },
+                position: Vec2 { x: rng.random_range(-0.3..0.3), y: rng.random_range(-0.3..0.3) },
                 rotation: 0.0,
             });
         }
