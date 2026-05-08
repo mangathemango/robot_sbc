@@ -1,12 +1,9 @@
-use std::iter::Once;
-use std::sync::mpsc::{Receiver, Sender};
-
 use crate::control::motion::MotionState;
 use crate::devices::gyro::GyroState;
 use crate::devices::maixcam::MaixcamState;
-use crate::devices::stm32::{PiToStm32Command, Stm32Controller, Stm32State};
-use crate::devices::qr::{self, QrState};
-use std::sync::{OnceLock, mpsc};
+use crate::devices::qr::QrState;
+use crate::devices::stm32::{Stm32Controller, Stm32State};
+use std::sync::OnceLock;
 use arc_swap::ArcSwap;
 
 pub struct Robot {

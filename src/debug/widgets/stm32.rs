@@ -7,7 +7,7 @@ use crate::debug::helpers::{paragraph, bool_icon};
 pub fn draw_stm32(f: &mut Frame, area: Rect) {
     let s = ROBOT.stm32_state.load();
     let motion_state = ROBOT.motion_state.load();
-    let motion_state = ROBOT.motion_state.load();
+
     let text = format!(
         "Running: {}\nWheels: {:?}\nConnected: {}\nFPS: {:.1}\n",
         bool_icon(s.start_flag),

@@ -2,7 +2,6 @@ use crate::ROBOT;
 use crate::devices::DriverPort;
 use crate::math::MecanumVelocities;
 use crate::math::Twist;
-use glam::Vec2;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
