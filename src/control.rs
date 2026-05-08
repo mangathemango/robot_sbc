@@ -71,27 +71,23 @@ impl ControllerState {
 
     pub fn move_to(&mut self, pose: Pose) {
         self.target_pose = pose;
-        let mut settled_frames = 0;
         let mut last = Instant::now();
         loop {
             let now = Instant::now();
-            let dt = now.duration_since(last);
+            let dt = now - last;
             if dt.as_secs_f32() < 0.01 {
+                thread::sleep(Duration::from_millis(1));
                 continue;
             }
+
             self.dt = dt;
             self.update(dt);
-            if self.linear_pid.is_settled() {
-                settled_frames += 1;
-            } else {
-                settled_frames = 0;
-            }
-            if settled_frames >= 10 {
+            if self.linear_pid.is_settled_for(Duration::from_millis(100)) {
                 self.stop();
-                thread::sleep(Duration::from_millis(100));
                 break;
             }
             last = now;
+            thread::sleep(Duration::from_millis(5));
         }
     }
 

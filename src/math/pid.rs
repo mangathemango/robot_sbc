@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{collections::VecDeque, time::Duration};
 
 /// A PID (Proportional Integral Derivative) controller is a feedback mechanism that calculates
 /// the error between the desired target and the actual measured value, and adjusting the output
@@ -17,6 +17,8 @@ pub struct PidController {
     // Controller states
     last_error: f32,
     integral: f32,
+
+    pub settled_duration: Duration,
 }
 
 impl std::fmt::Display for PidController {
@@ -50,15 +52,20 @@ impl PidController {
     }
 
     pub fn update(&mut self, current_error: f32, dt: Duration) -> f32 {
+        // Check if error is in tolerance range
         if current_error.abs() < self.tolerance {
             self.last_error = current_error;
             self.integral = 0.0;
+            self.settled_duration += dt;
             return 0.0;
+        } else {
+            self.settled_duration = Duration::ZERO;
         }
 
         if self.last_error.is_nan() {
             self.last_error = current_error
         }
+
         let error_diff = (current_error - self.last_error) / dt.as_secs_f32();
         self.last_error = current_error;
 
@@ -72,5 +79,9 @@ impl PidController {
 
     pub fn is_settled(&self) -> bool {
         self.last_error.abs() < self.tolerance
+    }
+
+    pub fn is_settled_for(&self, duration: Duration) -> bool {
+        self.settled_duration >= duration
     }
 }
