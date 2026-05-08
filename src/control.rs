@@ -21,11 +21,11 @@ pub fn spawn_main_controller_thread() {
                 rotation: 0.0,
             });
             controller_state.move_to(Pose {
-                position: Vec2 { x: -0.1, y: 0.1 },
+                position: Vec2 { x: -0.1, y: -0.1 },
                 rotation: 0.0,
             });
             controller_state.move_to(Pose {
-                position: Vec2 { x: -0.1, y: -0.1 },
+                position: Vec2 { x: -0.1, y: 0.1 },
                 rotation: 0.0,
             });
             controller_state.move_to(Pose {
