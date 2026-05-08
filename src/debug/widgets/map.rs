@@ -2,10 +2,12 @@ use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
 use crate::debug::helpers::{format_radian, paragraph};
+use crate::math::Pose;
 
 pub fn draw_map(f: &mut Frame, area: Rect) {
     let kinematic_state = ROBOT.kinematic_state.load();
-    let map_text = build_pose_map(&kinematic_state.current_pose, 11);
+    let controller_state = ROBOT.controller_state.load();
+    let map_text = build_pose_map(&kinematic_state.current_pose, &controller_state.target_pose, 15);
     let text = format!(
         "{}\n\nPosition: {:.2}, {:.2}\nHeading: {}\nFPS: {:.1}",
         map_text,
@@ -22,7 +24,7 @@ pub fn draw_map(f: &mut Frame, area: Rect) {
     paragraph(f, area, "MAP", text);
 }
 
-fn build_pose_map(pose: &crate::math::Pose, size: usize) -> String {
+fn build_pose_map(pose: &Pose, target_pose: &Pose, size: usize) -> String {
     let height = size.max(5) | 1;
     let width = height * 3;
     let half_w = (width / 2) as isize;
@@ -33,6 +35,12 @@ fn build_pose_map(pose: &crate::math::Pose, size: usize) -> String {
     robot_x = robot_x.clamp(-half_w, half_w);
     robot_y = robot_y.clamp(-half_h, half_h);
 
+    let mut target_x = (target_pose.position.x * 60.0).round() as isize;
+    let mut target_y = (target_pose.position.y * 20.0).round() as isize;
+    target_x = target_x.clamp(-half_w, half_w);
+    target_y = target_y.clamp(-half_h, half_h);
+    
+
     let mut rows = Vec::with_capacity(height);
     for row in (0..height as isize).rev() {
         let mut line = String::with_capacity(width);
@@ -41,6 +49,8 @@ fn build_pose_map(pose: &crate::math::Pose, size: usize) -> String {
             let y = row - half_h;
             let ch = if x == robot_x && y == robot_y {
                 'O'
+            } else if x == target_x && y == target_y {
+                'X'
             } else if x == 0 && y == 0 {
                 '+'
             } else {

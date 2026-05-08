@@ -44,10 +44,10 @@ impl MecanumVelocities {
         let vy = t.linear.y;
         let omega = t.omega;
 
-        let vfl = vx - vy - omega;
-        let vfr = vx + vy + omega;
-        let vrl = vx + vy - omega;
-        let vrr = vx - vy + omega;
+        let vfl = vy - vx - omega;
+        let vfr = vy + vx + omega;
+        let vrl = vy + vx - omega;
+        let vrr = vy - vx + omega;
 
         MecanumVelocities { vfl, vfr, vrl, vrr }
     }

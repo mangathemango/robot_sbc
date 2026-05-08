@@ -1,4 +1,5 @@
 pub mod compass;
+pub mod controller;
 pub mod gyro;
 pub mod maixcam;
 pub mod map;

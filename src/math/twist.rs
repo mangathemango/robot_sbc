@@ -22,7 +22,7 @@ impl Twist {
     }
 
     pub fn from_mecanum_velocities(v: MecanumVelocities) -> Self {
-        let vx = (- v.vfl + v.vfr - v.vrl + v.vrr) / 4.0;
+        let vx = (- v.vfl + v.vfr + v.vrl - v.vrr) / 4.0;
 
         let vy = (v.vfl + v.vfr + v.vrl + v.vrr) / 4.0;
 

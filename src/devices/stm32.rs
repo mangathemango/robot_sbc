@@ -47,7 +47,7 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
                 Ok(None) => {}
                 Err(_) => {
                     driver.reconnect();
-                    std::thread::sleep(std::time::Duration::from_millis(200));
+                    std::thread::sleep(std::time::Duration::from_millis(10));
                 }
             }
             state.driver_is_connected = driver.is_connected();

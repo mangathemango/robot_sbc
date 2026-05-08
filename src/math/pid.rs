@@ -69,4 +69,8 @@ impl PidController {
 
         correction
     }
+
+    pub fn is_settled(&self) -> bool {
+        self.last_error.abs() < self.tolerance
+    }
 }

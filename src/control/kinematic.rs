@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 use glam::Vec2;
 
 use crate::ROBOT;
-use crate::math::{MecanumVelocities, Pose, Twist};
+use crate::math::{MecanumVelocities, Pose, Twist, wrap_angle};
 use std::{sync::Arc, time::Duration};
 
 pub fn spawn_motion_thread() {
@@ -11,7 +11,7 @@ pub fn spawn_motion_thread() {
         std::thread::sleep(Duration::from_millis(100));
         let mut kinematic_state = KinematicState::new();
         let mut last_update = std::time::Instant::now();
-        let stm32_controller = ROBOT.get_stm32_controller();
+        
 
         loop {
             let now = std::time::Instant::now();
@@ -19,8 +19,6 @@ pub fn spawn_motion_thread() {
             last_update = now;
 
             kinematic_state.update(kinematic_state.dt);
-
-            stm32_controller.set_wheel_velocities([1000, 1000, 1000, 1000]);
             ROBOT.kinematic_state.store(Arc::new(kinematic_state));
             std::thread::sleep(Duration::from_millis(10));
         }
@@ -68,15 +66,6 @@ impl KinematicState {
             .rotate(Vec2::from_angle(self.current_pose.rotation));
 
         self.current_pose.position += translation;
-        self.current_pose.rotation = gyro_state.yaw - self.initial_rotation - PI / 2.0;
-        loop {
-            if self.current_pose.rotation > PI {
-                self.current_pose.rotation -= PI * 2.0;
-            } else if self.current_pose.rotation < -PI {
-                self.current_pose.rotation += PI * 2.0;
-            } else {
-                break;
-            }
-        }
+        self.current_pose.rotation = wrap_angle(gyro_state.yaw - self.initial_rotation - PI / 2.0);
     }
 }
