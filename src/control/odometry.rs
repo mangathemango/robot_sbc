@@ -59,8 +59,10 @@ impl OdometryState {
         let [vfl, vfr, vrl, vrr] = stm32_state
             .actual_wheel_velocities
             .map(|v| v as f32 / 10000.0);
+        
+        let target_mecanum_velocities = MecanumVelocities::new(vfl, vfr, vrl, vrr);
 
-        self.current_twist = MecanumVelocities::new(vfl, vfr, vrl, vrr).to_twist();
+        self.current_twist.simulate_mecanum_response(target_mecanum_velocities, dt);
         let translation = (self.current_twist.linear * dt.as_secs_f32())
             .rotate(Vec2::from_angle(self.current_pose.rotation));
 
