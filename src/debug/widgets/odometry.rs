@@ -8,8 +8,8 @@ pub fn draw_odometry(f: &mut Frame, area: Rect) {
     let odometry_state = ROBOT.odometry_state.load();
     let text = format!(
         "Current Twist: {}\nCurrent Pose: {}\nInitial Yaw: {}\nFPS: {:.1}",
-        odometry_state.current_twist,
-        odometry_state.current_pose,
+        odometry_state.twist,
+        odometry_state.pose,
         format_radian(odometry_state.initial_rotation),
         if odometry_state.dt.as_secs_f32() > 0.0 {
             1.0 / odometry_state.dt.as_secs_f32()

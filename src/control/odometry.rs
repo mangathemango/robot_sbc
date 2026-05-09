@@ -26,8 +26,8 @@ pub fn spawn_odometry_thread() {
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct OdometryState {
-    pub current_twist: Twist,
-    pub current_pose: Pose,
+    pub twist: Twist,
+    pub pose: Pose,
     pub initial_rotation: f32,
     /// Delta time for FPS calculation
     pub dt: std::time::Duration,
@@ -62,12 +62,12 @@ impl OdometryState {
 
         let target_mecanum_velocities = MecanumVelocities::new(vfl, vfr, vrl, vrr);
 
-        self.current_twist
+        self.twist
             .simulate_mecanum_response(target_mecanum_velocities, dt);
-        let translation = (self.current_twist.linear * dt.as_secs_f32())
-            .rotate(Vec2::from_angle(self.current_pose.rotation));
+        let translation =
+            (self.twist.linear * dt.as_secs_f32()).rotate(Vec2::from_angle(self.pose.rotation));
 
-        self.current_pose.position += translation;
-        self.current_pose.rotation = wrap_angle(gyro_state.yaw - self.initial_rotation);
+        self.pose.position += translation;
+        self.pose.rotation = wrap_angle(gyro_state.yaw - self.initial_rotation);
     }
 }

@@ -54,14 +54,14 @@ impl ControllerState {
 
         let odometry_state = ROBOT.odometry_state.load();
 
-        let error_pose = odometry_state.current_pose.difference(self.target_pose);
+        let error_pose = odometry_state.pose.difference(self.target_pose);
         let linear_error = error_pose.position.length();
         let angular_error = error_pose.rotation;
 
         let linear_correction_speed = self.linear_pid.update(linear_error, dt);
         let linear_correction_vec = (error_pose.position.normalize_or_zero()
             * linear_correction_speed)
-            .rotate(Vec2::from_angle(-odometry_state.current_pose.rotation));
+            .rotate(Vec2::from_angle(-odometry_state.pose.rotation));
         let angular_correction = self.angular_pid.update(angular_error, dt);
 
         self.target_twist = Twist::new(linear_correction_vec, angular_correction);

@@ -11,7 +11,7 @@ use crate::ROBOT;
 pub fn draw_compass(f: &mut Frame, area: Rect) {
     let odometry_state = ROBOT.odometry_state.load();
 
-    draw_compass_inner(f, area, odometry_state.current_pose.rotation);
+    draw_compass_inner(f, area, odometry_state.pose.rotation);
 }
 
 fn draw_compass_inner(f: &mut Frame, area: Rect, yaw: f32) {

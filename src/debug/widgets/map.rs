@@ -7,17 +7,13 @@ use crate::math::Pose;
 pub fn draw_map(f: &mut Frame, area: Rect) {
     let odometry_state = ROBOT.odometry_state.load();
     let controller_state = ROBOT.controller_state.load();
-    let map_text = build_pose_map(
-        &odometry_state.current_pose,
-        &controller_state.target_pose,
-        21,
-    );
+    let map_text = build_pose_map(&odometry_state.pose, &controller_state.target_pose, 21);
     let text = format!(
         "{}\n\nPosition: {:.2}, {:.2}\nHeading: {}\nFPS: {:.1}",
         map_text,
-        odometry_state.current_pose.position.x,
-        odometry_state.current_pose.position.y,
-        format_radian(odometry_state.current_pose.rotation),
+        odometry_state.pose.position.x,
+        odometry_state.pose.position.y,
+        format_radian(odometry_state.pose.rotation),
         if odometry_state.dt.as_secs_f32() > 0.0 {
             1.0 / odometry_state.dt.as_secs_f32()
         } else {
