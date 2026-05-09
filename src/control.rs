@@ -1,10 +1,8 @@
 pub mod odometry;
 
-use std::f32::consts::PI;
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
-use rand::distr::uniform::SampleRange;
 use rand::prelude::*;
 
 use crate::ROBOT;
@@ -13,7 +11,7 @@ use glam::Vec2;
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
-        let linear_pid = PidController::new(3.0, 0.0, 0.3, 0.01, 1.0);
+        let linear_pid = PidController::new(3.0, 0.1, 1.0, 0.01, 1.0);
         let angular_pid = PidController::new(0.001, 0.0, 0.0, 0.01, 1.0);
         let mut controller_state = ControllerState::new(linear_pid, angular_pid);
         // Get an RNG:
