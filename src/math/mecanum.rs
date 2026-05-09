@@ -97,31 +97,32 @@ impl MecanumVelocities {
         let accel = 10000.0;
         let max_delta =
             accel * dt.as_secs_f32();
+        let max_noise = 500.0;
 
         // Simulated wheel response
         let vfl = approach(
             self.vfl,
             target.vfl,
             max_delta,
-        ) + noise(1000.0);
+        ) + noise(max_noise);
 
         let vfr = approach(
             self.vfr,
             target.vfr,
             max_delta,
-        ) + noise(1000.0);
+        ) + noise(max_noise);
 
         let vrl = approach(
             self.vrl,
             target.vrl,
             max_delta,
-        ) + noise(1000.0);
+        ) + noise(max_noise);
 
         let vrr = approach(
             self.vrr,
             target.vrr,
             max_delta,
-        ) + noise(100.0);
+        ) + noise(max_noise);
 
         // Convert back to twist
         MecanumVelocities {

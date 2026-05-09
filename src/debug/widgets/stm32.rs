@@ -6,10 +6,9 @@ use crate::debug::helpers::{bool_icon, paragraph};
 
 pub fn draw_stm32(f: &mut Frame, area: Rect) {
     let s = ROBOT.stm32_state.load();
-    let odometry_state = ROBOT.odometry_state.load();
 
     let text = format!(
-        "Running: {}\nWheels: {:?}\nConnected: {}\nFPS: {:.1}\n",
+        "Running: {}\nWheels: {:#?}\nConnected: {}\nFPS: {:.1}\n",
         bool_icon(s.start_flag),
         s.actual_wheel_velocities,
         bool_icon(s.driver_is_connected),

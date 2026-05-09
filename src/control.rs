@@ -11,7 +11,7 @@ use glam::Vec2;
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
-        let linear_pid = PidController::new(3.0, 0.1, 1.0, 0.01, 1.0);
+        let linear_pid = PidController::new(5.0, 0.1, 2.0, 0.01, 1.0);
         let angular_pid = PidController::new(0.001, 0.0, 0.0, 0.01, 1.0);
         let mut controller_state = ControllerState::new(linear_pid, angular_pid);
         // Get an RNG:
@@ -74,12 +74,14 @@ impl ControllerState {
         self.target_pose = pose;
         let mut last = Instant::now();
         loop {
+            // Only update every 10ms
             let now = Instant::now();
             let dt = now - last;
             if dt.as_secs_f32() < 0.01 {
                 thread::sleep(Duration::from_millis(1));
                 continue;
             }
+
 
             self.dt = dt;
             self.update(dt);
@@ -88,7 +90,6 @@ impl ControllerState {
                 break;
             }
             last = now;
-            thread::sleep(Duration::from_millis(5));
         }
     }
 
