@@ -11,7 +11,7 @@ use glam::Vec2;
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
-        let linear_pid = PidController::new(5.0, 0.1, 2.0, 0.01, 1.0);
+        let linear_pid = PidController::new(5.0, 0.0, 2.0, 0.05, 1.0);
         let angular_pid = PidController::new(0.001, 0.0, 0.0, 0.01, 1.0);
         let mut controller_state = ControllerState::new(linear_pid, angular_pid);
         // Get an RNG:
@@ -19,10 +19,59 @@ pub fn spawn_main_controller_thread() {
         controller_state.publish();
         loop {
             controller_state.move_to(Pose {
-                position: Vec2 {
-                    x: rng.random_range(-0.6..0.0),
-                    y: rng.random_range(-0.0..0.6),
-                },
+                position: Vec2 {x: 0.0, y: 0.0},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.07, y: 0.10},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.03, y: 0.50},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.03, y: 0.30},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.57, y: 0.30},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.57, y: 0.57},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.30, y: 0.57},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.05, y: 0.57},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.05, y: 0.30},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.57, y: 0.30},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.57, y: 0.57},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.30, y: 0.57},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.05, y: 0.57},
+                rotation: 0.0,
+            });
+            controller_state.move_to(Pose {
+                position: Vec2 {x: -0.05, y: 0.05},
                 rotation: 0.0,
             });
         }
