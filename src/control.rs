@@ -20,8 +20,8 @@ pub fn spawn_main_controller_thread() {
         loop {
             controller_state.move_to(Pose {
                 position: Vec2 {
-                    x: rng.random_range(-0.3..0.3),
-                    y: rng.random_range(-0.3..0.3),
+                    x: rng.random_range(-0.6..0.0),
+                    y: rng.random_range(-0.0..0.6),
                 },
                 rotation: 0.0,
             });

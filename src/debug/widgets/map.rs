@@ -30,22 +30,17 @@ fn build_pose_map(pose: &Pose, target_pose: &Pose, size: usize) -> String {
     let half_w = (width / 2) as isize;
     let half_h = (height / 2) as isize;
 
-    let mut robot_x = (pose.position.x * 60.0).round() as isize;
-    let mut robot_y = (pose.position.y * 30.0).round() as isize;
-    robot_x = robot_x.clamp(-half_w, half_w);
-    robot_y = robot_y.clamp(-half_h, half_h);
-
-    let mut target_x = (target_pose.position.x * 60.0).round() as isize;
-    let mut target_y = (target_pose.position.y * 30.0).round() as isize;
-    target_x = target_x.clamp(-half_w, half_w);
-    target_y = target_y.clamp(-half_h, half_h);
+    let mut  robot_x = (pose.position.x * 60.0).round() as isize;
+    let mut  robot_y = (pose.position.y * 30.0).round() as isize;
+    let mut  target_x = (target_pose.position.x * 60.0).round() as isize;
+    let mut  target_y = (target_pose.position.y * 30.0).round() as isize;
 
     let mut rows = Vec::with_capacity(height);
     for row in (0..height as isize).rev() {
         let mut line = String::with_capacity(width);
         for col in 0..width as isize {
-            let x = col - half_w;
-            let y = row - half_h;
+            let x = col - half_w - 17;
+            let y = row - half_h + 9;
             let ch = if x == robot_x && y == robot_y {
                 'X'
             } else if x == target_x && y == target_y {
