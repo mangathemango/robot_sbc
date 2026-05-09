@@ -29,7 +29,10 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
                 Ok(cmd) => {
                     match cmd {
                         PiToStm32Command::SetWheelTargetVelocities { velocities } => {
-                            state.actual_wheel_velocities = velocities;
+                            let current_mecanum_velocities = MecanumVelocities::from_array(state.actual_wheel_velocities.map(|v| v as f32));
+                            let target_mecanum_velocities = MecanumVelocities::from_array(velocities.map(|v| v as f32));
+                            let simulated_mecanum_velocities = current_mecanum_velocities.simulate_mecanum_response(target_mecanum_velocities, state.dt);
+                            state.actual_wheel_velocities = simulated_mecanum_velocities.to_array().map(|v| v as i16);
                         }
                         _ => ()
                     }

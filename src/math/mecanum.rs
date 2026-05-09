@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::math::Twist;
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -58,5 +60,75 @@ impl MecanumVelocities {
 
     pub fn to_array(&self) -> [f32; 4] {
         [self.vfl, self.vfr, self.vrl, self.vrr]
+    }
+
+    pub fn from_array(array: [f32; 4]) -> Self {
+        Self { vfl: array[0], vfr: array[1], vrl: array[2], vrr: array[3] }
+    }
+
+    pub fn simulate_mecanum_response(
+        &self,
+        target: MecanumVelocities,
+        dt: Duration,
+    ) -> Self {
+        fn approach(
+            current: f32,
+            target: f32,
+            max_delta: f32,
+        ) -> f32 {
+            let delta = target - current;
+
+            if delta > max_delta {
+                current + max_delta
+            } else if delta < -max_delta {
+                current - max_delta
+            } else {
+                target
+            }
+        }
+
+        fn noise(amount: f32) -> f32 {
+            (rand::random::<f32>() - 0.5)
+                * 2.0
+                * amount
+        }
+
+
+        let accel = 10000.0;
+        let max_delta =
+            accel * dt.as_secs_f32();
+
+        // Simulated wheel response
+        let vfl = approach(
+            self.vfl,
+            target.vfl,
+            max_delta,
+        ) + noise(1000.0);
+
+        let vfr = approach(
+            self.vfr,
+            target.vfr,
+            max_delta,
+        ) + noise(1000.0);
+
+        let vrl = approach(
+            self.vrl,
+            target.vrl,
+            max_delta,
+        ) + noise(1000.0);
+
+        let vrr = approach(
+            self.vrr,
+            target.vrr,
+            max_delta,
+        ) + noise(100.0);
+
+        // Convert back to twist
+        MecanumVelocities {
+            vfl,
+            vfr,
+            vrl,
+            vrr
+        }
     }
 }
