@@ -10,7 +10,7 @@ pub fn draw_map(f: &mut Frame, area: Rect) {
     let map_text = build_pose_map(
         &kinematic_state.current_pose,
         &controller_state.target_pose,
-        15,
+        21,
     );
     let text = format!(
         "{}\n\nPosition: {:.2}, {:.2}\nHeading: {}\nFPS: {:.1}",
@@ -30,17 +30,17 @@ pub fn draw_map(f: &mut Frame, area: Rect) {
 
 fn build_pose_map(pose: &Pose, target_pose: &Pose, size: usize) -> String {
     let height = size.max(5) | 1;
-    let width = height * 3;
+    let width = height * 2;
     let half_w = (width / 2) as isize;
     let half_h = (height / 2) as isize;
 
     let mut robot_x = (pose.position.x * 60.0).round() as isize;
-    let mut robot_y = (pose.position.y * 20.0).round() as isize;
+    let mut robot_y = (pose.position.y * 30.0).round() as isize;
     robot_x = robot_x.clamp(-half_w, half_w);
     robot_y = robot_y.clamp(-half_h, half_h);
 
     let mut target_x = (target_pose.position.x * 60.0).round() as isize;
-    let mut target_y = (target_pose.position.y * 20.0).round() as isize;
+    let mut target_y = (target_pose.position.y * 30.0).round() as isize;
     target_x = target_x.clamp(-half_w, half_w);
     target_y = target_y.clamp(-half_h, half_h);
 
@@ -51,9 +51,9 @@ fn build_pose_map(pose: &Pose, target_pose: &Pose, size: usize) -> String {
             let x = col - half_w;
             let y = row - half_h;
             let ch = if x == robot_x && y == robot_y {
-                'O'
-            } else if x == target_x && y == target_y {
                 'X'
+            } else if x == target_x && y == target_y {
+                'O'
             } else if x == 0 && y == 0 {
                 '+'
             } else {

@@ -10,7 +10,7 @@ use crate::debug::widgets::{
 
 pub fn ui(f: &mut Frame) {
     let [map_area, right_area] =
-        Layout::horizontal([Constraint::Length(48), Constraint::Fill(1)]).areas(f.size());
+        Layout::horizontal([Constraint::Length(45), Constraint::Fill(1)]).areas(f.size());
 
     let [motion_area, bottom_area] =
         Layout::vertical([Constraint::Percentage(40), Constraint::Percentage(60)])
