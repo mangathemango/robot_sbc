@@ -9,16 +9,16 @@ use std::{sync::Arc, time::Duration};
 pub fn spawn_odometry_thread() {
     std::thread::spawn(|| {
         std::thread::sleep(Duration::from_millis(100));
-        let mut kinematic_state = OdometryState::new();
+        let mut odometry_state = OdometryState::new();
         let mut last_update = std::time::Instant::now();
 
         loop {
             let now = std::time::Instant::now();
-            kinematic_state.dt = now.duration_since(last_update);
+            odometry_state.dt = now.duration_since(last_update);
             last_update = now;
 
-            kinematic_state.update(kinematic_state.dt);
-            ROBOT.odometry_state.store(Arc::new(kinematic_state));
+            odometry_state.update(odometry_state.dt);
+            ROBOT.odometry_state.store(Arc::new(odometry_state));
             std::thread::sleep(Duration::from_millis(10));
         }
     });
@@ -59,10 +59,11 @@ impl OdometryState {
         let [vfl, vfr, vrl, vrr] = stm32_state
             .actual_wheel_velocities
             .map(|v| v as f32 / 10000.0);
-        
+
         let target_mecanum_velocities = MecanumVelocities::new(vfl, vfr, vrl, vrr);
 
-        self.current_twist.simulate_mecanum_response(target_mecanum_velocities, dt);
+        self.current_twist
+            .simulate_mecanum_response(target_mecanum_velocities, dt);
         let translation = (self.current_twist.linear * dt.as_secs_f32())
             .rotate(Vec2::from_angle(self.current_pose.rotation));
 

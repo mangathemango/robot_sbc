@@ -5,21 +5,21 @@ use crate::debug::helpers::{format_radian, paragraph};
 use crate::math::Pose;
 
 pub fn draw_map(f: &mut Frame, area: Rect) {
-    let kinematic_state = ROBOT.odometry_state.load();
+    let odometry_state = ROBOT.odometry_state.load();
     let controller_state = ROBOT.controller_state.load();
     let map_text = build_pose_map(
-        &kinematic_state.current_pose,
+        &odometry_state.current_pose,
         &controller_state.target_pose,
         21,
     );
     let text = format!(
         "{}\n\nPosition: {:.2}, {:.2}\nHeading: {}\nFPS: {:.1}",
         map_text,
-        kinematic_state.current_pose.position.x,
-        kinematic_state.current_pose.position.y,
-        format_radian(kinematic_state.current_pose.rotation),
-        if kinematic_state.dt.as_secs_f32() > 0.0 {
-            1.0 / kinematic_state.dt.as_secs_f32()
+        odometry_state.current_pose.position.x,
+        odometry_state.current_pose.position.y,
+        format_radian(odometry_state.current_pose.rotation),
+        if odometry_state.dt.as_secs_f32() > 0.0 {
+            1.0 / odometry_state.dt.as_secs_f32()
         } else {
             0.0
         }

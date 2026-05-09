@@ -1,9 +1,9 @@
 pub mod odometry;
 
+use rand::prelude::*;
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
-use rand::prelude::*;
 
 use crate::ROBOT;
 use crate::math::{PidController, Pose, Twist, wrap_angle};
@@ -11,7 +11,7 @@ use glam::Vec2;
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
-        let linear_pid = PidController::new(3.0, 0.1, 1.0, 0.01, 1.0);
+        let linear_pid = PidController::new(10.0, 0.1, 1.0, 0.01, 1.0);
         let angular_pid = PidController::new(0.001, 0.0, 0.0, 0.01, 1.0);
         let mut controller_state = ControllerState::new(linear_pid, angular_pid);
         // Get an RNG:
@@ -19,7 +19,10 @@ pub fn spawn_main_controller_thread() {
         controller_state.publish();
         loop {
             controller_state.move_to(Pose {
-                position: Vec2 { x: rng.random_range(-0.3..0.3), y: rng.random_range(-0.3..0.3) },
+                position: Vec2 {
+                    x: rng.random_range(-0.3..0.3),
+                    y: rng.random_range(-0.3..0.3),
+                },
                 rotation: 0.0,
             });
         }
@@ -49,16 +52,16 @@ impl ControllerState {
     pub fn update(&mut self, dt: Duration) {
         let stm32_controller = ROBOT.get_stm32_controller();
 
-        let kinematic_state = ROBOT.odometry_state.load();
+        let odometry_state = ROBOT.odometry_state.load();
 
-        let error_pose = kinematic_state.current_pose.difference(self.target_pose);
+        let error_pose = odometry_state.current_pose.difference(self.target_pose);
         let linear_error = error_pose.position.length();
         let angular_error = error_pose.rotation;
 
         let linear_correction_speed = self.linear_pid.update(linear_error, dt);
         let linear_correction_vec = (error_pose.position.normalize_or_zero()
             * linear_correction_speed)
-            .rotate(Vec2::from_angle(-kinematic_state.current_pose.rotation));
+            .rotate(Vec2::from_angle(-odometry_state.current_pose.rotation));
         let angular_correction = self.angular_pid.update(angular_error, dt);
 
         self.target_twist = Twist::new(linear_correction_vec, angular_correction);
