@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
-use glam::Vec2;
 use crate::math::wrap_angle;
+use glam::Vec2;
 /// A struct representing where an object is and where it's facing
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Pose {
@@ -13,7 +13,7 @@ impl std::fmt::Display for Pose {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "((x: {:.3}, y: {:.3}), θ: {:.2}π rad ({:.1}°))",
+            "((x: {:.3}, y: {:.3}), rotation: {:.2}π rad ({:.1}°))",
             self.position.x,
             self.position.y,
             self.rotation / PI,
@@ -30,9 +30,7 @@ impl Pose {
     pub fn difference(self, target: Pose) -> Pose {
         Pose {
             position: target.position - self.position,
-            rotation: wrap_angle(
-                target.rotation - self.rotation
-            ),
+            rotation: wrap_angle(target.rotation - self.rotation),
         }
     }
 
