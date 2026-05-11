@@ -2,16 +2,24 @@ use std::{sync::OnceLock, time::Duration};
 
 use glam::Vec2;
 
-use crate::{ROBOT, control::{ControllerState, actions::Action, landmark::{self, Landmark}, motion::{MotionPolicy, MotionPolicyPreset}}, devices::stm32::Stm32Controller, math::{PidController, Pose, Twist}};
-
+use crate::{
+    ROBOT,
+    control::{
+        ControllerState,
+        actions::Action,
+        landmark::{self, Landmark},
+        motion::{MotionPolicy, MotionPolicyPreset},
+    },
+    devices::stm32::Stm32Controller,
+    math::{PidController, Pose, Twist},
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct Navigate {
     target_pose: Pose,
     policy: MotionPolicy,
-    mode: ControlMode
+    mode: ControlMode,
 }
-
 
 impl Navigate {
     pub fn to_pose(pose: Pose) -> Self {
@@ -20,10 +28,10 @@ impl Navigate {
             ..Default::default()
         }
     }
-    
-    pub fn to_landmark(landmark: Landmark) -> Self {
+
+    pub fn to(landmark: Landmark) -> Self {
         Self {
-            target_pose: landmark.pose(), 
+            target_pose: landmark.pose(),
             ..Default::default()
         }
     }
@@ -46,7 +54,7 @@ impl Action for Navigate {
             ControlMode::Full => (),
             ControlMode::RotateOnly => {
                 self.target_pose.position = current_pose.position;
-            },
+            }
             ControlMode::TranslateOnly => {
                 self.target_pose.rotation = current_pose.rotation;
             }
@@ -56,12 +64,14 @@ impl Action for Navigate {
     fn update(&mut self, state: &mut ControllerState, dt: Duration) {
         let stm32_controller = ROBOT.get_stm32_controller();
         let current_pose = ROBOT.odometry_state.load().pose;
-        
-        let (linear_error, angular_error) = current_pose.difference(self.target_pose).to_components();
-        let (mut linear_output, angular_output) = self.policy.update(linear_error, angular_error, dt);
+
+        let (linear_error, angular_error) =
+            current_pose.difference(self.target_pose).to_components();
+        let (mut linear_output, angular_output) =
+            self.policy.update(linear_error, angular_error, dt);
         linear_output = linear_output.rotate(Vec2::from_angle(-current_pose.rotation));
 
-        let target_twist = Twist::new(linear_output,angular_output);
+        let target_twist = Twist::new(linear_output, angular_output);
         stm32_controller.set_twist(target_twist);
 
         state.angular_pid = self.policy.angular_pid;
@@ -85,6 +95,5 @@ pub enum ControlMode {
     #[default]
     Full,
     TranslateOnly,
-    RotateOnly
+    RotateOnly,
 }
-
