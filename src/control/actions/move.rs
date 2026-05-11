@@ -15,13 +15,13 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Default)]
-pub struct Navigate {
+pub struct Move {
     target_pose: Pose,
     policy: MotionPolicy,
     mode: ControlMode,
 }
 
-impl Navigate {
+impl Move {
     pub fn to_pose(pose: Pose) -> Self {
         Self {
             target_pose: pose,
@@ -47,7 +47,7 @@ impl Navigate {
     }
 }
 
-impl Action for Navigate {
+impl Action for Move {
     fn start(&mut self, state: &mut ControllerState) {
         let current_pose = ROBOT.odometry_state.load().pose;
         match self.mode {

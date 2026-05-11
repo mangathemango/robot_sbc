@@ -1,4 +1,4 @@
-pub mod navigate;
+pub mod r#move;
 
 use crate::control::ControllerState;
 use std::{fmt::Debug, time::Duration};

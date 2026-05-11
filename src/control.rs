@@ -10,7 +10,7 @@ use std::time::{Duration, Instant};
 
 use crate::ROBOT;
 use crate::control::actions::Action;
-use crate::control::actions::navigate::Navigate;
+use crate::control::actions::r#move::Move;
 use crate::control::landmark::Landmark;
 
 use crate::control::motion::MotionPolicyPreset;
@@ -30,27 +30,26 @@ pub fn spawn_main_controller_thread() {
             }
             if controller.action_queue.is_empty() {
                 controller
-                    .enqueue(Navigate::to(Landmark::QrZone))
-                    .enqueue(Navigate::to(Landmark::SourceZone))
-                    .enqueue(Navigate::to(Landmark::SideIntersection))
-                    .enqueue(Navigate::to(Landmark::TemporaryStorageZone))
-                    .enqueue(Navigate::to(Landmark::FirstCornerTurn))
-                    .enqueue(Navigate::to(Landmark::FinalProcessingZone))
-                    .enqueue(Navigate::to(Landmark::SecondCornerTurn))
-                    .enqueue(Navigate::to(Landmark::SourceZone))
-                    .enqueue(Navigate::to(Landmark::SideIntersection))
-                    .enqueue(Navigate::to(Landmark::TemporaryStorageZone))
-                    .enqueue(Navigate::to(Landmark::FirstCornerTurn))
-                    .enqueue(Navigate::to(Landmark::FinalProcessingZone))
-                    .enqueue(Navigate::to(Landmark::SecondCornerTurn))
-                    .enqueue(Navigate::to(Landmark::SourceZone))
-                    .enqueue(Navigate::to(Landmark::SideIntersection))
-                    .enqueue(Navigate::to(Landmark::TemporaryStorageZone))
-                    .enqueue(Navigate::to(Landmark::FirstCornerTurn))
-                    .enqueue(Navigate::to(Landmark::FinalProcessingZone))
-                    .enqueue(Navigate::to(Landmark::SecondCornerTurn))
-                    .enqueue(Navigate::to(Landmark::Start))
-                ;
+                    .enqueue(Move::to(Landmark::QrZone))
+                    .enqueue(Move::to(Landmark::SourceZone))
+                    .enqueue(Move::to(Landmark::SideIntersection))
+                    .enqueue(Move::to(Landmark::TemporaryStorageZone))
+                    .enqueue(Move::to(Landmark::FirstCornerTurn))
+                    .enqueue(Move::to(Landmark::FinalProcessingZone))
+                    .enqueue(Move::to(Landmark::SecondCornerTurn))
+                    .enqueue(Move::to(Landmark::SourceZone))
+                    .enqueue(Move::to(Landmark::SideIntersection))
+                    .enqueue(Move::to(Landmark::TemporaryStorageZone))
+                    .enqueue(Move::to(Landmark::FirstCornerTurn))
+                    .enqueue(Move::to(Landmark::FinalProcessingZone))
+                    .enqueue(Move::to(Landmark::SecondCornerTurn))
+                    .enqueue(Move::to(Landmark::SourceZone))
+                    .enqueue(Move::to(Landmark::SideIntersection))
+                    .enqueue(Move::to(Landmark::TemporaryStorageZone))
+                    .enqueue(Move::to(Landmark::FirstCornerTurn))
+                    .enqueue(Move::to(Landmark::FinalProcessingZone))
+                    .enqueue(Move::to(Landmark::SecondCornerTurn))
+                    .enqueue(Move::to(Landmark::Start));
             }
             controller.update(dt);
 
