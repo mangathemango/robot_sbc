@@ -34,6 +34,10 @@ impl Pose {
         }
     }
 
+    pub fn to_components(&self) -> (Vec2, f32) {
+        (self.position, self.rotation)
+    }
+
     pub fn forward(&self) -> Vec2 {
         Vec2::from_angle(self.rotation)
     }

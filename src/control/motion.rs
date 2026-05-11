@@ -1,0 +1,65 @@
+use std::time::Duration;
+
+use glam::Vec2;
+
+use crate::math::PidController;
+
+#[derive(Debug, Clone, Copy)]
+pub struct MotionPolicy {
+    pub linear_pid: PidController,
+    pub angular_pid: PidController,
+    pub settle_time: Duration,
+}
+
+impl MotionPolicy {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn update(&mut self, linear_error: Vec2, angular_error: f32, dt: Duration) -> (Vec2, f32) {
+        let linear_direction = linear_error.normalize_or_zero();
+        let linear_correction_speed = self.linear_pid.update(linear_error.length(), dt);
+        let linear_correction = linear_direction * linear_correction_speed;
+
+        let angular_correction = self.angular_pid.update(angular_error, dt);
+
+        (linear_correction, angular_correction)
+    }
+
+    pub fn is_settled(&self) -> bool {
+        self.linear_pid.is_settled_for(self.settle_time)
+            && self.angular_pid.is_settled_for(self.settle_time)
+    }
+}
+
+impl Default for MotionPolicy {
+    fn default() -> Self {
+        MotionPolicyPreset::Aggressive.to_motion_policy()
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub enum MotionPolicyPreset {
+    #[default]
+    Precise,
+    Aggressive,
+    Custom(MotionPolicy),
+}
+
+impl MotionPolicyPreset {
+    pub fn to_motion_policy(&self) -> MotionPolicy {
+        match self {
+            Self::Precise => MotionPolicy {
+                linear_pid: PidController::new(3.0, 0.0, 0.1, 0.001, 1.0),
+                angular_pid: PidController::new(2.0, 0.0, 0.1, 0.001, 1.0),
+                settle_time: Duration::from_millis(1000),
+            },
+            Self::Aggressive => MotionPolicy {
+                linear_pid: PidController::new(3.0, 0.0, 0.1, 0.05, 1.0),
+                angular_pid: PidController::new(3.0, 0.0, 0.5, 0.05, 1.0),
+                settle_time: Duration::from_millis(100),
+            },
+            Self::Custom(profile) => *profile,
+        }
+    }
+}
