@@ -5,6 +5,9 @@ use crate::math::Twist;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
+use std::time::Duration;
+use std::time::Instant;
+use std::vec;
 
 const STM32_DOTENV_KEY: &str = "STM32_PATH";
 
@@ -29,12 +32,17 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
                 Ok(cmd) => {
                     match cmd {
                         PiToStm32Command::SetWheelTargetVelocities { velocities } => {
-                            let current_mecanum_velocities = MecanumVelocities::from_array(state.actual_wheel_velocities.map(|v| v as f32));
-                            let target_mecanum_velocities = MecanumVelocities::from_array(velocities.map(|v| v as f32));
-                            let simulated_mecanum_velocities = current_mecanum_velocities.simulate_mecanum_response(target_mecanum_velocities, state.dt);
-                            state.actual_wheel_velocities = simulated_mecanum_velocities.to_array().map(|v| v as i16);
+                            let current_mecanum_velocities = MecanumVelocities::from_array(
+                                state.actual_wheel_velocities.map(|v| v as f32),
+                            );
+                            let target_mecanum_velocities =
+                                MecanumVelocities::from_array(velocities.map(|v| v as f32));
+                            let simulated_mecanum_velocities = current_mecanum_velocities
+                                .simulate_mecanum_response(target_mecanum_velocities, state.dt);
+                            state.actual_wheel_velocities =
+                                simulated_mecanum_velocities.to_array().map(|v| v as i16);
                         }
-                        _ => ()
+                        _ => (),
                     }
                     let _ = driver.send_command(cmd);
                 }
@@ -86,7 +94,7 @@ impl Stm32Driver {
             }
             DriverPort::Connected(port) => port,
         };
-        port.write(&command.to_bytes())
+        port.write(&command.to_packet_bytes())
             .map_err(|e| format!("Send command to STM32 failed: {}", e))
     }
 
@@ -286,46 +294,48 @@ impl PiToStm32Command {
         }
     }
 
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
+    pub fn to_packet_bytes(&self) -> Vec<u8> {
+        let data = self.to_data_bytes();
+        let len = data.len() as u8;
+        let mut packet = vec![
+            STM32_START_BYTE, // START
+            self.id(),        // ID
+            len,              // LEN
+        ];
 
-        buf.push(STM32_START_BYTE);
-
-        let id = self.id();
-        buf.push(id);
-
-        // reserve space for length (we fill later)
-        buf.push(0);
-
-        match self {
-            PiToStm32Command::SetYawServoAngle { angle } => {
-                buf.push(*angle);
-            }
-
-            PiToStm32Command::SetDisplayText { text } => {
-                let bytes = text.as_bytes();
-
-                // ⚠ enforce max length
-                let len = bytes.len().min(32);
-                buf.extend(&bytes[..len]);
-            }
-
-            PiToStm32Command::SetWheelTargetVelocities { velocities } => {
-                velocities.iter().for_each(|v| buf.extend(v.to_le_bytes()));
-            }
-
-            _ => {}
-        }
-
-        // fill in length (data only)
-        let data_len = buf.len() - 3;
-        buf[2] = data_len as u8;
+        packet.extend(&data); // DATA
 
         // checksum (XOR)
-        let checksum = buf.iter().fold(0u8, |acc, x| acc ^ x);
-        buf.push(checksum);
+        let checksum = packet.iter().fold(0u8, |acc, x| acc ^ x);
+        packet.push(checksum);
 
-        buf
+        packet
+    }
+
+    pub fn to_data_bytes(&self) -> Vec<u8> {
+        match self {
+            PiToStm32Command::SetYawServoAngle { angle } => {
+                vec![*angle]
+            }
+
+            PiToStm32Command::SetDisplayText { text } => text.as_bytes().to_vec(),
+
+            PiToStm32Command::SetWheelTargetVelocities { velocities } => velocities
+                .iter()
+                .map(|v| v.to_le_bytes())
+                .flatten()
+                .collect(),
+
+            _ => Vec::new(),
+        }
+    }
+
+    pub fn to_bytes_string(&self) -> String {
+        let bytes = self.to_packet_bytes();
+
+        let hex_bytes: Vec<String> = bytes.iter().map(|b| format!("0x{:02X}", b)).collect();
+
+        format!("[{}]", hex_bytes.join(", "))
     }
 }
 
