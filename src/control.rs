@@ -13,12 +13,12 @@ use crate::control::actions::Action;
 use crate::control::actions::navigate::Navigate;
 use crate::control::landmark::Landmark;
 
+use crate::control::motion::MotionPolicyPreset;
 use crate::math::{PidController, Pose, Twist};
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
         let mut controller = Controller::new();
-
 
         let mut last_tick = Instant::now();
         loop {
@@ -30,64 +30,25 @@ pub fn spawn_main_controller_thread() {
             }
             if controller.action_queue.is_empty() {
                 controller
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::QrZone)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::SourceZone)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::SideIntersection)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::TemporaryStorageZone)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::FirstCornerTurn)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::FinalProcessingZone)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::SecondCornerTurn)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::SourceZone)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::SideIntersection)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::TemporaryStorageZone)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::FirstCornerTurn)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::FinalProcessingZone)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::SecondCornerTurn)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::SourceZone)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::SideIntersection)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::TemporaryStorageZone)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::FirstCornerTurn)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::FinalProcessingZone)
-                    )
-                    .enqueue(
-                        Navigate::to_landmark(Landmark::SecondCornerTurn)
-                    )
-                ;
+                    .enqueue(Navigate::to_landmark(Landmark::QrZone))
+                    .enqueue(Navigate::to_landmark(Landmark::SourceZone))
+                    .enqueue(Navigate::to_landmark(Landmark::SideIntersection))
+                    .enqueue(Navigate::to_landmark(Landmark::TemporaryStorageZone))
+                    .enqueue(Navigate::to_landmark(Landmark::FirstCornerTurn))
+                    .enqueue(Navigate::to_landmark(Landmark::FinalProcessingZone))
+                    .enqueue(Navigate::to_landmark(Landmark::SecondCornerTurn))
+                    .enqueue(Navigate::to_landmark(Landmark::SourceZone))
+                    .enqueue(Navigate::to_landmark(Landmark::SideIntersection))
+                    .enqueue(Navigate::to_landmark(Landmark::TemporaryStorageZone))
+                    .enqueue(Navigate::to_landmark(Landmark::FirstCornerTurn))
+                    .enqueue(Navigate::to_landmark(Landmark::FinalProcessingZone))
+                    .enqueue(Navigate::to_landmark(Landmark::SecondCornerTurn))
+                    .enqueue(Navigate::to_landmark(Landmark::SourceZone))
+                    .enqueue(Navigate::to_landmark(Landmark::SideIntersection))
+                    .enqueue(Navigate::to_landmark(Landmark::TemporaryStorageZone))
+                    .enqueue(Navigate::to_landmark(Landmark::FirstCornerTurn))
+                    .enqueue(Navigate::to_landmark(Landmark::FinalProcessingZone))
+                    .enqueue(Navigate::to_landmark(Landmark::SecondCornerTurn));
             }
             controller.update(dt);
 
@@ -101,7 +62,7 @@ pub fn spawn_main_controller_thread() {
 pub struct Controller {
     pub action_queue: VecDeque<Box<dyn Action>>,
     pub current_action: Option<Box<dyn Action>>,
-    pub state: ControllerState
+    pub state: ControllerState,
 }
 
 impl Controller {
@@ -123,8 +84,8 @@ impl Controller {
         if self.current_action.is_none() {
             self.current_action = self.action_queue.pop_front();
             return;
-        } 
-        
+        }
+
         if let Some(mut action) = self.current_action.take() {
             action.update(&mut self.state, dt);
             if action.is_finished() {
@@ -145,7 +106,7 @@ pub struct ControllerState {
     pub linear_pid: PidController,
     pub angular_pid: PidController,
 
-    pub dt: Duration
+    pub dt: Duration,
 }
 
 impl ControllerState {
