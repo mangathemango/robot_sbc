@@ -28,7 +28,7 @@ pub fn spawn_main_controller_thread() {
         loop {
             let now = Instant::now();
             let dt = now - last_tick;
-            if dt < Duration::from_millis(10) {
+            if dt < Duration::from_millis(50) {
                 continue;
             }
             controller.state.dt = dt;
