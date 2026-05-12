@@ -27,7 +27,7 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
         loop {
             let now = std::time::Instant::now();
             let dt = now - last_update;
-            if dt < Duration::from_millis(10) {
+            if dt < Duration::from_millis(20) {
                 continue;
             }
             state.dt = now.duration_since(last_update);
