@@ -1,6 +1,6 @@
 use crate::ROBOT;
-use crate::control::claw_servo::ClawServoState;
-use crate::control::yaw_servo::YawServoState;
+use crate::control::states::claw_servo::ClawServoState;
+use crate::control::states::yaw_servo::YawServoState;
 use crate::devices::DriverPort;
 use crate::math::MecanumVelocities;
 use crate::math::Twist;
@@ -8,7 +8,6 @@ use std::sync::Arc;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
 use std::time::Duration;
-use std::time::Instant;
 use std::vec;
 
 const STM32_DOTENV_KEY: &str = "STM32_PATH";

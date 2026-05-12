@@ -1,6 +1,5 @@
-use crate::control::yaw_servo::YawServoState;
-use crate::control::claw_servo::ClawServoState;
-use crate::control::{ControllerState, odometry::OdometryState};
+use crate::control::ControllerState;
+use crate::control::states::odometry::OdometryState;
 use crate::devices::gyro::GyroState;
 use crate::devices::maixcam::MaixcamState;
 use crate::devices::qr::QrState;

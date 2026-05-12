@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use crate::{
     ROBOT,
-    control::{ControllerState, actions::Action, yaw_servo::ArmPosition},
+    control::{ControllerState, actions::Action, states::yaw_servo::ArmPosition},
 };
 
 #[derive(Clone, Copy, Debug, Default)]

@@ -1,23 +1,19 @@
 pub mod actions;
-pub mod claw_servo;
+pub mod states;
 pub mod landmark;
 pub mod motion;
-pub mod odometry;
-pub mod yaw_servo;
 
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use crate::{ROBOT, control};
+use crate::ROBOT;
 use crate::control::actions::Action;
 use crate::control::actions::r#move::Move;
 use crate::control::actions::rotate_arm::RotateArm;
 use crate::control::landmark::Landmark;
-
-use crate::control::motion::MotionPolicyPreset;
-use crate::control::yaw_servo::{ArmPosition, YawServoState};
+use crate::control::states::yaw_servo::ArmPosition;
 use crate::math::Pose;
 
 pub fn spawn_main_controller_thread() {
