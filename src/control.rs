@@ -29,7 +29,6 @@ pub fn spawn_main_controller_thread() {
             let now = Instant::now();
             let dt = now - last_tick;
             if dt < Duration::from_millis(10) {
-                std::thread::sleep(Duration::from_millis(1));
                 continue;
             }
             controller.state.dt = dt;
