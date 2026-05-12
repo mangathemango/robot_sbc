@@ -1,4 +1,5 @@
 pub mod main;
+pub mod navigation;
 
 use std::{collections::VecDeque, time::Duration};
 use crate::control::actions::Action;
