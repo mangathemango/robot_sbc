@@ -25,11 +25,11 @@ impl RotateArm {
 impl Action for RotateArm {
     fn start(&mut self, state: &mut ControllerState) {
         self.initial_angle = ROBOT.stm32_state.load().yaw_servo_state.current_angle;
+        let stm32_controller = ROBOT.get_stm32_controller();
+        stm32_controller.set_yaw_servo(self.target_angle);
     }
 
     fn update(&mut self, state: &mut ControllerState, dt: Duration) {
-        let stm32_controller = ROBOT.get_stm32_controller();
-        stm32_controller.set_yaw_servo(self.target_angle);
         self.elapsed_time += dt
     }
 
