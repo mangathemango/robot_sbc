@@ -97,7 +97,7 @@ impl MecanumVelocities {
         let accel = 10000.0;
         let max_delta =
             accel * dt.as_secs_f32();
-        let max_noise = 100.0;
+        let max_noise = 0.0;
 
         // Simulated wheel response
         let vfl = approach(

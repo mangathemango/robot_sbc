@@ -8,8 +8,9 @@ pub fn draw_stm32(f: &mut Frame, area: Rect) {
     let s = ROBOT.stm32_state.load();
 
     let text = format!(
-        "Running: {}\nWheels: {:#?}\nConnected: {}\nFPS: {:.1}\n",
+        "Running: {}\nYaw Servo: {:?}\nWheel Velocities{:#?}\nConnected: {}\nFPS: {:.1}\n",
         bool_icon(s.start_flag),
+        s.yaw_servo_state.current_angle,
         s.actual_wheel_velocities,
         bool_icon(s.driver_is_connected),
         if s.dt.as_secs_f32() > 0.0 {

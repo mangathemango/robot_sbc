@@ -1,16 +1,21 @@
+use crate::control::yaw_servo::YawServoState;
+use crate::control::claw_servo::ClawServoState;
 use crate::control::{ControllerState, odometry::OdometryState};
 use crate::devices::gyro::GyroState;
 use crate::devices::maixcam::MaixcamState;
 use crate::devices::qr::QrState;
 use crate::devices::stm32::{Stm32Controller, Stm32State};
 use arc_swap::ArcSwap;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 
 pub struct Robot {
+    // Device states
     pub gyro_state: ArcSwap<GyroState>,
     pub stm32_state: ArcSwap<Stm32State>,
     pub maixcam_state: ArcSwap<MaixcamState>,
     pub qr_state: ArcSwap<QrState>,
+
+    // Control states
     pub odometry_state: ArcSwap<OdometryState>,
     pub controller_state: ArcSwap<ControllerState>,
 

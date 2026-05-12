@@ -1,7 +1,9 @@
 pub mod actions;
+pub mod claw_servo;
 pub mod landmark;
 pub mod motion;
 pub mod odometry;
+pub mod yaw_servo;
 
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -11,10 +13,12 @@ use std::time::{Duration, Instant};
 use crate::ROBOT;
 use crate::control::actions::Action;
 use crate::control::actions::r#move::Move;
+use crate::control::actions::rotate_arm::RotateArm;
 use crate::control::landmark::Landmark;
 
 use crate::control::motion::MotionPolicyPreset;
-use crate::math::{PidController, Pose, Twist};
+use crate::control::yaw_servo::{ArmPosition, YawServoState};
+use crate::math::Pose;
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
@@ -30,24 +34,31 @@ pub fn spawn_main_controller_thread() {
             }
             if controller.action_queue.is_empty() {
                 controller
+                    .enqueue(RotateArm::to(ArmPosition::Middle))
                     .enqueue(Move::to(Landmark::QrZone))
                     .enqueue(Move::to(Landmark::SourceZone))
+                    .enqueue(RotateArm::to(ArmPosition::Right))
+                    .enqueue(RotateArm::to(ArmPosition::Middle))
                     .enqueue(Move::to(Landmark::SideIntersection))
                     .enqueue(Move::to(Landmark::TemporaryStorageZone))
+                    .enqueue(RotateArm::to(ArmPosition::Left))
+                    .enqueue(RotateArm::to(ArmPosition::Middle))
                     .enqueue(Move::to(Landmark::FirstCornerTurn))
                     .enqueue(Move::to(Landmark::FinalProcessingZone))
+                    .enqueue(RotateArm::to(ArmPosition::Right))
+                    .enqueue(RotateArm::to(ArmPosition::Middle))
                     .enqueue(Move::to(Landmark::SecondCornerTurn))
                     .enqueue(Move::to(Landmark::SourceZone))
+                    .enqueue(RotateArm::to(ArmPosition::Right))
+                    .enqueue(RotateArm::to(ArmPosition::Middle))
                     .enqueue(Move::to(Landmark::SideIntersection))
                     .enqueue(Move::to(Landmark::TemporaryStorageZone))
+                    .enqueue(RotateArm::to(ArmPosition::Left))
+                    .enqueue(RotateArm::to(ArmPosition::Middle))
                     .enqueue(Move::to(Landmark::FirstCornerTurn))
                     .enqueue(Move::to(Landmark::FinalProcessingZone))
-                    .enqueue(Move::to(Landmark::SecondCornerTurn))
-                    .enqueue(Move::to(Landmark::SourceZone))
-                    .enqueue(Move::to(Landmark::SideIntersection))
-                    .enqueue(Move::to(Landmark::TemporaryStorageZone))
-                    .enqueue(Move::to(Landmark::FirstCornerTurn))
-                    .enqueue(Move::to(Landmark::FinalProcessingZone))
+                    .enqueue(RotateArm::to(ArmPosition::Right))
+                    .enqueue(RotateArm::to(ArmPosition::Middle))
                     .enqueue(Move::to(Landmark::SecondCornerTurn))
                     .enqueue(Move::to(Landmark::Start));
             }
@@ -84,10 +95,15 @@ impl Controller {
     pub fn update(&mut self, dt: Duration) {
         if self.current_action.is_none() {
             self.current_action = self.action_queue.pop_front();
+
+            if let Some(action) = &mut self.current_action {
+                action.start(&mut self.state);
+            }
             return;
         }
 
         if let Some(mut action) = self.current_action.take() {
+            self.state.current_command = format!("{:?}", action);
             action.update(&mut self.state, dt);
             if action.is_finished() {
                 action.stop(&mut self.state);
@@ -99,19 +115,19 @@ impl Controller {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone)]
 pub struct ControllerState {
+    pub current_command: String,
     pub target_pose: Pose,
-    pub target_twist: Twist,
-
-    pub linear_pid: PidController,
-    pub angular_pid: PidController,
-
     pub dt: Duration,
 }
 
 impl ControllerState {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     pub fn publish(&self) {
-        ROBOT.controller_state.store(Arc::new(*self));
+        ROBOT.controller_state.store(Arc::new(self.clone()));
     }
 }

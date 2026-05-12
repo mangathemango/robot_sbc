@@ -74,10 +74,7 @@ impl Action for Move {
         let target_twist = Twist::new(linear_output, angular_output);
         stm32_controller.set_twist(target_twist);
 
-        state.angular_pid = self.policy.angular_pid;
-        state.linear_pid = self.policy.linear_pid;
         state.target_pose = self.target_pose;
-        state.target_twist = target_twist;
     }
 
     fn is_finished(&self) -> bool {

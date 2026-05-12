@@ -1,4 +1,6 @@
 use crate::ROBOT;
+use crate::control::claw_servo::ClawServoState;
+use crate::control::yaw_servo::YawServoState;
 use crate::devices::DriverPort;
 use crate::math::MecanumVelocities;
 use crate::math::Twist;
@@ -21,7 +23,7 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
         let mut driver = Stm32Driver::new();
         let mut state = Stm32State::new();
         let mut last_update = std::time::Instant::now();
-
+        let mut target_mecanum_velocities = MecanumVelocities::default();
         loop {
             let now = std::time::Instant::now();
             state.dt = now.duration_since(last_update);
@@ -32,15 +34,13 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
                 Ok(cmd) => {
                     match cmd {
                         PiToStm32Command::SetWheelTargetVelocities { velocities } => {
-                            let current_mecanum_velocities = MecanumVelocities::from_array(
-                                state.actual_wheel_velocities.map(|v| v as f32),
-                            );
-                            let target_mecanum_velocities =
-                                MecanumVelocities::from_array(velocities.map(|v| v as f32));
-                            let simulated_mecanum_velocities = current_mecanum_velocities
-                                .simulate_mecanum_response(target_mecanum_velocities, state.dt);
-                            state.actual_wheel_velocities =
-                                simulated_mecanum_velocities.to_array().map(|v| v as i16);
+                            target_mecanum_velocities = MecanumVelocities::from_array(velocities.map(|v| v as f32));
+                        }
+                        PiToStm32Command::SetClawServoAngle { angle } => {
+                            state.claw_servo_state.set_angle(angle);
+                        }
+                        PiToStm32Command::SetYawServoAngle { angle } => {
+                            state.yaw_servo_state.set_angle(angle);
                         }
                         _ => (),
                     }
@@ -61,6 +61,14 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
                     std::thread::sleep(std::time::Duration::from_millis(10));
                 }
             }
+
+            let current_mecanum_velocities = MecanumVelocities::from_array(
+                state.actual_wheel_velocities.map(|v| v as f32),
+            );
+            let simulated_mecanum_velocities = current_mecanum_velocities
+                .simulate_mecanum_response(target_mecanum_velocities, state.dt);
+            state.actual_wheel_velocities =
+                simulated_mecanum_velocities.to_array().map(|v| v as i16);
             state.driver_is_connected = driver.is_connected();
             state.publish();
         }
@@ -218,6 +226,9 @@ impl Stm32Controller {
 pub struct Stm32State {
     pub driver_is_connected: bool,
     pub start_flag: bool,
+
+    pub yaw_servo_state: YawServoState,
+    pub claw_servo_state: ClawServoState,
     // Movement
     pub actual_wheel_velocities: [i16; 4],
     /// Delta time for FPS calculation
