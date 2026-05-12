@@ -1,5 +1,6 @@
 pub mod r#move;
 pub mod rotate_arm;
+pub mod rotate_claw;
 
 use crate::control::ControllerState;
 use std::{fmt::Debug, time::Duration};

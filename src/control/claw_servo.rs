@@ -12,13 +12,13 @@ impl ClawServoState {
         self.current_angle = target_angle
     }
 
-    pub fn rotate_to(&mut self, target_position: ClawServoPosition) {
+    pub fn rotate_to(&mut self, target_position: ClawPosition) {
         self.set_angle(target_position.to_angle());
     }
 }
 
 #[derive(Debug, Clone, Copy, Default)]
-pub enum ClawServoPosition {
+pub enum ClawPosition {
     #[default]
     Open,
     SoftOpen,
@@ -26,13 +26,13 @@ pub enum ClawServoPosition {
     Custom(u8),
 }
 
-impl ClawServoPosition {
+impl ClawPosition {
     pub fn to_angle(&self) -> u8 {
         match self {
-            ClawServoPosition::Open => 30,
-            ClawServoPosition::SoftOpen => 120,
-            ClawServoPosition::Close => 180,
-            ClawServoPosition::Custom(angle) => *angle,
+            ClawPosition::Open => 30,
+            ClawPosition::SoftOpen => 120,
+            ClawPosition::Close => 180,
+            ClawPosition::Custom(angle) => *angle,
         }
     }
 }
