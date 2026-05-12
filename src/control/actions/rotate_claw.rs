@@ -23,13 +23,13 @@ impl RotateClaw {
 
 #[allow(unused_variables)]
 impl Action for RotateClaw {
-    fn start(&mut self, state: &mut ControllerState) {
+    fn start(&mut self) {
         self.initial_angle = ROBOT.stm32_state.load().yaw_servo_state.current_angle;
         let stm32_controller = ROBOT.get_stm32_controller();
         stm32_controller.set_yaw_servo(self.target_angle);
     }
 
-    fn update(&mut self, state: &mut ControllerState, dt: Duration) {
+    fn update(&mut self, dt: Duration) {
         self.elapsed_time += dt
     }
 
@@ -38,5 +38,5 @@ impl Action for RotateClaw {
             > Duration::from_millis(self.target_angle.abs_diff(self.initial_angle) as u64 * 20)
     }
 
-    fn stop(&mut self, state: &mut ControllerState) {}
+    fn stop(&mut self) {}
 }

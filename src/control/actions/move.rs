@@ -48,7 +48,7 @@ impl Move {
 }
 
 impl Action for Move {
-    fn start(&mut self, state: &mut ControllerState) {
+    fn start(&mut self) {
         let current_pose = ROBOT.odometry_state.load().pose;
         match self.mode {
             ControlMode::Full => (),
@@ -61,7 +61,7 @@ impl Action for Move {
         }
     }
 
-    fn update(&mut self, state: &mut ControllerState, dt: Duration) {
+    fn update(&mut self, dt: Duration) {
         let stm32_controller = ROBOT.get_stm32_controller();
         let current_pose = ROBOT.odometry_state.load().pose;
 
@@ -73,15 +73,13 @@ impl Action for Move {
 
         let target_twist = Twist::new(linear_output, angular_output);
         stm32_controller.set_twist(target_twist);
-
-        state.target_pose = self.target_pose;
     }
 
     fn is_finished(&self) -> bool {
         self.policy.is_settled()
     }
 
-    fn stop(&mut self, state: &mut ControllerState) {
+    fn stop(&mut self) {
         let stm32_controller = ROBOT.get_stm32_controller();
         stm32_controller.set_wheel_velocities([0, 0, 0, 0]);
     }

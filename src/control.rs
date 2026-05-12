@@ -1,7 +1,8 @@
 pub mod actions;
-pub mod states;
 pub mod landmark;
 pub mod motion;
+pub mod sequences;
+pub mod states;
 
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -89,25 +90,24 @@ impl Controller {
     }
 
     pub fn update(&mut self, dt: Duration) {
-        if self.current_action.is_none() {
-            self.current_action = self.action_queue.pop_front();
+        match &mut self.current_action {
+            None => {
+                self.current_action = self.action_queue.pop_front();
 
-            if let Some(action) = &mut self.current_action {
-                action.start(&mut self.state);
+                if let Some(action) = &mut self.current_action {
+                    action.start();
+                }
             }
-            return;
-        }
-
-        if let Some(mut action) = self.current_action.take() {
-            self.state.current_command = format!("{:?}", action);
-            action.update(&mut self.state, dt);
-            if action.is_finished() {
-                action.stop(&mut self.state);
-                self.current_action = None;
-            } else {
-                self.current_action = Some(action);
+            Some(action) => {
+                self.state.current_command = format!("{:?}", action);
+                action.update(dt);
+                if action.is_finished() {
+                    action.stop();
+                    self.current_action = None;
+                }
             }
         }
+
     }
 }
 
