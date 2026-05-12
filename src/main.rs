@@ -35,7 +35,7 @@ fn main() {
     spawn_qr_thread();
     spawn_odometry_thread();
     spawn_main_controller_thread();
-
+    
     // The Debug thread has to be the last thread spawned
     spawn_debug_thread();
 }

@@ -13,7 +13,7 @@ pub fn ui(f: &mut Frame) {
         Layout::horizontal([Constraint::Length(45), Constraint::Fill(1)]).areas(f.size());
 
     let [motion_area, bottom_area] =
-        Layout::vertical([Constraint::Percentage(40), Constraint::Percentage(60)])
+        Layout::vertical([Constraint::Percentage(45), Constraint::Percentage(55)])
             .areas(right_area);
 
     let [odometry_panel, controller_panel, compass_panel] = Layout::horizontal([
@@ -28,7 +28,7 @@ pub fn ui(f: &mut Frame) {
             .areas(bottom_area);
 
     let [top_devices, bottom_devices] =
-        Layout::vertical([Constraint::Fill(1), Constraint::Fill(1)]).areas(devices_area);
+        Layout::vertical([Constraint::Fill(1), Constraint::Fill(2)]).areas(devices_area);
 
     let [gyro_panel, qr_panel] =
         Layout::horizontal([Constraint::Fill(1), Constraint::Fill(1)]).areas(top_devices);

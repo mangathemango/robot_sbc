@@ -2,7 +2,7 @@ use crate::control::sequences::{Sequence, navigation::*};
 
 
 pub fn main_sequence() -> Sequence {
-    Sequence::new()
+    Sequence::new("Main Sequence")
         .then(flag_1())
         .then(flag_2())
         .then(flag_3())

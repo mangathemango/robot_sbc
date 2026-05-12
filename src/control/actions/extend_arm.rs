@@ -1,3 +1,5 @@
+use std::{fmt::Display};
+
 use crate::{ROBOT, control::actions::{Action, lift_arm::LiftArm}};
 
 #[derive(Debug, Clone, Default)]
@@ -30,6 +32,16 @@ impl Action for ExtendArm {
 
     fn is_finished(&self) -> bool {
         todo!("Implement get arm motor current position")
+    }
+
+    fn name(&self) -> String {
+        "Extend Arm".into()
+    }
+}
+
+impl Display for ExtendArm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Extend Arm to {}", self.target_position)
     }
 }
 

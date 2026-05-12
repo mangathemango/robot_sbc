@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{fmt::Display, time::Duration};
 
 use crate::{ROBOT, control::actions::Action};
 
@@ -52,6 +52,17 @@ impl Action for RotateArm {
 
     fn current_action(&self) -> &dyn Action {
         self
+    }
+
+    fn name(&self) -> String {
+        "Rotate Arm".into()
+    }
+
+}
+
+impl Display for RotateArm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Rotating Arm to {}", self.target_angle)
     }
 }
 

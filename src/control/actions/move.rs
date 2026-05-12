@@ -1,4 +1,4 @@
-use std::{time::Duration};
+use std::{fmt::Display, time::Duration};
 
 use glam::Vec2;
 
@@ -16,6 +16,7 @@ use crate::{
 pub struct Move {
     target_pose: Pose,
     policy: MotionPolicy,
+    policy_preset: MotionPolicyPreset,
     mode: ControlMode,
 }
 
@@ -35,6 +36,7 @@ impl Move {
     }
 
     pub fn policy(mut self, preset: MotionPolicyPreset) -> Self {
+        self.policy_preset = preset;
         self.policy = preset.to_motion_policy();
         self
     }
@@ -42,6 +44,10 @@ impl Move {
     pub fn mode(mut self, mode: ControlMode) -> Self {
         self.mode = mode;
         self
+    }
+
+    pub fn name(&self) -> String {
+        "Move".into()
     }
 }
 
@@ -85,6 +91,17 @@ impl Action for Move {
 
     fn current_action(&self) -> &dyn Action {
         self
+    }
+
+    fn name(&self) -> String {
+        "Move".into()
+    }
+}
+
+impl Display for Move {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Moving to {} with policy {:?} and mode {:?}\n\nLinear PID: {}\n\nAngular PID: {}\n\nSettle time: {}ms", 
+            self.target_pose, self.policy_preset, self.mode, self.policy.linear_pid, self.policy.angular_pid, self.policy.settle_time.as_millis())
     }
 }
 

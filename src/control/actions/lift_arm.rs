@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::{ROBOT, control::actions::Action};
 
 #[derive(Debug, Clone, Default)]
@@ -44,6 +46,16 @@ impl Action for LiftArm {
     fn is_finished(&self) -> bool {
         todo!("Implement get arm motor current position")
     }
+
+    fn name(&self) -> String {
+        "Lift Arm".into()
+    }
+}
+
+impl Display for LiftArm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Lift Arm to {}", self.target_position)
+    }
 }
 
 enum LiftPosition {
@@ -63,3 +75,4 @@ impl LiftPosition {
         }
     }
 }
+

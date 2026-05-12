@@ -1,18 +1,21 @@
 pub mod main;
 pub mod navigation;
 
-use std::{collections::VecDeque, time::Duration};
+use core::fmt;
+use std::{collections::VecDeque, fmt::Display, time::Duration};
 use crate::control::actions::Action;
 
 #[derive(Debug, Default)]
 pub struct Sequence {
+    pub name: String,
     pub action_queue: VecDeque<Box<dyn Action>>,
     pub current_action: Option<Box<dyn Action>>,
 }
 
 impl Sequence {
-    pub fn new() -> Self {
+    pub fn new(name: &str) -> Self {
         Self {
+            name: name.into(),
             ..Default::default()
         }
     }
@@ -31,6 +34,14 @@ impl Sequence {
     {
         self.action_queue.push_back(Box::new(action));
         self
+    }
+
+    fn current_action_string(&self) -> String {
+        if let Some(action) = self.current_action.as_ref() {
+            format!("{}", action)
+        } else {
+            "Empty".into()
+        }
     }
 }
 
@@ -76,5 +87,16 @@ impl Action for Sequence {
         } else {
             self
         }
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+}
+
+impl Display for Sequence {
+   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "{}: \n{}", 
+            self.name, self.current_action_string())
     }
 }

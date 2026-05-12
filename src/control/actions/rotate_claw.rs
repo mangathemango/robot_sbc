@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{fmt::Display, time::Duration};
 
 use crate::{
     ROBOT,
@@ -43,8 +43,17 @@ impl Action for RotateClaw {
     fn current_action(&self) -> &dyn Action {
         self
     }
+
+    fn name(&self) -> String {
+        "Rotate Claw".into()
+    }
 }
 
+impl Display for RotateClaw {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Rotate Claw to {}", self.target_angle)
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default)]
 pub enum ClawPosition {

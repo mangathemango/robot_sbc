@@ -45,12 +45,13 @@ pub struct Controller {
 impl Controller {
     pub fn new() -> Self {
         Self {
+            sequence: Sequence::new("Controller"),
             ..Default::default()
         }
     }
 
     pub fn update(&mut self, dt: Duration) {
-        self.state.current_command_debug_string = format!("{:?}", self.sequence.current_action());
+        self.state.current_command_debug_string = format!("{}", self.sequence);
         self.sequence.update(dt);
     }
 }
