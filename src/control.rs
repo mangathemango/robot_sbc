@@ -9,17 +9,16 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use crate::ROBOT;
 use crate::control::actions::Action;
-use crate::control::actions::r#move::Move;
-use crate::control::actions::rotate_arm::RotateArm;
-use crate::control::landmark::Landmark;
-use crate::control::states::yaw_servo::ArmPosition;
+use crate::control::sequences::Sequence;
+use crate::control::sequences::main::main_sequence;
 use crate::math::Pose;
+use crate::{ROBOT, main};
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
         let mut controller = Controller::new();
+        controller.sequence.enqueue(main_sequence());
 
         let mut last_tick = Instant::now();
         loop {
@@ -29,36 +28,7 @@ pub fn spawn_main_controller_thread() {
                 continue;
             }
             controller.state.dt = dt;
-            if controller.action_queue.is_empty() {
-                controller
-                    .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::QrZone))
-                    .enqueue(Move::to(Landmark::SourceZone))
-                    .enqueue(RotateArm::to(ArmPosition::Right))
-                    .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::CentralRightCrossing))
-                    .enqueue(Move::to(Landmark::TemporaryStorageZone))
-                    .enqueue(RotateArm::to(ArmPosition::Left))
-                    .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::UpperLeftTurn))
-                    .enqueue(Move::to(Landmark::FinalProcessingZone))
-                    .enqueue(RotateArm::to(ArmPosition::Right))
-                    .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::UpperRightTurn))
-                    .enqueue(Move::to(Landmark::SourceZone))
-                    .enqueue(RotateArm::to(ArmPosition::Right))
-                    .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::CentralRightCrossing))
-                    .enqueue(Move::to(Landmark::TemporaryStorageZone))
-                    .enqueue(RotateArm::to(ArmPosition::Left))
-                    .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::UpperLeftTurn))
-                    .enqueue(Move::to(Landmark::FinalProcessingZone))
-                    .enqueue(RotateArm::to(ArmPosition::Right))
-                    .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::UpperRightTurn))
-                    .enqueue(Move::to(Landmark::Start));
-            }
+
             controller.update(dt);
 
             controller.state.publish();
@@ -69,8 +39,7 @@ pub fn spawn_main_controller_thread() {
 
 #[derive(Debug, Default)]
 pub struct Controller {
-    pub action_queue: VecDeque<Box<dyn Action>>,
-    pub current_action: Option<Box<dyn Action>>,
+    pub sequence: Sequence,
     pub state: ControllerState,
 }
 
@@ -81,39 +50,15 @@ impl Controller {
         }
     }
 
-    pub fn enqueue<A>(&mut self, action: A) -> &mut Self
-    where
-        A: Action + 'static,
-    {
-        self.action_queue.push_back(Box::new(action));
-        self
-    }
-
     pub fn update(&mut self, dt: Duration) {
-        match &mut self.current_action {
-            None => {
-                self.current_action = self.action_queue.pop_front();
-
-                if let Some(action) = &mut self.current_action {
-                    action.start();
-                }
-            }
-            Some(action) => {
-                self.state.current_command = format!("{:?}", action);
-                action.update(dt);
-                if action.is_finished() {
-                    action.stop();
-                    self.current_action = None;
-                }
-            }
-        }
-
+        self.state.current_command_debug_string = format!("{:?}", self.sequence.current_action());
+        self.sequence.update(dt);
     }
 }
 
 #[derive(Debug, Default, Clone)]
 pub struct ControllerState {
-    pub current_command: String,
+    pub current_command_debug_string: String,
     pub target_pose: Pose,
     pub dt: Duration,
 }

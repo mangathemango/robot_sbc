@@ -69,7 +69,8 @@ impl Action for Move {
             current_pose.difference(self.target_pose).to_components();
         let (mut linear_output, angular_output) =
             self.policy.update(linear_error, angular_error, dt);
-        linear_output = linear_output.rotate(Vec2::from_angle(-current_pose.rotation)) * LANDMARK_SCALE;
+        linear_output =
+            linear_output.rotate(Vec2::from_angle(-current_pose.rotation)) * LANDMARK_SCALE;
 
         let target_twist = Twist::new(linear_output, angular_output);
         stm32_controller.set_twist(target_twist);
@@ -82,6 +83,10 @@ impl Action for Move {
     fn stop(&mut self) {
         let stm32_controller = ROBOT.get_stm32_controller();
         stm32_controller.set_wheel_velocities([0, 0, 0, 0]);
+    }
+
+    fn current_action(&self) -> &dyn Action {
+        self
     }
 }
 

@@ -38,4 +38,8 @@ impl Action for RotateArm {
     }
 
     fn stop(&mut self) {}
+
+    fn current_action(&self) -> &dyn Action {
+        self
+    }
 }

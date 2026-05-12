@@ -13,4 +13,6 @@ pub trait Action: Debug {
     fn is_finished(&self) -> bool;
 
     fn stop(&mut self);
+
+    fn current_action(&self) -> &dyn Action;
 }
