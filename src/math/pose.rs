@@ -1,4 +1,4 @@
-use std::{f32::consts::PI, ops::Mul};
+use std::f32::consts::PI;
 
 use crate::math::wrap_angle;
 use glam::Vec2;
@@ -23,10 +23,6 @@ impl std::fmt::Display for Pose {
 }
 
 impl Pose {
-    pub fn new(position: Vec2, rotation: f32) -> Self {
-        Pose { position, rotation }
-    }
-
     pub fn difference(self, target: Pose) -> Pose {
         Pose {
             position: target.position - self.position,
@@ -41,18 +37,5 @@ impl Pose {
 
     pub fn to_components(&self) -> (Vec2, f32) {
         (self.position, self.rotation)
-    }
-
-    pub fn forward(&self) -> Vec2 {
-        Vec2::from_angle(self.rotation)
-    }
-    pub fn right(&self) -> Vec2 {
-        self.forward().perp()
-    }
-    pub fn back(&self) -> Vec2 {
-        -self.forward()
-    }
-    pub fn left(&self) -> Vec2 {
-        -self.right()
     }
 }

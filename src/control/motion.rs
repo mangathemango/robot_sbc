@@ -12,9 +12,6 @@ pub struct MotionPolicy {
 }
 
 impl MotionPolicy {
-    pub fn new() -> Self {
-        Self::default()
-    }
 
     pub fn update(&mut self, linear_error: Vec2, angular_error: f32, dt: Duration) -> (Vec2, f32) {
         let linear_direction = linear_error.normalize_or_zero();

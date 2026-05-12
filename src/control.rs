@@ -4,7 +4,6 @@ pub mod motion;
 pub mod sequences;
 pub mod states;
 
-use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -13,7 +12,7 @@ use crate::control::actions::Action;
 use crate::control::sequences::Sequence;
 use crate::control::sequences::main::main_sequence;
 use crate::math::Pose;
-use crate::{ROBOT, main};
+use crate::ROBOT;
 
 pub fn spawn_main_controller_thread() {
     std::thread::spawn(|| {
@@ -64,10 +63,6 @@ pub struct ControllerState {
 }
 
 impl ControllerState {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     pub fn publish(&self) {
         ROBOT.controller_state.store(Arc::new(self.clone()));
     }

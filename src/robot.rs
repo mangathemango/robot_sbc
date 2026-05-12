@@ -5,7 +5,7 @@ use crate::devices::maixcam::MaixcamState;
 use crate::devices::qr::QrState;
 use crate::devices::stm32::{Stm32Controller, Stm32State};
 use arc_swap::ArcSwap;
-use std::sync::{Arc, OnceLock};
+use std::sync::OnceLock;
 
 pub struct Robot {
     // Device states

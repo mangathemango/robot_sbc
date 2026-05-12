@@ -51,7 +51,6 @@ impl OdometryState {
     pub fn update(&mut self, dt: Duration) {
         let stm32_state = ROBOT.stm32_state.load();
         let gyro_state = ROBOT.gyro_state.load();
-        let controller_state = ROBOT.controller_state.load();
 
         if self.initial_rotation.is_nan() {
             self.initial_rotation = gyro_state.yaw;

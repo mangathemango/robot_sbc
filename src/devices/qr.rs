@@ -10,9 +10,6 @@ pub use linux::*;
 #[cfg(not(target_os = "linux"))]
 pub use stub::*;
 
-use crate::ROBOT;
-use std::sync::Arc;
-
 pub fn spawn_qr_thread() {
     std::thread::spawn(move || {
         let mut driver = QrDriver::new();
