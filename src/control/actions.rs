@@ -1,6 +1,8 @@
 pub mod r#move;
 pub mod rotate_arm;
 pub mod rotate_claw;
+pub mod lift_arm;
+pub mod extend_arm;
 
 use std::{fmt::Debug, time::Duration};
 

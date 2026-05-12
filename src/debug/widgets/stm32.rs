@@ -10,7 +10,7 @@ pub fn draw_stm32(f: &mut Frame, area: Rect) {
     let text = format!(
         "Running: {}\nYaw Servo: {:?}\nWheel Velocities{:#?}\nConnected: {}\nFPS: {:.1}\n",
         bool_icon(s.start_flag),
-        s.yaw_servo_state.current_angle,
+        s.yaw_servo_current_angle,
         s.actual_wheel_velocities,
         bool_icon(s.driver_is_connected),
         if s.dt.as_secs_f32() > 0.0 {

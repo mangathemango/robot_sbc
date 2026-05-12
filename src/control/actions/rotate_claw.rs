@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use crate::{
     ROBOT,
-    control::{ControllerState, actions::Action, states::claw_servo::ClawPosition},
+    control::{ControllerState, actions::Action},
 };
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -24,7 +24,7 @@ impl RotateClaw {
 #[allow(unused_variables)]
 impl Action for RotateClaw {
     fn start(&mut self) {
-        self.initial_angle = ROBOT.stm32_state.load().yaw_servo_state.current_angle;
+        self.initial_angle = ROBOT.stm32_state.load().yaw_servo_current_angle;
         let stm32_controller = ROBOT.get_stm32_controller();
         stm32_controller.set_yaw_servo(self.target_angle);
     }
@@ -42,5 +42,26 @@ impl Action for RotateClaw {
 
     fn current_action(&self) -> &dyn Action {
         self
+    }
+}
+
+
+#[derive(Debug, Clone, Copy, Default)]
+pub enum ClawPosition {
+    #[default]
+    Open,
+    SoftOpen,
+    Close,
+    Custom(u8),
+}
+
+impl ClawPosition {
+    pub fn to_angle(&self) -> u8 {
+        match self {
+            ClawPosition::Open => 30,
+            ClawPosition::SoftOpen => 120,
+            ClawPosition::Close => 180,
+            ClawPosition::Custom(angle) => *angle,
+        }
     }
 }

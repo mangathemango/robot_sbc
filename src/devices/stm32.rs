@@ -1,6 +1,4 @@
 use crate::ROBOT;
-use crate::control::states::claw_servo::ClawServoState;
-use crate::control::states::yaw_servo::YawServoState;
 use crate::devices::DriverPort;
 use crate::math::MecanumVelocities;
 use crate::math::Twist;
@@ -39,10 +37,10 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
                         target_mecanum_velocities = MecanumVelocities::from_array(velocities.map(|v| v as f32));
                     }
                     PiToStm32Command::SetClawServoAngle { angle } => {
-                        state.claw_servo_state.set_angle(angle);
+                        state.claw_servo_current_angle = angle;
                     }
                     PiToStm32Command::SetYawServoAngle { angle } => {
-                        state.yaw_servo_state.set_angle(angle);
+                        state.yaw_servo_current_angle = angle;
                     }
                     _ => (),
                 }
@@ -203,6 +201,18 @@ impl Stm32Controller {
         self.send(PiToStm32Command::SetYawServoAngle { angle });
     }
 
+    pub fn set_vertical_arm_position(&self, position: u16) {
+        self.send(PiToStm32Command::SetVerticalArmPosition { position })
+    }
+    
+    pub fn set_horizontal_arm_position(&self, position: u16) {
+        self.send(PiToStm32Command::SetHorizontalArmPosition { position })
+    }
+
+    pub fn set_display_text(&self, text: String) {
+        self.send(PiToStm32Command::SetDisplayText { text })
+    }
+
     pub fn set_claw_servo(&self, angle: u8) {
         self.send(PiToStm32Command::SetClawServoAngle { angle });
     }
@@ -227,8 +237,8 @@ pub struct Stm32State {
     pub driver_is_connected: bool,
     pub start_flag: bool,
 
-    pub yaw_servo_state: YawServoState,
-    pub claw_servo_state: ClawServoState,
+    pub yaw_servo_current_angle: u8,
+    pub claw_servo_current_angle: u8,
     // Movement
     pub actual_wheel_velocities: [i16; 4],
     /// Delta time for FPS calculation
