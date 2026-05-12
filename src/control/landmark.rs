@@ -1,4 +1,4 @@
-const LANDMARK_SCALING: f32 = 0.6;
+pub const LANDMARK_SCALE: f32 = 0.6;
 
 use glam::Vec2;
 
@@ -59,6 +59,6 @@ impl Landmark {
                 rotation: 0.0,
             },
         };
-        normalized.scale(LANDMARK_SCALING)
+        normalized.scale(LANDMARK_SCALE)
     }
 }

@@ -7,7 +7,7 @@ use crate::{
     control::{
         ControllerState,
         actions::Action,
-        landmark::{self, Landmark},
+        landmark::{self, LANDMARK_SCALE, Landmark},
         motion::{MotionPolicy, MotionPolicyPreset},
     },
     devices::stm32::Stm32Controller,
@@ -69,7 +69,7 @@ impl Action for Move {
             current_pose.difference(self.target_pose).to_components();
         let (mut linear_output, angular_output) =
             self.policy.update(linear_error, angular_error, dt);
-        linear_output = linear_output.rotate(Vec2::from_angle(-current_pose.rotation));
+        linear_output = linear_output.rotate(Vec2::from_angle(-current_pose.rotation)) * LANDMARK_SCALE;
 
         let target_twist = Twist::new(linear_output, angular_output);
         stm32_controller.set_twist(target_twist);

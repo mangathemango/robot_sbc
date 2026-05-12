@@ -26,29 +26,30 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
         let mut target_mecanum_velocities = MecanumVelocities::default();
         loop {
             let now = std::time::Instant::now();
+            let dt = now - last_update;
+            if dt < Duration::from_millis(10) {
+                continue;
+            }
             state.dt = now.duration_since(last_update);
             last_update = now;
 
             // 🟣 1. Handle outgoing commands
-            match rx.try_recv() {
-                Ok(cmd) => {
-                    match cmd {
-                        PiToStm32Command::SetWheelTargetVelocities { velocities } => {
-                            target_mecanum_velocities = MecanumVelocities::from_array(velocities.map(|v| v as f32));
-                        }
-                        PiToStm32Command::SetClawServoAngle { angle } => {
-                            state.claw_servo_state.set_angle(angle);
-                        }
-                        PiToStm32Command::SetYawServoAngle { angle } => {
-                            state.yaw_servo_state.set_angle(angle);
-                        }
-                        _ => (),
+            while let Ok(cmd) = rx.try_recv() {
+                match cmd {
+                    PiToStm32Command::SetWheelTargetVelocities { velocities } => {
+                        target_mecanum_velocities = MecanumVelocities::from_array(velocities.map(|v| v as f32));
                     }
-                    let _ = driver.send_command(cmd);
+                    PiToStm32Command::SetClawServoAngle { angle } => {
+                        state.claw_servo_state.set_angle(angle);
+                    }
+                    PiToStm32Command::SetYawServoAngle { angle } => {
+                        state.yaw_servo_state.set_angle(angle);
+                    }
+                    _ => (),
                 }
-                Err(std::sync::mpsc::TryRecvError::Empty) => {}
-                Err(std::sync::mpsc::TryRecvError::Disconnected) => break,
+                let _ = driver.send_command(cmd);
             }
+
 
             // 🔵 2. Handle incoming data
             match driver.try_read_frame() {
