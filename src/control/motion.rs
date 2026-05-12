@@ -34,7 +34,7 @@ impl MotionPolicy {
 
 impl Default for MotionPolicy {
     fn default() -> Self {
-        MotionPolicyPreset::Aggressive.to_motion_policy()
+        MotionPolicyPreset::default().to_motion_policy()
     }
 }
 
@@ -50,14 +50,14 @@ impl MotionPolicyPreset {
     pub fn to_motion_policy(&self) -> MotionPolicy {
         match self {
             Self::Precise => MotionPolicy {
-                linear_pid: PidController::new(3.0, 0.0, 0.1, 0.001, 1.0),
+                linear_pid: PidController::new(2.0, 0.0, 0.1, 0.001, 1.0),
                 angular_pid: PidController::new(2.0, 0.0, 0.1, 0.001, 1.0),
                 settle_time: Duration::from_millis(1000),
             },
             Self::Aggressive => MotionPolicy {
-                linear_pid: PidController::new(3.0, 0.0, 0.1, 0.05, 1.0),
-                angular_pid: PidController::new(3.0, 0.0, 0.5, 0.05, 1.0),
-                settle_time: Duration::from_millis(100),
+                linear_pid: PidController::new(2.0, 0.0, 0.5, 0.05, 1.0),
+                angular_pid: PidController::new(3.0, 0.0, 0.1, 0.05, 1.0),
+                settle_time: Duration::from_millis(1000),
             },
             Self::Custom(profile) => *profile,
         }

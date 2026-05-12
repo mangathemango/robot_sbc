@@ -1,4 +1,4 @@
-use std::f32::consts::PI;
+use std::{f32::consts::PI, ops::Mul};
 
 use crate::math::wrap_angle;
 use glam::Vec2;
@@ -32,6 +32,11 @@ impl Pose {
             position: target.position - self.position,
             rotation: wrap_angle(target.rotation - self.rotation),
         }
+    }
+
+    pub fn scale(mut self, scale: f32) -> Pose {
+        self.position *= scale;
+        self
     }
 
     pub fn to_components(&self) -> (Vec2, f32) {

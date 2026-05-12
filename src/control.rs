@@ -10,7 +10,7 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use crate::ROBOT;
+use crate::{ROBOT, control};
 use crate::control::actions::Action;
 use crate::control::actions::r#move::Move;
 use crate::control::actions::rotate_arm::RotateArm;
@@ -32,6 +32,7 @@ pub fn spawn_main_controller_thread() {
                 std::thread::sleep(Duration::from_millis(1));
                 continue;
             }
+            controller.state.dt = dt;
             if controller.action_queue.is_empty() {
                 controller
                     .enqueue(RotateArm::to(ArmPosition::Middle))
@@ -39,27 +40,27 @@ pub fn spawn_main_controller_thread() {
                     .enqueue(Move::to(Landmark::SourceZone))
                     .enqueue(RotateArm::to(ArmPosition::Right))
                     .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::SideIntersection))
+                    .enqueue(Move::to(Landmark::CentralRightCrossing))
                     .enqueue(Move::to(Landmark::TemporaryStorageZone))
                     .enqueue(RotateArm::to(ArmPosition::Left))
                     .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::FirstCornerTurn))
+                    .enqueue(Move::to(Landmark::UpperLeftTurn))
                     .enqueue(Move::to(Landmark::FinalProcessingZone))
                     .enqueue(RotateArm::to(ArmPosition::Right))
                     .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::SecondCornerTurn))
+                    .enqueue(Move::to(Landmark::UpperRightTurn))
                     .enqueue(Move::to(Landmark::SourceZone))
                     .enqueue(RotateArm::to(ArmPosition::Right))
                     .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::SideIntersection))
+                    .enqueue(Move::to(Landmark::CentralRightCrossing))
                     .enqueue(Move::to(Landmark::TemporaryStorageZone))
                     .enqueue(RotateArm::to(ArmPosition::Left))
                     .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::FirstCornerTurn))
+                    .enqueue(Move::to(Landmark::UpperLeftTurn))
                     .enqueue(Move::to(Landmark::FinalProcessingZone))
                     .enqueue(RotateArm::to(ArmPosition::Right))
                     .enqueue(RotateArm::to(ArmPosition::Middle))
-                    .enqueue(Move::to(Landmark::SecondCornerTurn))
+                    .enqueue(Move::to(Landmark::UpperRightTurn))
                     .enqueue(Move::to(Landmark::Start));
             }
             controller.update(dt);
