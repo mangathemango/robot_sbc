@@ -1,5 +1,8 @@
 use crate::math::MecanumVelocities;
 use glam::Vec2;
+
+/// A struct containing a linear velocity (vx vy) and an angular velocity (omega)
+/// This project defines vy as the forward velocity and vx as the right velocity with respect to the robot
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Twist {
     pub linear: Vec2, // (vx, vy)

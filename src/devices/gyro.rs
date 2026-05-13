@@ -1,5 +1,5 @@
 use crate::ROBOT;
-use crate::devices::DriverPort;
+use crate::devices::DriverSerialPort;
 use std::f32::consts::PI;
 use std::sync::Arc;
 
@@ -38,18 +38,18 @@ pub fn spawn_gyro_thread() {
 /// Driver struct to read + parse data sent from the gyro
 #[derive(Debug)]
 pub struct GyroDriver {
-    port: DriverPort,
+    port: DriverSerialPort,
 }
 
 impl GyroDriver {
     pub fn new() -> Self {
         GyroDriver {
-            port: DriverPort::from_dotenv_key(GYRO_DOTENV_KEY),
+            port: DriverSerialPort::from_dotenv_key(GYRO_DOTENV_KEY),
         }
     }
 
     pub fn reconnect(&mut self) {
-        self.port = DriverPort::from_dotenv_key(GYRO_DOTENV_KEY);
+        self.port = DriverSerialPort::from_dotenv_key(GYRO_DOTENV_KEY);
     }
 
     pub fn is_connected(&self) -> bool {
@@ -62,8 +62,8 @@ impl GyroDriver {
     /// [0x55] [0x53] [...] [yaw] [...] [gy] [gz]
     pub fn try_read_frame(&mut self) -> Result<GyroSample, String> {
         match &mut self.port {
-            DriverPort::Disconnected(msg) => Err(format!("Gyro driver not active: {}", msg)),
-            DriverPort::Connected(port) => {
+            DriverSerialPort::Disconnected(msg) => Err(format!("Gyro driver not active: {}", msg)),
+            DriverSerialPort::Connected(port) => {
                 let mut buffer = [0; 1];
                 let mut frame = Vec::new();
                 loop {
@@ -73,7 +73,7 @@ impl GyroDriver {
                             continue;
                         }
                         Err(e) => {
-                            self.port = DriverPort::Disconnected(
+                            self.port = DriverSerialPort::Disconnected(
                                 format!("Gyro read frame error: {}", e).into(),
                             );
                             return Err(format!("Gyro read frame error: {}", e));

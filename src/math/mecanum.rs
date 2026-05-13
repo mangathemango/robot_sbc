@@ -2,11 +2,16 @@ use std::time::Duration;
 
 use crate::math::Twist;
 
+/// A struct representing the velocities of a set of 4 mecanum wheels
 #[derive(Debug, Clone, Copy, Default)]
 pub struct MecanumVelocities {
-    pub vfl: f32,
+    /// Front Left wheel velocity
+    pub vfl: f32, 
+    /// Front Right wheel velocity
     pub vfr: f32,
+    /// Rear Left wheel velocity
     pub vrl: f32,
+    /// Rear Right wheel velocity
     pub vrr: f32,
 }
 

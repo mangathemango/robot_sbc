@@ -3,21 +3,24 @@ use std::time::Duration;
 /// A PID (Proportional Integral Derivative) controller is a feedback mechanism that calculates
 /// the error between the desired target and the actual measured value, and adjusting the output
 /// to minimize this difference.
-///
-/// The tuning of this model
 #[derive(Debug, Default, Clone, Copy)]
 pub struct PidController {
-    // Controller configuration variables
-    kp: f32,           // How much current error contribute to correction
-    ki: f32,           // How much accumulated error over time contribute to correction
-    kd: f32,           // How much the change in error over time contribute to correction
-    tolerance: f32,    // The range in which errors are ignored
-    max_integral: f32, // Maximum accumulated integral
+    /// How much current error contribute to correction
+    kp: f32,           
+    /// How much accumulated error over time (integral) contribute to correction
+    ki: f32,        
+    /// How much the change in error over time contribute to correction
+    kd: f32,           
+    // The range in which errors are deemed to be in a settled state
+    tolerance: f32,    
+    // Maximum accumulated integral to avoid integral overshooting
+    max_integral: f32, 
 
     // Controller states
     last_error: f32,
     integral: f32,
 
+    // How much time 
     pub settled_duration: Duration,
 }
 
@@ -61,7 +64,7 @@ impl PidController {
         } else {
             self.settled_duration = Duration::ZERO;
         }
-
+        
         if self.last_error.is_nan() {
             self.last_error = current_error
         }

@@ -1,4 +1,4 @@
-use crate::devices::DriverPort;
+use crate::devices::DriverSerialPort;
 use glam::Vec2;
 use crate::ROBOT;
 use std::sync::Arc;
@@ -42,18 +42,18 @@ pub fn spawn_maixcam_thread() {
 
 #[derive(Debug)]
 pub struct MaixcamDriver {
-    port: DriverPort,
+    port: DriverSerialPort,
 }
 
 impl MaixcamDriver {
     pub fn new() -> Self {
         MaixcamDriver {
-            port: DriverPort::from_dotenv_key(MAIXCAM_DOTENV_KEY),
+            port: DriverSerialPort::from_dotenv_key(MAIXCAM_DOTENV_KEY),
         }
     }
 
     pub fn reconnect(&mut self) {
-        self.port = DriverPort::from_dotenv_key(MAIXCAM_DOTENV_KEY);
+        self.port = DriverSerialPort::from_dotenv_key(MAIXCAM_DOTENV_KEY);
     }
 
     pub fn is_connected(&self) -> bool {
@@ -62,8 +62,8 @@ impl MaixcamDriver {
 
     pub fn try_read_frame(&mut self) -> Result<MaixcamSample, String> {
         match &mut self.port {
-            DriverPort::Disconnected(msg) => Err(format!("Maixcam driver not active: {}", msg)),
-            DriverPort::Connected(port) => {
+            DriverSerialPort::Disconnected(msg) => Err(format!("Maixcam driver not active: {}", msg)),
+            DriverSerialPort::Connected(port) => {
                 let mut buffer = [0; 1];
                 let mut frame = Vec::<u8>::new();
                 let mut idx = 0;
@@ -74,7 +74,7 @@ impl MaixcamDriver {
                             if e.kind() == std::io::ErrorKind::TimedOut {
                                 continue;
                             } else {
-                                self.port = DriverPort::Disconnected(
+                                self.port = DriverSerialPort::Disconnected(
                                     format!("Maixcam read frame error: {}", e).into(),
                                 );
                                 return Err(format!("Read from Maixcam failed: {}", e));

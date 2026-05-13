@@ -1,5 +1,5 @@
 use crate::ROBOT;
-use crate::devices::DriverPort;
+use crate::devices::DriverSerialPort;
 use crate::math::MecanumVelocities;
 use crate::math::Twist;
 use std::sync::Arc;
@@ -75,18 +75,18 @@ pub fn spawn_stm32_thread(rx: Receiver<PiToStm32Command>) {
 
 #[derive(Debug)]
 pub struct Stm32Driver {
-    port: DriverPort,
+    port: DriverSerialPort,
 }
 
 impl Stm32Driver {
     pub fn new() -> Self {
         Stm32Driver {
-            port: DriverPort::from_dotenv_key(STM32_DOTENV_KEY),
+            port: DriverSerialPort::from_dotenv_key(STM32_DOTENV_KEY),
         }
     }
 
     pub fn reconnect(&mut self) {
-        self.port = DriverPort::from_dotenv_key(STM32_DOTENV_KEY);
+        self.port = DriverSerialPort::from_dotenv_key(STM32_DOTENV_KEY);
     }
 
     pub fn is_connected(&self) -> bool {
@@ -95,10 +95,10 @@ impl Stm32Driver {
 
     pub fn send_command(&mut self, command: PiToStm32Command) -> Result<usize, String> {
         let port = match &mut self.port {
-            DriverPort::Disconnected(msg) => {
+            DriverSerialPort::Disconnected(msg) => {
                 return Err(format!("Send command to STM32 failed: {}", msg).into());
             }
-            DriverPort::Connected(port) => port,
+            DriverSerialPort::Connected(port) => port,
         };
         port.write(&command.to_packet_bytes())
             .map_err(|e| format!("Send command to STM32 failed: {}", e))
@@ -106,10 +106,10 @@ impl Stm32Driver {
 
     pub fn try_read_frame(&mut self) -> Result<Option<Stm32ToPiCommand>, String> {
         let port = match &mut self.port {
-            DriverPort::Disconnected(msg) => {
+            DriverSerialPort::Disconnected(msg) => {
                 return Err(format!("Read from STM32 failed: {}", msg).into());
             }
-            DriverPort::Connected(port) => port,
+            DriverSerialPort::Connected(port) => port,
         };
 
         let mut buffer = [0u8; 1];
@@ -125,7 +125,7 @@ impl Stm32Driver {
                         return Ok(None);
                     } else {
                         self.port =
-                            DriverPort::Disconnected(format!("Read from STM32 failed: {}", e));
+                            DriverSerialPort::Disconnected(format!("Read from STM32 failed: {}", e));
                         return Err(format!("Read from STM32 failed: {}", e));
                     }
                 }

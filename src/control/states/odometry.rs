@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 use glam::Vec2;
 
 use crate::ROBOT;
-use crate::math::{MecanumVelocities, Pose, Twist, wrap_angle};
+use crate::math::{MecanumVelocities, Pose, Twist, utils::wrap_angle};
 use std::{sync::Arc, time::Duration};
 
 pub fn spawn_odometry_thread() {

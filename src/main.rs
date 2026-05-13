@@ -9,12 +9,13 @@ use crate::debug::spawn_debug_thread;
 use crate::devices::gyro::spawn_gyro_thread;
 use crate::devices::maixcam::spawn_maixcam_thread;
 use crate::devices::qr::spawn_qr_thread;
-use crate::devices::stm32::{PiToStm32Command, Stm32Controller, Stm32Driver, spawn_stm32_thread};
+use crate::devices::stm32::{Stm32Controller, spawn_stm32_thread};
 
 use once_cell::sync::Lazy;
 use robot::Robot;
 use std::sync::mpsc;
 
+// The global ROBOT variable used to share data across different threads
 static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());
 
 fn main() {
@@ -28,12 +29,24 @@ fn main() {
         .set(Stm32Controller::new(sender))
         .expect("Unable to set STM32_CONTROLLER: {}");
 
-    // Receiver is passed on to stm32 thread
-    spawn_stm32_thread(receiver);
-    spawn_gyro_thread();
+    // DEVICE THREADS
+    // Thread to retrieve and send serial data to the STM32. Updates ROBOT.stm32_state
+    spawn_stm32_thread(receiver);       
+
+    // Thread to retrieve raw data from the HWTCT101 gyroscope. Updates ROBOT.gyro_data
+    spawn_gyro_thread();                 
+
+    // Thread to retrieve detected circle data from the maixcam. Updates ROBOT.maixcam_state
     spawn_maixcam_thread();
+
+    // Thread to continuously read data from the QR code reader. 
     spawn_qr_thread();
+
+    // CONTROL THREADS
+    // Thread to estimate current position + movement of the robot. Updates ROBOT.odometry_state
     spawn_odometry_thread();
+
+    // Thread to queue high level actions and sequences. Updates ROBOT.controller_state
     spawn_main_controller_thread();
     
     // The Debug thread has to be the last thread spawned

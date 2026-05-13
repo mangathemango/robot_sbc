@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use crate::math::wrap_angle;
+use crate::math::utils::wrap_angle;
 use glam::Vec2;
 /// A struct representing where an object is and where it's facing
 #[derive(Debug, Clone, Copy, Default)]
