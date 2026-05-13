@@ -1,9 +1,10 @@
 use crate::control::ControllerState;
 use crate::control::states::odometry::OdometryState;
-use crate::devices::gyro::GyroState;
-use crate::devices::maixcam::MaixcamState;
+use crate::devices::gyro::state::GyroState;
+use crate::devices::maixcam::state::MaixcamState;
 use crate::devices::qr::QrState;
-use crate::devices::stm32::{Stm32Controller, Stm32State};
+use crate::devices::stm32::controller::Stm32Controller;
+use crate::devices::stm32::state::Stm32State;
 use arc_swap::ArcSwap;
 use std::sync::OnceLock;
 

@@ -6,7 +6,7 @@ use ratatui::{
 };
 
 use crate::{ROBOT, debug::helpers::format_radian};
-use crate::devices::gyro::GyroState;
+use crate::devices::gyro::state::GyroState;
 
 use crate::debug::helpers::bool_icon;
 
