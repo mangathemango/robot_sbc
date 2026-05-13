@@ -1,8 +1,8 @@
-use std::time::Duration;
+use std::{fmt::Display, time::Duration};
 
 use glam::Vec2;
 
-use crate::{ROBOT, control::{actions::{Action, rotate_arm::RotatePosition}, motion::{MotionPolicy, MotionPolicyPreset}}, devices::maixcam::MaixcamCircleColor, math::Pose};
+use crate::{ROBOT, control::{actions::{Action, rotate_arm::RotatePosition}, motion::{MotionPolicy, MotionPolicyPreset}}, devices::maixcam::MaixcamCircleColor, math::{Pose, Twist}};
 
 
 #[derive(Debug, Default)]
@@ -77,7 +77,7 @@ impl Action for Calibrate {
     }
     
     fn update(&mut self, dt: Duration) {
-
+        todo!("Finish Calibrate implementation");
     }
 
     fn stop(&mut self) {
@@ -89,11 +89,15 @@ impl Action for Calibrate {
     }
 
     fn is_finished(&self) -> bool {
-        
+        true
     }
 }
 
-
+impl Display for Calibrate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Display: {:?}", self)
+    }
+}
 
 #[derive(Debug, Default)]
 pub enum CalibrateMode {
