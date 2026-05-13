@@ -46,10 +46,6 @@ impl Action for LiftArm {
     fn is_finished(&self) -> bool {
         todo!("Implement get arm motor current position")
     }
-
-    fn name(&self) -> String {
-        "Lift Arm".into()
-    }
 }
 
 impl Display for LiftArm {

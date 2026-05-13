@@ -88,10 +88,6 @@ impl Action for Sequence {
             self
         }
     }
-
-    fn name(&self) -> String {
-        self.name.clone()
-    }
 }
 
 impl Display for Sequence {

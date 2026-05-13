@@ -43,10 +43,6 @@ impl Action for RotateClaw {
     fn current_action(&self) -> &dyn Action {
         self
     }
-
-    fn name(&self) -> String {
-        "Rotate Claw".into()
-    }
 }
 
 impl Display for RotateClaw {

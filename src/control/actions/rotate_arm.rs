@@ -54,10 +54,6 @@ impl Action for RotateArm {
         self
     }
 
-    fn name(&self) -> String {
-        "Rotate Arm".into()
-    }
-
 }
 
 impl Display for RotateArm {

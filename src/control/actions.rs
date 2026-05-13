@@ -16,5 +16,4 @@ pub trait Action: Debug + Display {
     fn stop(&mut self);
 
     fn current_action(&self) -> &dyn Action;
-    fn name(&self) -> String;
 }

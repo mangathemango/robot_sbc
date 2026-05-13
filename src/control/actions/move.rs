@@ -92,10 +92,6 @@ impl Action for Move {
     fn current_action(&self) -> &dyn Action {
         self
     }
-
-    fn name(&self) -> String {
-        "Move".into()
-    }
 }
 
 impl Display for Move {

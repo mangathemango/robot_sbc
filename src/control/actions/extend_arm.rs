@@ -33,10 +33,6 @@ impl Action for ExtendArm {
     fn is_finished(&self) -> bool {
         todo!("Implement get arm motor current position")
     }
-
-    fn name(&self) -> String {
-        "Extend Arm".into()
-    }
 }
 
 impl Display for ExtendArm {
