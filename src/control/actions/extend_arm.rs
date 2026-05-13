@@ -2,6 +2,8 @@ use std::{fmt::Display};
 
 use crate::{ROBOT, control::actions::{Action, lift_arm::LiftArm}};
 
+pub type RetractArm = ExtendArm;
+
 #[derive(Debug, Clone, Default)]
 pub struct ExtendArm {
     target_position: u16,
@@ -41,6 +43,6 @@ impl Display for ExtendArm {
     }
 }
 
-enum ExtendPosition {
+pub enum ExtendPosition {
     
 }

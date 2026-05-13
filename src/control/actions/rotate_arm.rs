@@ -63,7 +63,7 @@ impl Display for RotateArm {
 }
 
 #[derive(Debug, Clone, Copy, Default)]
-enum RotatePosition {
+pub enum RotatePosition {
     #[default]
     Middle,
     Left,
@@ -84,6 +84,17 @@ impl RotatePosition {
             RotatePosition::MiddleStorage => 60,
             RotatePosition::RightStorage =>  70,
             RotatePosition::Custom(angle) => *angle,
+        }
+    }
+
+    pub fn from_angle(angle: u8) -> Self {
+        match angle {
+            0   => RotatePosition::Right,
+            50  => RotatePosition::LeftStorage,
+            60  => RotatePosition::Middle,
+            70  => RotatePosition::RightStorage,
+            120 => RotatePosition::Left,
+            _   => RotatePosition::Custom(angle),
         }
     }
 }

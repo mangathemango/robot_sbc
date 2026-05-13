@@ -3,6 +3,7 @@ pub mod rotate_arm;
 pub mod rotate_claw;
 pub mod lift_arm;
 pub mod extend_arm;
+pub mod calibrate;
 
 use std::{fmt::{Debug, Display}, time::Duration};
 

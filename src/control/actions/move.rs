@@ -15,7 +15,7 @@ use crate::{
 #[derive(Debug, Clone, Default)]
 pub struct Move {
     target_pose: Pose,
-    policy: MotionPolicy,
+    motion_policy: MotionPolicy,
     policy_preset: MotionPolicyPreset,
     mode: ControlMode,
 }
@@ -37,7 +37,7 @@ impl Move {
 
     pub fn policy(mut self, preset: MotionPolicyPreset) -> Self {
         self.policy_preset = preset;
-        self.policy = preset.to_motion_policy();
+        self.motion_policy = preset.to_motion_policy();
         self
     }
 
@@ -66,22 +66,25 @@ impl Action for Move {
     }
 
     fn update(&mut self, dt: Duration) {
-        let stm32_controller = ROBOT.get_stm32_controller();
         let current_pose = ROBOT.odometry_state.load().pose;
 
         let (linear_error, angular_error) =
             current_pose.difference(self.target_pose).to_components();
+        
+        // Get PID outputs from motion_policy
         let (mut linear_output, angular_output) =
-            self.policy.update(linear_error, angular_error, dt);
+            self.motion_policy.update(linear_error, angular_error, dt);
+
+        // Rotate linear_output back to world space
         linear_output =
             linear_output.rotate(Vec2::from_angle(-current_pose.rotation));
 
         let target_twist = Twist::new(linear_output, angular_output);
-        stm32_controller.set_twist(target_twist);
+        ROBOT.get_stm32_controller().set_twist(target_twist);
     }
 
     fn is_finished(&self) -> bool {
-        self.policy.is_settled()
+        self.motion_policy.is_settled()
     }
 
     fn stop(&mut self) {
@@ -97,7 +100,7 @@ impl Action for Move {
 impl Display for Move {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Moving to {} with policy {:?} and mode {:?}\n\nLinear PID: {}\n\nAngular PID: {}\n\nSettle time: {}ms", 
-            self.target_pose, self.policy_preset, self.mode, self.policy.linear_pid, self.policy.angular_pid, self.policy.settle_time.as_millis())
+            self.target_pose, self.policy_preset, self.mode, self.motion_policy.linear_pid, self.motion_policy.angular_pid, self.motion_policy.settle_time.as_millis())
     }
 }
 

@@ -2,6 +2,8 @@ use std::fmt::Display;
 
 use crate::{ROBOT, control::actions::Action};
 
+pub type LowerArm = LiftArm;
+
 #[derive(Debug, Clone, Default)]
 pub struct LiftArm {
     target_position: u16
@@ -54,7 +56,7 @@ impl Display for LiftArm {
     }
 }
 
-enum LiftPosition {
+pub enum LiftPosition {
     Up,
     Storage,
     Ground, 
