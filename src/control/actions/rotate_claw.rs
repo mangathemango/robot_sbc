@@ -13,7 +13,7 @@ pub struct RotateClaw {
 }
 
 impl RotateClaw {
-    pub fn to(target_position: ClawPosition) -> Self {
+    pub fn to(target_position: ClawRotationPreset) -> Self {
         Self {
             target_angle: target_position.to_angle(),
             ..Default::default()
@@ -52,7 +52,7 @@ impl Display for RotateClaw {
 }
 
 #[derive(Debug, Clone, Copy, Default)]
-pub enum ClawPosition {
+pub enum ClawRotationPreset {
     #[default]
     Open,
     SoftOpen,
@@ -60,13 +60,13 @@ pub enum ClawPosition {
     Custom(u8),
 }
 
-impl ClawPosition {
+impl ClawRotationPreset {
     pub fn to_angle(&self) -> u8 {
         match self {
-            ClawPosition::Open => 30,
-            ClawPosition::SoftOpen => 120,
-            ClawPosition::Close => 180,
-            ClawPosition::Custom(angle) => *angle,
+            ClawRotationPreset::Open => 30,
+            ClawRotationPreset::SoftOpen => 120,
+            ClawRotationPreset::Close => 180,
+            ClawRotationPreset::Custom(angle) => *angle,
         }
     }
 }

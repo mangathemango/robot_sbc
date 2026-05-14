@@ -17,19 +17,31 @@ impl RotateArm {
         }
     }
 
-    pub fn to(target_position: RotatePosition) -> Self {
+    pub fn to(target_position: ArmRotationPreset) -> Self {
         Self {
             target_angle: target_position.to_angle(),
             ..Default::default()
         }
     }
 
-    pub fn middle() -> Self         { Self::to(RotatePosition::Middle) }
-    pub fn left() -> Self           { Self::to(RotatePosition::Left) }
-    pub fn right() -> Self          { Self::to(RotatePosition::Right) }
-    pub fn middle_storage() -> Self { Self::to(RotatePosition::MiddleStorage) }
-    pub fn left_storage() -> Self   { Self::to(RotatePosition::LeftStorage) }
-    pub fn right_storage() -> Self  { Self::to(RotatePosition::RightStorage) }
+    pub fn middle() -> Self {
+        Self::to(ArmRotationPreset::Middle)
+    }
+    pub fn left() -> Self {
+        Self::to(ArmRotationPreset::Left)
+    }
+    pub fn right() -> Self {
+        Self::to(ArmRotationPreset::Right)
+    }
+    pub fn middle_storage() -> Self {
+        Self::to(ArmRotationPreset::MiddleStorage)
+    }
+    pub fn left_storage() -> Self {
+        Self::to(ArmRotationPreset::LeftStorage)
+    }
+    pub fn right_storage() -> Self {
+        Self::to(ArmRotationPreset::RightStorage)
+    }
 }
 
 impl Action for RotateArm {
@@ -53,7 +65,6 @@ impl Action for RotateArm {
     fn current_action(&self) -> &dyn Action {
         self
     }
-
 }
 
 impl Display for RotateArm {
@@ -63,7 +74,7 @@ impl Display for RotateArm {
 }
 
 #[derive(Debug, Clone, Copy, Default)]
-pub enum RotatePosition {
+pub enum ArmRotationPreset {
     #[default]
     Middle,
     Left,
@@ -74,27 +85,27 @@ pub enum RotatePosition {
     Custom(u8),
 }
 
-impl RotatePosition {
+impl ArmRotationPreset {
     pub fn to_angle(&self) -> u8 {
         match self {
-            RotatePosition::Middle =>        60,
-            RotatePosition::Left =>          120,
-            RotatePosition::Right =>         0,
-            RotatePosition::LeftStorage =>   50,
-            RotatePosition::MiddleStorage => 60,
-            RotatePosition::RightStorage =>  70,
-            RotatePosition::Custom(angle) => *angle,
+            ArmRotationPreset::Middle => 60,
+            ArmRotationPreset::Left => 120,
+            ArmRotationPreset::Right => 0,
+            ArmRotationPreset::LeftStorage => 50,
+            ArmRotationPreset::MiddleStorage => 60,
+            ArmRotationPreset::RightStorage => 70,
+            ArmRotationPreset::Custom(angle) => *angle,
         }
     }
 
     pub fn from_angle(angle: u8) -> Self {
         match angle {
-            0   => RotatePosition::Right,
-            50  => RotatePosition::LeftStorage,
-            60  => RotatePosition::Middle,
-            70  => RotatePosition::RightStorage,
-            120 => RotatePosition::Left,
-            _   => RotatePosition::Custom(angle),
+            0 => ArmRotationPreset::Right,
+            50 => ArmRotationPreset::LeftStorage,
+            60 => ArmRotationPreset::Middle,
+            70 => ArmRotationPreset::RightStorage,
+            120 => ArmRotationPreset::Left,
+            _ => ArmRotationPreset::Custom(angle),
         }
     }
 }

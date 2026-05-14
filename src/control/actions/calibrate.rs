@@ -5,7 +5,7 @@ use glam::Vec2;
 use crate::{
     ROBOT,
     control::{
-        actions::{Action, rotate_arm::RotatePosition},
+        actions::{Action, rotate_arm::ArmRotationPreset},
         motion::{MotionPolicy, MotionPolicyPreset},
     },
     devices::maixcam::color::MaixcamCircleColor,
@@ -15,7 +15,7 @@ use crate::{
 #[derive(Debug, Default)]
 pub struct Calibrate {
     motion_policy: MotionPolicy,
-    arm_rotation: RotatePosition,
+    arm_rotation: ArmRotationPreset,
     mode: CalibrateMode,
 
     elapsed: Duration,
@@ -27,7 +27,7 @@ impl Calibrate {
         Self {
             motion_policy: mode.motion_policy(),
             mode,
-            arm_rotation: RotatePosition::Left,
+            arm_rotation: ArmRotationPreset::Left,
             ..Default::default()
         }
     }
@@ -45,7 +45,7 @@ impl Calibrate {
         })
     }
 
-    pub fn with_arm_rotation(mut self, rotation: RotatePosition) -> Self {
+    pub fn with_arm_rotation(mut self, rotation: ArmRotationPreset) -> Self {
         self.arm_rotation = rotation;
         self
     }
