@@ -17,8 +17,8 @@ pub struct CalibratePlacement {
     motion_policy: MotionPolicy,
     arm_rotation: ArmRotationPreset,
     mode: CalibrateMode,
-    
-    initial_pose: Pose,
+
+    initial_rotation: f32,
 }
 
 impl CalibratePlacement {
@@ -51,7 +51,7 @@ impl Action for CalibratePlacement {
         ROBOT
             .get_stm32_controller()
             .set_yaw_servo(self.arm_rotation.to_angle());
-        self.initial_pose = ROBOT.odometry_state.load().pose;
+        self.initial_rotation = ROBOT.odometry_state.load().pose.rotation;
     }
 
     fn update(&mut self, dt: Duration) {
@@ -74,7 +74,7 @@ impl Action for CalibratePlacement {
 
         let target_state = Pose {
             position: self.mode.target_circle_position(),
-            rotation: self.initial_pose.rotation,
+            rotation: self.initial_rotation,
         };
 
         let (linear_error, angular_error) = current_state.difference(target_state).to_components();
