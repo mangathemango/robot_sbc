@@ -1,4 +1,4 @@
-use std::{fmt::Display, time::Duration};
+use std::{f32::consts::FRAC_PI_2, fmt::Display, time::Duration};
 
 use glam::Vec2;
 
@@ -13,7 +13,7 @@ use crate::{
 };
 
 #[derive(Debug, Default)]
-pub struct Calibrate {
+pub struct CalibratePlacement {
     motion_policy: MotionPolicy,
     arm_rotation: ArmRotationPreset,
     mode: CalibrateMode,
@@ -22,27 +22,21 @@ pub struct Calibrate {
     initial_pose: Pose,
 }
 
-impl Calibrate {
+impl CalibratePlacement {
     pub fn from_mode(mode: CalibrateMode) -> Self {
         Self {
-            motion_policy: mode.motion_policy(),
+            motion_policy: MotionPolicyPreset::CalibrationPlace.to_motion_policy(),
             mode,
             arm_rotation: ArmRotationPreset::Left,
             ..Default::default()
         }
     }
 
-    pub fn at_place_zone_ground() -> Self {
-        Self::from_mode(CalibrateMode::PlaceZoneGround)
+    pub fn ground() -> Self {
+        Self::from_mode(CalibrateMode::Ground)
     }
-    pub fn at_place_zone_stack() -> Self {
-        Self::from_mode(CalibrateMode::PlaceZoneStack)
-    }
-    pub fn at_source_zone() -> Self {
-        Self::from_mode(CalibrateMode::SourceZone {
-            stable_time: Duration::from_millis(500),
-            calibrate_time: Duration::from_millis(2000),
-        })
+    pub fn stack() -> Self {
+        Self::from_mode(CalibrateMode::Stack)
     }
 
     pub fn with_arm_rotation(mut self, rotation: ArmRotationPreset) -> Self {
@@ -50,13 +44,32 @@ impl Calibrate {
         self
     }
 
-    pub fn move_to_target(&mut self, dt: Duration) {
+    pub fn move_to_target(&mut self, circle_position: Vec2, dt: Duration) {}
+}
+
+impl Action for CalibratePlacement {
+    fn start(&mut self) {
+        ROBOT
+            .get_stm32_controller()
+            .set_yaw_servo(self.arm_rotation.to_angle());
+        self.initial_pose = ROBOT.odometry_state.load().pose;
+    }
+
+    fn update(&mut self, dt: Duration) {
         let current_pose = ROBOT.odometry_state.load().pose;
-        let current_circle_position = ROBOT.maixcam_state.load().circle_position;
+        let maixcam_state = ROBOT.maixcam_state.load();
+
+        let circle_position = match maixcam_state.circle_color {
+            MaixcamCircleColor::Blue => maixcam_state.circle_position + Vec2::new(500.0, 0.0),
+            MaixcamCircleColor::Green => maixcam_state.circle_position,
+            MaixcamCircleColor::Red => maixcam_state.circle_position - Vec2::new(500.0, 0.0),
+            MaixcamCircleColor::Unknown => maixcam_state.circle_position
+        };
+
 
         // Move the robot linearly so that the circle ends up in the target position while keeping the initial rotation stable
         let current_state = Pose {
-            position: current_circle_position,
+            position: circle_position,
             rotation: current_pose.rotation,
         };
 
@@ -72,37 +85,30 @@ impl Calibrate {
             self.motion_policy.update(linear_error, angular_error, dt);
 
         // Rotate linear_output back to world space
-        linear_output = linear_output.rotate(Vec2::from_angle(-current_pose.rotation));
+        linear_output = linear_output.rotate(Vec2::from_angle(match self.arm_rotation {
+            ArmRotationPreset::Left => -FRAC_PI_2,
+            ArmRotationPreset::Right => FRAC_PI_2,
+            _ => 0.0,
+        }));
 
         let target_twist = Twist::new(linear_output, angular_output);
         ROBOT.get_stm32_controller().set_twist(target_twist);
     }
-}
 
-impl Action for Calibrate {
-    fn start(&mut self) {
-        ROBOT
-            .get_stm32_controller()
-            .set_yaw_servo(self.arm_rotation.to_angle());
-        self.initial_pose = ROBOT.odometry_state.load().pose;
+    fn stop(&mut self) {
+        ROBOT.get_stm32_controller().set_twist(Twist::ZERO);
     }
-
-    fn update(&mut self, dt: Duration) {
-        todo!("Finish Calibrate implementation");
-    }
-
-    fn stop(&mut self) {}
 
     fn current_action(&self) -> &dyn Action {
         self
     }
 
     fn is_finished(&self) -> bool {
-        true
+        self.motion_policy.is_settled() || !ROBOT.maixcam_state.load().driver_is_connected
     }
 }
 
-impl Display for Calibrate {
+impl Display for CalibratePlacement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Display: {:?}", self)
     }
@@ -111,28 +117,15 @@ impl Display for Calibrate {
 #[derive(Debug, Default)]
 pub enum CalibrateMode {
     #[default]
-    PlaceZoneGround,
-    SourceZone {
-        stable_time: Duration,
-        calibrate_time: Duration,
-    },
-    PlaceZoneStack,
+    Ground,
+    Stack,
 }
 
 impl CalibrateMode {
     pub fn target_circle_position(&self) -> Vec2 {
         match self {
-            CalibrateMode::PlaceZoneGround => Vec2::new(120.0, 120.0),
-            CalibrateMode::PlaceZoneStack => Vec2::new(120.0, 120.0),
-            CalibrateMode::SourceZone { .. } => Vec2::new(120.0, 120.0),
+            CalibrateMode::Ground => Vec2::new(120.0, 120.0),
+            CalibrateMode::Stack => Vec2::new(120.0, 120.0),
         }
-    }
-
-    pub fn motion_policy(&self) -> MotionPolicy {
-        match self {
-            CalibrateMode::SourceZone { .. } => MotionPolicyPreset::CalibrationSource,
-            _ => MotionPolicyPreset::CalibrationPlace,
-        }
-        .to_motion_policy()
     }
 }
