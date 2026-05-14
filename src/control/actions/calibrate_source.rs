@@ -46,7 +46,7 @@ impl Action for CalibrateSource {
     }
 
     fn update(&mut self, dt: Duration) {
-        let current_circle_position = ROBOT.maixcam_state.load().circle_position;
+        let current_circle_position = ROBOT.maixcam_state.load().circles[0].position;
         let circle_velocity = current_circle_position.distance(self.last_circle_position) / dt.as_secs_f32();
 
         match self.state {

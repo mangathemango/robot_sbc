@@ -1,9 +1,9 @@
-use crate::devices::maixcam::{driver::MaixcamDriver, state::MaixcamState};
-
-pub mod color;
+pub mod circle;
 pub mod driver;
 pub mod sample;
 pub mod state;
+pub mod message;
+use crate::devices::maixcam::{driver::MaixcamDriver, message::MaixcamMessage, state::MaixcamState};
 
 const MAIXCAM_DOTENV_KEY: &str = "MAIXCAM_PATH";
 const MAIXCAM_START_BYTE: u8 = 0x69;
@@ -13,7 +13,7 @@ const MAIXCAM_CAMERA_RESOLUTION_HEIGHT: f32 = 240.0;
 
 /// The Maixcam does nothing but send circle coordinates, so it doesn't really need to scale for the time being
 /// A packet of data is formatted like this:
-/// [Start] [pos_x] [pos_x] [pos_y] [pos_y]
+/// [START] [ID] [LEN] [DATA] [CHECKSUM]
 /// Where pos_x/y is a float from 0 to RESOLUTION_WIDTH/HEIGHT mapped into the range of 0..10000
 
 pub fn spawn_maixcam_thread() {
@@ -28,8 +28,14 @@ pub fn spawn_maixcam_thread() {
             last_update = now;
 
             match driver.try_read_frame() {
-                Ok(sample) => {
-                    state.update(sample);
+                Ok(messages) => {
+                    for message in messages {
+                        match message {
+                            MaixcamMessage::CircleData(circles) => {
+                                state.circles = circles;
+                            }
+                        }
+                    }
                 }
                 Err(_) => {
                     driver.reconnect();

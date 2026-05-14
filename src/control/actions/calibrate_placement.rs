@@ -8,7 +8,7 @@ use crate::{
         actions::{Action, rotate_arm::ArmRotationPreset},
         motion::{MotionPolicy, MotionPolicyPreset},
     },
-    devices::maixcam::color::MaixcamCircleColor,
+    devices::maixcam::circle::MaixcamCircleColor,
     math::{Pose, Twist},
 };
 
@@ -57,12 +57,13 @@ impl Action for CalibratePlacement {
     fn update(&mut self, dt: Duration) {
         let current_pose = ROBOT.odometry_state.load().pose;
         let maixcam_state = ROBOT.maixcam_state.load();
-
-        let circle_position = match maixcam_state.circle_color {
-            MaixcamCircleColor::Blue => maixcam_state.circle_position + Vec2::new(500.0, 0.0),
-            MaixcamCircleColor::Green => maixcam_state.circle_position,
-            MaixcamCircleColor::Red => maixcam_state.circle_position - Vec2::new(500.0, 0.0),
-            MaixcamCircleColor::Unknown => maixcam_state.circle_position
+        todo!("Handle case where there are no circles");
+        let circle = maixcam_state.circles[0];
+        let circle_position = match circle.color {
+            MaixcamCircleColor::Blue =>     circle.position + Vec2::new(500.0, 0.0),
+            MaixcamCircleColor::Green =>    circle.position,
+            MaixcamCircleColor::Red =>      circle.position - Vec2::new(500.0, 0.0),
+            MaixcamCircleColor::Unknown =>  circle.position
         };
 
 

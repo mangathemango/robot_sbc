@@ -1,6 +1,6 @@
 use std::{fmt::Display, time::Duration};
 
-use crate::{ROBOT, control::actions::Action, devices::maixcam::color::MaixcamCircleColor};
+use crate::{ROBOT, control::actions::Action, devices::maixcam::circle::MaixcamCircleColor};
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct RotateArm {

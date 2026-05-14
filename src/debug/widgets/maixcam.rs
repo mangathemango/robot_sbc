@@ -8,11 +8,9 @@ pub fn draw_maixcam(f: &mut Frame, area: Rect) {
     let maixcam = ROBOT.maixcam_state.load();
 
     let text = format!(
-        "Connected: {}\nPosition: {:.1}, {:.1}\nColor: {:?}\nFPS: {:.1}",
+        "Connected: {}\nCircles {:?}\nFPS: {:.1}",
         bool_icon(maixcam.driver_is_connected),
-        maixcam.circle_position.x,
-        maixcam.circle_position.y,
-        maixcam.circle_color,
+        maixcam.circles,
         if maixcam.dt.as_secs_f32() > 0.0 { 1.0 / maixcam.dt.as_secs_f32() } else { 0.0 } as i32,
     );
 

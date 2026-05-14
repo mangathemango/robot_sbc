@@ -61,9 +61,9 @@ pub fn spawn_stm32_thread() {
 
             // 🔵 2. Handle incoming data
             match driver.try_read_frame() {
-                Ok(commands) => {
-                    for command in commands {
-                        state.update(command);
+                Ok(messages) => {
+                    for message in messages {
+                        state.update(message);
                     }
                 }
                 Err(_) => {
