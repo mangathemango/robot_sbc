@@ -16,16 +16,16 @@ impl LiftArm {
         }
     }
 
-    pub fn to(position: LiftPosition) -> Self {
+    pub fn to(position: ArmLiftPreset) -> Self {
         Self {
             target_position: position.to_position()
         }
     }
 
-    pub fn up() -> Self {Self::to(LiftPosition::Up)}
-    pub fn storage() -> Self {Self::to(LiftPosition::Storage)}
-    pub fn ground() -> Self {Self::to(LiftPosition::Ground)}
-    pub fn stack() -> Self {Self::to(LiftPosition::Stack)}
+    pub fn up() -> Self {Self::to(ArmLiftPreset::Up)}
+    pub fn storage() -> Self {Self::to(ArmLiftPreset::Storage)}
+    pub fn ground() -> Self {Self::to(ArmLiftPreset::Ground)}
+    pub fn stack() -> Self {Self::to(ArmLiftPreset::Stack)}
 }
 
 impl Action for LiftArm {
@@ -46,30 +46,30 @@ impl Action for LiftArm {
     }
 
     fn is_finished(&self) -> bool {
-        todo!("Implement get arm motor current position")
+        self.target_position.abs_diff(ROBOT.stm32_state.load().vertical_arm_position) < 100
     }
 }
 
 impl Display for LiftArm {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Lift Arm to {}", self.target_position)
+        writeln!(f, "Lifting Arm to {}", self.target_position)
     }
 }
 
-pub enum LiftPosition {
+pub enum ArmLiftPreset {
     Up,
     Storage,
     Ground, 
     Stack
 }
 
-impl LiftPosition {
+impl ArmLiftPreset {
     pub fn to_position(&self) -> u16 {
         match self {
-            LiftPosition::Up => 10000,
-            LiftPosition::Storage => 6000,
-            LiftPosition::Ground => 1000,
-            LiftPosition::Stack => 2000,
+            ArmLiftPreset::Up => 10000,
+            ArmLiftPreset::Storage => 6000,
+            ArmLiftPreset::Ground => 1000,
+            ArmLiftPreset::Stack => 2000,
         }
     }
 }

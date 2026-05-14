@@ -92,7 +92,7 @@ impl Action for Sequence {
 
 impl Display for Sequence {
    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}: \n{}", 
+        write!(f, "{}: \n{}", 
             self.name, self.current_action_string())
     }
 }

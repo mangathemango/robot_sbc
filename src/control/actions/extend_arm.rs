@@ -33,16 +33,24 @@ impl Action for ExtendArm {
     }
 
     fn is_finished(&self) -> bool {
-        todo!("Implement get arm motor current position")
+        self.target_position.abs_diff(ROBOT.stm32_state.load().vertical_arm_position) < 100
     }
 }
 
 impl Display for ExtendArm {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Extend Arm to {}", self.target_position)
+        writeln!(f, "Extending Arm to {}", self.target_position)
     }
 }
 
-pub enum ExtendPosition {
+pub enum ArmExtendPreset {
     
+}
+
+impl ArmExtendPreset {
+    pub fn to_position(&self) -> u16 {
+        match self {
+            _ => 10000
+        }
+    }
 }
