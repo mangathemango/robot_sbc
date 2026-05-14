@@ -96,17 +96,31 @@ impl PiToStm32Command {
 
 #[derive(Debug)]
 pub enum Stm32ToPiCommand {
+    Log {
+        msg: String
+    },
     /// Actual wheel velocities from motor encoders
-    SendActualWheelVelocities { velocities: [i16; 4] },
+    SendActualWheelVelocities {
+        velocities: [i16; 4],
+    },
+    SendHorizontalArmPosition {
+        position: u16,
+    },
+    SendVerticalArmPosition {
+        position: u16,
+    },
     /// running: 0x00 for false, 0x01 for true. Will set to 1 when button on STM32 is clicked
-    SetRunningFlag { running: u8 },
+    SetRunningFlag,
 }
 
 impl Stm32ToPiCommand {
     pub fn from_id(id: u8) -> Option<Self> {
         match id {
+            0x50 => Some(Stm32ToPiCommand::Log { msg: String::new() }),
             0x51 => Some(Stm32ToPiCommand::SendActualWheelVelocities { velocities: [0; 4] }),
-            0x52 => Some(Stm32ToPiCommand::SetRunningFlag { running: 0x0 }),
+            0x52 => Some(Stm32ToPiCommand::SetRunningFlag),
+            0x53 => Some(Stm32ToPiCommand::SendHorizontalArmPosition { position: 0 }),
+            0x54 => Some(Stm32ToPiCommand::SendVerticalArmPosition { position: 0 }),
             _ => None,
         }
     }
@@ -121,29 +135,50 @@ impl Stm32ToPiCommand {
 
         let data = &frame[3..3 + len];
 
-        match id {
-            0x51 => {
-                if data.len() != 8 {
-                    return Err("Invalid velocity data length".into());
+        if let Some(command) = Stm32ToPiCommand::from_id(id) {
+            match command {
+                Stm32ToPiCommand::Log { .. } => {
+                    let msg = String::from_utf8_lossy(data);
+                    Ok(Stm32ToPiCommand::Log { msg: msg.into() })
                 }
 
-                let mut velocities = [0i16; 4];
-                for i in 0..4 {
-                    velocities[i] = i16::from_le_bytes([data[i * 2], data[i * 2 + 1]]);
+                Stm32ToPiCommand::SendActualWheelVelocities { .. } => {
+                    if data.len() != 8 {
+                        return Err("Invalid velocity data length".into());
+                    }
+
+                    let mut velocities = [0i16; 4];
+                    for i in 0..4 {
+                        velocities[i] = i16::from_le_bytes([data[i * 2], data[i * 2 + 1]]);
+                    }
+
+                    Ok(Stm32ToPiCommand::SendActualWheelVelocities { velocities })
                 }
 
-                Ok(Stm32ToPiCommand::SendActualWheelVelocities { velocities })
+                Stm32ToPiCommand::SetRunningFlag => {
+                    if data.len() != 0 {
+                        return Err("Invalid running flag length".into());
+                    }
+
+                    Ok(Stm32ToPiCommand::SetRunningFlag)
+                }
+
+                Stm32ToPiCommand::SendVerticalArmPosition {..} => {
+                    if data.len() != 2 {
+                        return Err("Invalid vertical arm positon length".into());
+                    }
+                    Ok(Self::SendVerticalArmPosition { position: u16::from_le_bytes([data[0], data[1]]) })
+                }
+
+                Stm32ToPiCommand::SendHorizontalArmPosition {..} => {
+                    if data.len() != 2 {
+                        return Err("Invalid vertical arm positon length".into());
+                    }
+                    Ok(Self::SendHorizontalArmPosition { position: u16::from_le_bytes([data[0], data[1]]) })
+                }
             }
-
-            0x52 => {
-                if data.len() != 1 {
-                    return Err("Invalid running flag length".into());
-                }
-
-                Ok(Stm32ToPiCommand::SetRunningFlag { running: data[0] })
-            }
-
-            _ => Err(format!("Unknown command ID: {}", id)),
+        } else {
+            Err(format!("Unknown command ID: {}", id))
         }
     }
 }
