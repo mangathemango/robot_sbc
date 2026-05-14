@@ -1,5 +1,6 @@
 pub mod main;
 pub mod navigation;
+pub mod placement;
 
 use core::fmt;
 use std::{collections::VecDeque, fmt::Display, time::Duration};

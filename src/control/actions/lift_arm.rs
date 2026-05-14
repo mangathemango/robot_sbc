@@ -6,26 +6,32 @@ pub type LowerArm = LiftArm;
 
 #[derive(Debug, Clone, Default)]
 pub struct LiftArm {
-    target_position: u16
+    target_position: u16,
 }
 
 impl LiftArm {
     pub fn to_position(target_position: u16) -> Self {
+        Self { target_position }
+    }
+
+    pub fn to_preset(position: ArmLiftPreset) -> Self {
         Self {
-            target_position
+            target_position: position.to_position(),
         }
     }
 
-    pub fn to(position: ArmLiftPreset) -> Self {
-        Self {
-            target_position: position.to_position()
-        }
+    pub fn up() -> Self {
+        Self::to_preset(ArmLiftPreset::Up)
     }
-
-    pub fn up() -> Self {Self::to(ArmLiftPreset::Up)}
-    pub fn storage() -> Self {Self::to(ArmLiftPreset::Storage)}
-    pub fn ground() -> Self {Self::to(ArmLiftPreset::Ground)}
-    pub fn stack() -> Self {Self::to(ArmLiftPreset::Stack)}
+    pub fn storage() -> Self {
+        Self::to_preset(ArmLiftPreset::Storage)
+    }
+    pub fn ground() -> Self {
+        Self::to_preset(ArmLiftPreset::Ground)
+    }
+    pub fn stack() -> Self {
+        Self::to_preset(ArmLiftPreset::Stack)
+    }
 }
 
 impl Action for LiftArm {
@@ -34,19 +40,17 @@ impl Action for LiftArm {
         stm32_controller.set_vertical_arm_position(self.target_position);
     }
 
-    fn update(&mut self, dt: std::time::Duration) {
-        
-    }
+    fn update(&mut self, dt: std::time::Duration) {}
 
-    fn stop(&mut self) {
-        
-    }
+    fn stop(&mut self) {}
     fn current_action(&self) -> &dyn Action {
         self
     }
 
     fn is_finished(&self) -> bool {
-        self.target_position.abs_diff(ROBOT.stm32_state.load().vertical_arm_position) < 100
+        self.target_position
+            .abs_diff(ROBOT.stm32_state.load().vertical_arm_position)
+            < 100
     }
 }
 
@@ -56,11 +60,12 @@ impl Display for LiftArm {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum ArmLiftPreset {
     Up,
     Storage,
-    Ground, 
-    Stack
+    Ground,
+    Stack,
 }
 
 impl ArmLiftPreset {
@@ -73,4 +78,3 @@ impl ArmLiftPreset {
         }
     }
 }
-

@@ -19,6 +19,10 @@ impl RotateClaw {
             ..Default::default()
         }
     }
+
+    pub fn open() -> Self {Self::to(ClawRotationPreset::Open)}
+    pub fn close() -> Self {Self::to(ClawRotationPreset::Close)}
+    pub fn soft_open() -> Self {Self::to(ClawRotationPreset::SoftOpen)}
 }
 
 #[allow(unused_variables)]

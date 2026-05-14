@@ -1,4 +1,4 @@
-use crate::control::sequences::{Sequence, navigation::*};
+use crate::control::sequences::{Sequence, navigation::*, placement::*};
 
 
 pub fn main_sequence() -> Sequence {

@@ -13,6 +13,14 @@ impl ExtendArm {
     pub fn to_position(position: u16) -> Self {
         ExtendArm { target_position: position }
     }
+
+    pub fn to_preset(preset: ArmExtendPreset) -> Self {
+        Self::to_position(preset.to_position())
+    }
+
+    pub fn back() -> Self {
+        Self::to_preset(ArmExtendPreset::Back)
+    }
 }
 
 impl Action for ExtendArm {
@@ -44,12 +52,17 @@ impl Display for ExtendArm {
 }
 
 pub enum ArmExtendPreset {
-    
+    Back,
+    PlacementStraight,
+    PlacementDiagonal
 }
 
 impl ArmExtendPreset {
     pub fn to_position(&self) -> u16 {
         match self {
+            ArmExtendPreset::Back => 0,
+            ArmExtendPreset::PlacementStraight => 1000,
+            ArmExtendPreset::PlacementDiagonal => 8000,
             _ => 10000
         }
     }
