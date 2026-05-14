@@ -1,6 +1,9 @@
 use std::f32::consts::PI;
 
-use crate::devices::{DriverSerialPort, gyro::{GYRO_DOTENV_KEY, sample::GyroSample}};
+use crate::devices::{
+    utils::DriverSerialPort,
+    gyro::{GYRO_DOTENV_KEY, sample::GyroSample},
+};
 
 /// Driver struct to read + parse data sent from the gyro
 #[derive(Debug)]

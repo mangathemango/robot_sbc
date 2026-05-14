@@ -1,4 +1,7 @@
-use crate::devices::{DriverSerialPort, maixcam::{MAIXCAM_DOTENV_KEY, MAIXCAM_START_BYTE, sample::MaixcamSample}};
+use crate::devices::{
+    maixcam::{MAIXCAM_DOTENV_KEY, MAIXCAM_START_BYTE, sample::MaixcamSample},
+    utils::DriverSerialPort,
+};
 
 #[derive(Debug)]
 pub struct MaixcamDriver {
@@ -22,7 +25,9 @@ impl MaixcamDriver {
 
     pub fn try_read_frame(&mut self) -> Result<MaixcamSample, String> {
         match &mut self.port {
-            DriverSerialPort::Disconnected(msg) => Err(format!("Maixcam driver not active: {}", msg)),
+            DriverSerialPort::Disconnected(msg) => {
+                Err(format!("Maixcam driver not active: {}", msg))
+            }
             DriverSerialPort::Connected(port) => {
                 let mut buffer = [0; 1];
                 let mut frame = Vec::<u8>::new();

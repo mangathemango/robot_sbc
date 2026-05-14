@@ -1,4 +1,10 @@
-use crate::devices::{DriverSerialPort, stm32::{STM32_DOTENV_KEY, STM32_START_BYTE, commands::{PiToStm32Command, Stm32ToPiCommand}}};
+use crate::devices::{
+    stm32::{
+        STM32_DOTENV_KEY, STM32_START_BYTE,
+        commands::{PiToStm32Command, Stm32ToPiCommand},
+    },
+    utils::DriverSerialPort,
+};
 
 #[derive(Debug)]
 pub struct Stm32Driver {
@@ -51,8 +57,10 @@ impl Stm32Driver {
                     if e.kind() == std::io::ErrorKind::TimedOut {
                         return Ok(None);
                     } else {
-                        self.port =
-                            DriverSerialPort::Disconnected(format!("Read from STM32 failed: {}", e));
+                        self.port = DriverSerialPort::Disconnected(format!(
+                            "Read from STM32 failed: {}",
+                            e
+                        ));
                         return Err(format!("Read from STM32 failed: {}", e));
                     }
                 }
