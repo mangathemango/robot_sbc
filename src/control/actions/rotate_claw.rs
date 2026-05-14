@@ -42,8 +42,6 @@ impl Action for RotateClaw {
             > Duration::from_millis(self.target_angle.abs_diff(self.initial_angle) as u64 * 20)
     }
 
-    fn stop(&mut self) {}
-
     fn current_action(&self) -> &dyn Action {
         self
     }

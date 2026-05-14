@@ -1,4 +1,6 @@
-use crate::control::sequences::{Sequence, navigation::*, placement::*};
+use std::time::Duration;
+
+use crate::control::{actions::general::WaitFor, sequences::{Sequence, navigation::*, placement::*}};
 
 
 pub fn main_sequence() -> Sequence {

@@ -36,7 +36,7 @@ pub fn spawn_main_controller_thread() {
     });
 }
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Controller {
     pub sequence: Sequence,
     pub state: ControllerState,

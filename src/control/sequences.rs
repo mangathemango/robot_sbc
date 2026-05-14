@@ -6,7 +6,7 @@ use core::fmt;
 use std::{collections::VecDeque, fmt::Display, time::Duration};
 use crate::control::actions::Action;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Sequence {
     pub name: String,
     pub action_queue: VecDeque<Box<dyn Action>>,

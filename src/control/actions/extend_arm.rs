@@ -29,13 +29,6 @@ impl Action for ExtendArm {
         stm32_controller.set_horizontal_arm_position(self.target_position);
     }
 
-    fn update(&mut self, dt: std::time::Duration) {
-        
-    }
-
-    fn stop(&mut self) {
-        
-    }
     fn current_action(&self) -> &dyn Action {
         self
     }
