@@ -45,10 +45,6 @@ impl Move {
         self.mode = mode;
         self
     }
-
-    pub fn name(&self) -> String {
-        "Move".into()
-    }
 }
 
 impl Action for Move {
