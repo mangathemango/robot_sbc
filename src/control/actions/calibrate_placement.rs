@@ -17,8 +17,7 @@ pub struct CalibratePlacement {
     motion_policy: MotionPolicy,
     arm_rotation: ArmRotationPreset,
     mode: CalibrateMode,
-
-    elapsed: Duration,
+    
     initial_pose: Pose,
 }
 

@@ -1,6 +1,6 @@
 use std::{fmt::Display};
 
-use crate::{ROBOT, control::actions::{Action, lift_arm::LiftArm}};
+use crate::{ROBOT, control::actions::Action};
 
 pub type RetractArm = ExtendArm;
 

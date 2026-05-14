@@ -1,7 +1,7 @@
 use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
-use crate::debug::helpers::{format_radian, paragraph};
+use crate::debug::helpers::paragraph;
 
 pub fn draw_controller(f: &mut Frame, area: Rect) {
     let controller_state = ROBOT.controller_state.load();

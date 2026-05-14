@@ -11,11 +11,8 @@ use crate::devices::maixcam::spawn_maixcam_thread;
 use crate::devices::qr::spawn_qr_thread;
 use crate::devices::stm32::spawn_stm32_thread;
 
-use crate::devices::stm32::controller::Stm32Controller;
-
 use once_cell::sync::Lazy;
 use robot::Robot;
-use std::sync::mpsc;
 
 // The global ROBOT variable used to share data across different threads
 static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());

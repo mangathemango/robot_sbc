@@ -30,10 +30,10 @@ fn build_pose_map(pose: &Pose, target_pose: &Pose, size: usize) -> String {
     let half_w = (width / 2) as isize;
     let half_h = (height / 2) as isize;
 
-    let mut  robot_x = (pose.position.x * 60.0).round() as isize;
-    let mut  robot_y = (pose.position.y * 30.0).round() as isize;
-    let mut  target_x = (target_pose.position.x * 60.0).round() as isize;
-    let mut  target_y = (target_pose.position.y * 30.0).round() as isize;
+    let robot_x = (pose.position.x * 60.0).round() as isize;
+    let robot_y = (pose.position.y * 30.0).round() as isize;
+    let target_x = (target_pose.position.x * 60.0).round() as isize;
+    let target_y = (target_pose.position.y * 30.0).round() as isize;
 
     let mut rows = Vec::with_capacity(height);
     for row in (0..height as isize).rev() {

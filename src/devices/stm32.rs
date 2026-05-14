@@ -10,7 +10,7 @@ use crate::devices::stm32::state::Stm32State;
 use crate::math::MecanumVelocities;
 use commands::PiToStm32Command;
 
-use std::sync::mpsc::{self, Receiver};
+use std::sync::mpsc;
 use std::time::Duration;
 const STM32_DOTENV_KEY: &str = "STM32_PATH";
 const STM32_START_BYTE: u8 = 0x67;
