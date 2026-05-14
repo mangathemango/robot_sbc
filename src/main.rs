@@ -21,19 +21,9 @@ use std::sync::mpsc;
 static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());
 
 fn main() {
-    // Create mpsc (Multi-Producer, Single-Consumer) channel for multiple different threads
-    // to send commands to the stm32 in the stm32_thread
-    let (sender, receiver) = mpsc::channel();
-
-    // Sender is set globally. Other threads can clone to control the STM32
-    ROBOT
-        .stm32_controller
-        .set(Stm32Controller::new(sender))
-        .expect("Unable to set STM32_CONTROLLER: {}");
-
     // DEVICE THREADS
     // Thread to retrieve and send serial data to the STM32. Updates ROBOT.stm32_state
-    spawn_stm32_thread(receiver);       
+    spawn_stm32_thread();       
 
     // Thread to retrieve raw data from the HWTCT101 gyroscope. Updates ROBOT.gyro_data
     spawn_gyro_thread();                 
