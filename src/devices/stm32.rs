@@ -1,14 +1,15 @@
-pub mod commands;
+pub mod command;
 pub mod controller;
 pub mod driver;
 pub mod state;
+pub mod message;
 
 use crate::ROBOT;
 use crate::devices::stm32::controller::Stm32Controller;
 use crate::devices::stm32::driver::Stm32Driver;
 use crate::devices::stm32::state::Stm32State;
 use crate::math::MecanumVelocities;
-use commands::PiToStm32Command;
+use command::Stm32Command;
 
 use std::sync::mpsc;
 use std::time::Duration;
@@ -43,14 +44,14 @@ pub fn spawn_stm32_thread() {
             // 🟣 1. Handle outgoing commands
             while let Ok(cmd) = receiver.try_recv() {
                 match cmd {
-                    PiToStm32Command::SetWheelTargetVelocities { velocities } => {
+                    Stm32Command::SetWheelTargetVelocities { velocities } => {
                         target_mecanum_velocities =
                             MecanumVelocities::from_array(velocities.map(|v| v as f32));
                     }
-                    PiToStm32Command::SetClawServoAngle { angle } => {
+                    Stm32Command::SetClawServoAngle { angle } => {
                         state.claw_servo_current_angle = angle;
                     }
-                    PiToStm32Command::SetYawServoAngle { angle } => {
+                    Stm32Command::SetYawServoAngle { angle } => {
                         state.yaw_servo_current_angle = angle;
                     }
                     _ => (),
@@ -60,10 +61,11 @@ pub fn spawn_stm32_thread() {
 
             // 🔵 2. Handle incoming data
             match driver.try_read_frame() {
-                Ok(Some(command)) => {
-                    state.update(command);
+                Ok(commands) => {
+                    for command in commands {
+                        state.update(command);
+                    }
                 }
-                Ok(None) => {}
                 Err(_) => {
                     driver.reconnect();
                     std::thread::sleep(std::time::Duration::from_millis(10));

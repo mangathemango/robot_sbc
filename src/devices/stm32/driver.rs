@@ -1,20 +1,19 @@
 use crate::devices::{
-    stm32::{
-        STM32_DOTENV_KEY, STM32_START_BYTE,
-        commands::{PiToStm32Command, Stm32ToPiCommand},
-    },
-    utils::DriverSerialPort,
+    stm32::{STM32_DOTENV_KEY, STM32_START_BYTE, command::Stm32Command, message::Stm32Message},
+    utils::{DriverSerialPort, SerialDecoder, SerialMessage},
 };
 
 #[derive(Debug)]
 pub struct Stm32Driver {
     port: DriverSerialPort,
+    decoder: SerialDecoder<Stm32Message>,
 }
 
 impl Stm32Driver {
     pub fn new() -> Self {
         Stm32Driver {
             port: DriverSerialPort::from_dotenv_key(STM32_DOTENV_KEY),
+            decoder: SerialDecoder::new(),
         }
     }
 
@@ -26,7 +25,7 @@ impl Stm32Driver {
         self.port.is_connected()
     }
 
-    pub fn send_command(&mut self, command: PiToStm32Command) -> Result<usize, String> {
+    pub fn send_command(&mut self, command: Stm32Command) -> Result<usize, String> {
         let port = match &mut self.port {
             DriverSerialPort::Disconnected(msg) => {
                 return Err(format!("Send command to STM32 failed: {}", msg).into());
@@ -37,7 +36,7 @@ impl Stm32Driver {
             .map_err(|e| format!("Send command to STM32 failed: {}", e))
     }
 
-    pub fn try_read_frame(&mut self) -> Result<Option<Stm32ToPiCommand>, String> {
+    pub fn try_read_frame(&mut self) -> Result<Vec<Stm32Message>, String> {
         let port = match &mut self.port {
             DriverSerialPort::Disconnected(msg) => {
                 return Err(format!("Read from STM32 failed: {}", msg).into());
@@ -45,71 +44,29 @@ impl Stm32Driver {
             DriverSerialPort::Connected(port) => port,
         };
 
-        let mut buffer = [0u8; 1];
-        let mut frame = Vec::<u8>::new();
-        let mut idx: usize = 0;
-        let mut total_len: usize = usize::MAX;
+        let mut buffer = [0u8; 256];
 
-        loop {
-            match port.read(&mut buffer) {
-                Ok(_) => {}
-                Err(e) => {
-                    if e.kind() == std::io::ErrorKind::TimedOut {
-                        return Ok(None);
-                    } else {
-                        self.port = DriverSerialPort::Disconnected(format!(
-                            "Read from STM32 failed: {}",
-                            e
-                        ));
-                        return Err(format!("Read from STM32 failed: {}", e));
+        let mut result = Vec::new();
+
+        match port.read(&mut buffer) {
+            Ok(n) => {
+                for byte in &buffer[..n] {
+                    if let Some(msg) = self.decoder.push_byte(*byte) {
+                        result.push(msg);
                     }
                 }
             }
-
-            let byte = buffer[0];
-
-            match idx {
-                0 => {
-                    if byte != STM32_START_BYTE {
-                        continue;
-                    }
+            Err(e) => {
+                if e.kind() == std::io::ErrorKind::TimedOut {
+                    return Ok(Vec::new());
+                } else {
+                    self.port =
+                        DriverSerialPort::Disconnected(format!("Read from STM32 failed: {}", e));
+                    return Err(format!("Read from STM32 failed: {}", e));
                 }
-
-                1 => {
-                    if Stm32ToPiCommand::from_id(byte).is_none() {
-                        idx = 0;
-                        frame.clear();
-                        continue;
-                    }
-                }
-
-                2 => {
-                    let len = byte as usize;
-                    total_len = 3 + len + 1; // START + ID + LEN + DATA + CHK
-                }
-
-                _ => {}
             }
+        };
 
-            frame.push(byte);
-            idx += 1;
-
-            if idx == total_len {
-                let checksum = frame[total_len - 1];
-
-                let calc = frame[..total_len - 1].iter().fold(0u8, |acc, x| acc ^ x);
-
-                if checksum != calc {
-                    // bad frame, reset and continue scanning
-                    idx = 0;
-                    frame.clear();
-                    continue;
-                }
-
-                let parsed = Stm32ToPiCommand::from_frame(frame)?;
-
-                return Ok(Some(parsed));
-            }
-        }
+        Ok(result)
     }
 }

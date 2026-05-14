@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{ROBOT, devices::stm32::commands::Stm32ToPiCommand};
+use crate::{ROBOT, devices::stm32::message::Stm32Message};
 
 /// A struct representing the current states polled from the Stm32
 #[derive(Debug, Default, Clone)]
@@ -26,23 +26,19 @@ impl Stm32State {
         Stm32State::default()
     }
 
-    pub fn update(&mut self, command: Stm32ToPiCommand) {
+    pub fn update(&mut self, command: Stm32Message) {
         match command {
-            Stm32ToPiCommand::Log { msg } => {
-                self.log_msg = msg
-            }
-            Stm32ToPiCommand::SendActualWheelVelocities { velocities } => {
+            Stm32Message::Log { msg } => self.log_msg = msg,
+            Stm32Message::WheelVelocities { velocities } => {
                 self.actual_wheel_velocities = velocities;
             }
-            Stm32ToPiCommand::SetRunningFlag => {
+            Stm32Message::Key1 => {
                 self.start_flag = !self.start_flag;
             }
-            Stm32ToPiCommand::SendHorizontalArmPosition { position } => {
+            Stm32Message::HorizontalArmPosition { position } => {
                 self.horizontal_arm_position = position
             }
-            Stm32ToPiCommand::SendVerticalArmPosition { position } => {
-                self.vertical_arm_position = position
-            }
+            Stm32Message::VerticalArmPosition { position } => self.vertical_arm_position = position,
         };
     }
 
