@@ -11,7 +11,6 @@ use std::time::{Duration, Instant};
 use crate::control::actions::Action;
 use crate::control::sequences::Sequence;
 use crate::control::sequences::main::main_sequence;
-use crate::math::Pose;
 use crate::ROBOT;
 
 pub fn spawn_main_controller_thread() {
@@ -59,7 +58,6 @@ impl Controller {
 #[derive(Debug, Default, Clone)]
 pub struct ControllerState {
     pub current_command_debug_string: String,
-    pub target_pose: Pose,
     pub dt: Duration,
 }
 
