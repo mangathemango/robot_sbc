@@ -1,6 +1,6 @@
 use crate::devices::{
-    stm32::{STM32_DOTENV_KEY, STM32_START_BYTE, command::Stm32Command, message::Stm32Message},
-    utils::{DriverSerialPort, SerialDecoder, SerialMessage},
+    stm32::{STM32_DOTENV_KEY, command::Stm32Command, message::Stm32Message},
+    utils::{DriverSerialPort, SerialDecoder},
 };
 
 #[derive(Debug)]

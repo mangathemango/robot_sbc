@@ -30,7 +30,7 @@ impl Action for RotateClaw {
     fn start(&mut self) {
         self.initial_angle = ROBOT.stm32_state.load().yaw_servo_current_angle;
         let stm32_controller = ROBOT.get_stm32_controller();
-        stm32_controller.set_yaw_servo(self.target_angle);
+        stm32_controller.set_claw_servo(self.target_angle);
     }
 
     fn update(&mut self, dt: Duration) {

@@ -42,8 +42,6 @@ impl CalibratePlacement {
         self.arm_rotation = rotation;
         self
     }
-
-    pub fn move_to_target(&mut self, circle_position: Vec2, dt: Duration) {}
 }
 
 impl Action for CalibratePlacement {
@@ -55,9 +53,8 @@ impl Action for CalibratePlacement {
     }
 
     fn update(&mut self, dt: Duration) {
-        let current_pose = ROBOT.odometry_state.load().pose;
+        let current_rotation = ROBOT.odometry_state.load().pose.rotation;
         let maixcam_state = ROBOT.maixcam_state.load();
-        todo!("Handle case where there are no circles");
         let circle = maixcam_state.circles[0];
         let circle_position = match circle.color {
             MaixcamCircleColor::Blue =>     circle.position + Vec2::new(500.0, 0.0),
@@ -70,7 +67,7 @@ impl Action for CalibratePlacement {
         // Move the robot linearly so that the circle ends up in the target position while keeping the initial rotation stable
         let current_state = Pose {
             position: circle_position,
-            rotation: current_pose.rotation,
+            rotation: current_rotation,
         };
 
         let target_state = Pose {

@@ -2,7 +2,7 @@ use std::{fmt::Display, time::Duration};
 
 use glam::Vec2;
 
-use crate::{ROBOT, control::{actions::Action, motion::{MotionPolicy, MotionPolicyPreset}}, math::Pose};
+use crate::{ROBOT, control::{actions::Action, motion::{MotionPolicy, MotionPolicyPreset}}};
 
 // This command assumes the arm is on the right side by hard code bc we only do that lmoa
 

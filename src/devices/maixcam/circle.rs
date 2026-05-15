@@ -7,10 +7,6 @@ pub struct MaixcamCircle {
 }
 
 impl MaixcamCircle {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     pub fn from_bytes(bytes: &[u8]) -> Self {
         
         let pos_x = u16::from_le_bytes([bytes[0], bytes[1]]) as f32 / 10000.0;

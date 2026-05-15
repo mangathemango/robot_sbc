@@ -1,5 +1,5 @@
 use crate::devices::{
-    maixcam::{MAIXCAM_DOTENV_KEY, message::MaixcamMessage, circle::MaixcamCircle},
+    maixcam::{MAIXCAM_DOTENV_KEY, message::MaixcamMessage},
     utils::{DriverSerialPort, SerialDecoder},
 };
 
