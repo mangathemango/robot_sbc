@@ -8,9 +8,6 @@ use std::time::Duration;
 use crate::devices::maixcam::{driver::MaixcamDriver, message::MaixcamMessage, state::MaixcamState};
 
 const MAIXCAM_DOTENV_KEY: &str = "MAIXCAM_PATH";
-const MAIXCAM_START_BYTE: u8 = 0x69;
-const MAIXCAM_CAMERA_RESOLUTION_WIDTH: f32 = 360.0;
-const MAIXCAM_CAMERA_RESOLUTION_HEIGHT: f32 = 240.0;
 
 
 /// The Maixcam does nothing but send circle coordinates, so it doesn't really need to scale for the time being
