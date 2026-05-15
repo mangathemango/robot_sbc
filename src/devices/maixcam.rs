@@ -3,6 +3,8 @@ pub mod driver;
 pub mod sample;
 pub mod state;
 pub mod message;
+use std::time::Duration;
+
 use crate::devices::maixcam::{driver::MaixcamDriver, message::MaixcamMessage, state::MaixcamState};
 
 const MAIXCAM_DOTENV_KEY: &str = "MAIXCAM_PATH";
@@ -24,6 +26,10 @@ pub fn spawn_maixcam_thread() {
 
         loop {
             let now = std::time::Instant::now();
+            let dt = now.duration_since(last_update);
+            if dt < Duration::from_millis(20) {
+                continue;
+            }
             state.dt = now.duration_since(last_update);
             last_update = now;
 
