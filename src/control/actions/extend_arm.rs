@@ -34,7 +34,7 @@ impl Action for ExtendArm {
     }
 
     fn is_finished(&self) -> bool {
-        self.target_position.abs_diff(ROBOT.get_stm32_state().vertical_arm_position) < 100
+        self.target_position.abs_diff(ROBOT.get_stm32_state().horizontal_arm_position) < 100
     }
 }
 
