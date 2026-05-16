@@ -14,7 +14,7 @@ pub fn place_material_at_temporary_storage_zone_1() -> Sequence {
     if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
         place_material_at_temporary_storage_zone(color_queue)
     } else {
-        Sequence::new("Skipping place material...")
+        Sequence::new(format!("Skipping place material... {:?}", ROBOT.get_qr_state().color_queue_1).as_str())
             .then(WaitFor::new(Duration::from_millis(3000)))
     }
 }
