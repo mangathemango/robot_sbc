@@ -19,7 +19,7 @@ pub fn draw_system(f: &mut Frame, area: Rect) {
     let mem_usage = (used_mem / total_mem) * 100.0;
 
     let text = format!(
-        "SYSTEM\n\nCPU: {:.1}%\nRAM: {:.1}%\nTEMP: {}°C (ideal: 50-70°C)\n\nPROCS: {}",
+        "SYSTEM\n\nCPU: {:.1}%\nRAM: {:.1}%\nTEMP: {}°C\n(ideal: 50-70°C)\n\nPROCS: {}",
         sys.global_cpu_usage(),
         mem_usage,
         read_temperature().unwrap_or(0.0),
