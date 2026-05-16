@@ -1,6 +1,7 @@
 use crate::devices::maixcam::circle::MaixcamCircleColor;
 use std::{thread, time::Duration};
 use std::sync::Arc;
+use std::fmt::Display;
 use evdev::{Device, EventSummary, KeyCode};
 const QR_READER_DOTENV_KEY: &str = "QR_READER_PATH";
 
