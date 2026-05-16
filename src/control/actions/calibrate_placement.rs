@@ -55,6 +55,9 @@ impl Action for CalibratePlacement {
     fn update(&mut self, dt: Duration) {
         let current_rotation = ROBOT.get_odometry_state().pose.rotation;
         let maixcam_state = ROBOT.maixcam_state.load();
+        if maixcam_state.circles.is_empty() {
+            return;
+        }
         let circle = maixcam_state.circles[0];
         let circle_position = match circle.color {
             MaixcamCircleColor::Blue =>     circle.position + Vec2::new(500.0, 0.0),
@@ -101,7 +104,7 @@ impl Action for CalibratePlacement {
     }
 
     fn is_finished(&self) -> bool {
-        self.motion_policy.is_settled() || !ROBOT.maixcam_state.load().driver_is_connected
+        self.motion_policy.is_settled() || !ROBOT.maixcam_state.load().driver_is_connected || true
     }
 }
 

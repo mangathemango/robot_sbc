@@ -1,23 +1,20 @@
-use std::{fmt::Display, time::Duration};
 use crate::control::actions::Action;
+use std::{fmt::Display, time::Duration};
 
-pub struct Instant {
-    f: Box<dyn FnMut()>
+pub struct OneShot {
+    f: Box<dyn FnMut()>,
 }
 
-impl Instant {
-    pub fn new<F> (f: F) -> Self
-    where 
-        F: FnMut()+ 'static
+impl OneShot {
+    pub fn new<F>(f: F) -> Self
+    where
+        F: FnMut() + 'static,
     {
-        Self {
-            f: 
-            Box::new(f)
-        }
-    }   
+        Self { f: Box::new(f) }
+    }
 }
 
-impl Action for Instant {
+impl Action for OneShot {
     fn start(&mut self) {
         (self.f)()
     }
@@ -31,24 +28,23 @@ impl Action for Instant {
     }
 }
 
-impl Display for Instant {
+impl Display for OneShot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Instant")
     }
 }
 
-
 #[derive(Debug, Default)]
 pub struct WaitFor {
     wait_duration: Duration,
-    elapsed: Duration
+    elapsed: Duration,
 }
 
 impl WaitFor {
     pub fn new(wait_duration: Duration) -> Self {
         Self {
             wait_duration,
-            elapsed: Duration::ZERO
+            elapsed: Duration::ZERO,
         }
     }
 }
@@ -69,20 +65,25 @@ impl Action for WaitFor {
 
 impl Display for WaitFor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Waiting for {:?} / {:?}", self.elapsed, self.wait_duration)
+        writeln!(
+            f,
+            "Waiting for {:?} / {:?}",
+            self.elapsed, self.wait_duration
+        )
     }
 }
 
 pub struct WaitUntil {
-    condition: Box<dyn Fn() -> bool>
+    condition: Box<dyn Fn() -> bool>,
 }
 
 impl WaitUntil {
-    pub fn new<F> (condition: F) -> Self
-    where F: Fn() -> bool + 'static
+    pub fn new<F>(condition: F) -> Self
+    where
+        F: Fn() -> bool + 'static,
     {
         Self {
-            condition: Box::new(condition)
+            condition: Box::new(condition),
         }
     }
 }
@@ -106,18 +107,18 @@ impl Display for WaitUntil {
 pub struct UntilTimeout {
     action: Box<dyn Action>,
     timeout: Duration,
-    elapsed: Duration
+    elapsed: Duration,
 }
 
 impl UntilTimeout {
     pub fn new<A>(action: A, timeout: Duration) -> Self
-    where 
-        A: Action + 'static
+    where
+        A: Action + 'static,
     {
         Self {
-            action:  Box::new(action),
+            action: Box::new(action),
             timeout: timeout,
-            elapsed: Duration::ZERO
+            elapsed: Duration::ZERO,
         }
     }
 }
@@ -141,12 +142,14 @@ impl Action for UntilTimeout {
     fn current_action(&self) -> &dyn Action {
         self
     }
-
 }
 
 impl Display for UntilTimeout {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}Until Timeout: {:?}/{:?}", 
-            self.action, self.elapsed, self.timeout)
+        writeln!(
+            f,
+            "{}Until Timeout: {:?}/{:?}",
+            self.action, self.elapsed, self.timeout
+        )
     }
 }
