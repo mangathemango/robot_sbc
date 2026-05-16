@@ -3,7 +3,8 @@ mod debug;
 mod devices;
 mod math;
 mod robot;
-use crate::control::states::odometry::{self, spawn_odometry_thread};
+
+use crate::control::states::odometry::spawn_odometry_thread;
 use crate::control::spawn_main_controller_thread;
 use crate::debug::spawn_debug_thread;
 use crate::devices::gyro::spawn_gyro_thread;
@@ -11,13 +12,15 @@ use crate::devices::maixcam::spawn_maixcam_thread;
 use crate::devices::qr::spawn_qr_thread;
 use crate::devices::stm32::spawn_stm32_thread;
 
-use once_cell::sync::Lazy;
+use std::sync::OnceLock;
 use robot::Robot;
 
 // The global ROBOT variable used to share data across different threads
-static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());
+static ROBOT: OnceLock<Robot> = OnceLock::new();
 
 fn main() {
+    ROBOT.set(Robot::new());
+    
     // DEVICE THREADS
     // Thread to retrieve and send serial data to the STM32. Updates ROBOT.stm32_state and provides ROBOT.get_stm32_controller()
     spawn_stm32_thread();       
