@@ -1,4 +1,4 @@
-use crate::control::ControllerState;
+use crate::scheduler::SchedulerState;
 use crate::control::states::odometry::OdometryState;
 use crate::devices::gyro::state::GyroState;
 use crate::devices::maixcam::state::MaixcamState;
@@ -17,7 +17,7 @@ pub struct Robot {
 
     // Control states
     odometry_state: Arc<Mutex<OdometryState>>,
-    controller_state: ArcSwap<ControllerState>,
+    controller_state: ArcSwap<SchedulerState>,
 
     stm32_controller: OnceLock<Stm32Controller>,
 }
@@ -30,7 +30,7 @@ impl Robot {
             maixcam_state: ArcSwap::from_pointee(MaixcamState::new()),
             qr_state: Arc::new(Mutex::new(QrState::new())),
             odometry_state: Arc::new(Mutex::new(OdometryState::new())),
-            controller_state: ArcSwap::from_pointee(ControllerState::new()),
+            controller_state: ArcSwap::from_pointee(SchedulerState::new()),
 
             stm32_controller: OnceLock::new(),
         }
@@ -76,11 +76,11 @@ impl Robot {
         self.odometry_state.lock().unwrap()
     }
 
-    pub fn get_controller_state(&self) -> Guard<Arc<ControllerState>> {
+    pub fn get_controller_state(&self) -> Guard<Arc<SchedulerState>> {
         self.controller_state.load()
     }
 
-    pub fn set_controller_state(&self, state: ControllerState) {
+    pub fn set_controller_state(&self, state: SchedulerState) {
         self.controller_state.store(Arc::new(state));
     }
 
