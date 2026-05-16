@@ -2,22 +2,22 @@ use glam::Vec2;
 
 use crate::ROBOT;
 use crate::math::{MecanumVelocities, Pose, Twist, utils::wrap_angle};
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
 pub fn spawn_odometry_thread() {
     std::thread::spawn(|| {
         std::thread::sleep(Duration::from_millis(100));
-        let mut odometry_state = OdometryState::new();
         let mut last_update = std::time::Instant::now();
 
         loop {
             let now = std::time::Instant::now();
-            odometry_state.dt = now.duration_since(last_update);
+            let dt = now.duration_since(last_update);
+            if dt < Duration::from_millis(10) {
+                continue;
+            }
             last_update = now;
 
-            odometry_state.update(odometry_state.dt);
-            ROBOT.odometry_state.store(Arc::new(odometry_state));
-            std::thread::sleep(Duration::from_millis(10));
+            ROBOT.lock_odometry_state().update(dt);
         }
     });
 }
@@ -47,6 +47,8 @@ impl OdometryState {
     }
 
     pub fn update(&mut self, dt: Duration) {
+        self.dt = dt;
+
         let stm32_state = ROBOT.stm32_state.load();
         let gyro_state = ROBOT.gyro_state.load();
 

@@ -49,7 +49,7 @@ impl Move {
 
 impl Action for Move {
     fn start(&mut self) {
-        let current_pose = ROBOT.odometry_state.load().pose;
+        let current_pose = ROBOT.get_odometry_state().pose;
         match self.mode {
             ControlMode::Full => (),
             ControlMode::RotateOnly => {
@@ -62,7 +62,7 @@ impl Action for Move {
     }
 
     fn update(&mut self, dt: Duration) {
-        let current_pose = ROBOT.odometry_state.load().pose;
+        let current_pose = ROBOT.get_odometry_state().pose;
 
         let (linear_error, angular_error) =
             current_pose.difference(self.target_pose).to_components();
