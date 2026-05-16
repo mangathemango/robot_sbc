@@ -1,6 +1,6 @@
-use std::{thread, time::Duration};
 use crate::ROBOT;
 use std::sync::Arc;
+use std::{thread, time::Duration};
 
 #[derive(Debug)]
 pub enum DriverHIDDevice {
@@ -15,9 +15,7 @@ pub struct QrDriver {
 impl QrDriver {
     pub fn new() -> Self {
         QrDriver {
-            device: DriverHIDDevice::Disconnected(
-                "QR not supported on this OS".to_string(),
-            ),
+            device: DriverHIDDevice::Disconnected("QR not supported on this OS".to_string()),
         }
     }
 
@@ -50,9 +48,5 @@ impl QrState {
             error_msg: "The qr code module depends on evdev to read data, which is a crate only built for Linux OS".into(),
             ..QrState::default()
         }
-    }
-
-    pub fn publish(&self) {
-        ROBOT.set_qr_state(self.clone());
     }
 }

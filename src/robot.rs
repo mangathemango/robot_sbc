@@ -1,4 +1,4 @@
-use crate::control::{Controller, ControllerState};
+use crate::control::ControllerState;
 use crate::control::states::odometry::OdometryState;
 use crate::devices::gyro::state::GyroState;
 use crate::devices::maixcam::state::MaixcamState;
@@ -13,7 +13,7 @@ pub struct Robot {
     gyro_state: ArcSwap<GyroState>,
     stm32_state: ArcSwap<Stm32State>,
     maixcam_state: ArcSwap<MaixcamState>,
-    qr_state: ArcSwap<QrState>,
+    qr_state: Arc<Mutex<QrState>>,
 
     // Control states
     odometry_state: Arc<Mutex<OdometryState>>,
@@ -28,7 +28,7 @@ impl Robot {
             gyro_state: ArcSwap::from_pointee(GyroState::new()),
             stm32_state: ArcSwap::from_pointee(Stm32State::new()),
             maixcam_state: ArcSwap::from_pointee(MaixcamState::new()),
-            qr_state: ArcSwap::from_pointee(QrState::new()),
+            qr_state: Arc::new(Mutex::new(QrState::new())),
             odometry_state: Arc::new(Mutex::new(OdometryState::default())),
             controller_state: ArcSwap::from_pointee(ControllerState::default()),
 
@@ -52,7 +52,6 @@ impl Robot {
         self.stm32_state.store(Arc::new(state));
     }
 
-
     pub fn get_maixcam_state(&self) -> Guard<Arc<MaixcamState>> {
         self.maixcam_state.load()
     }
@@ -61,20 +60,19 @@ impl Robot {
         self.maixcam_state.store(Arc::new(state));
     }
 
-    pub fn get_qr_state(&self) -> Guard<Arc<QrState>> {
-        self.qr_state.load()
+    pub fn get_qr_state(&self) -> QrState {
+        self.qr_state.lock().unwrap().clone()
     }
 
-    pub fn set_qr_state(&self, state: QrState) {
-        self.qr_state.store(Arc::new(state));
+    pub fn lock_qr_state(&self) -> MutexGuard<QrState> {
+        self.qr_state.lock().unwrap()
     }
-
 
     pub fn get_odometry_state(&self) -> OdometryState {
         self.odometry_state.lock().unwrap().clone()
     }
 
-    pub fn lock_odometry_state(&self) -> MutexGuard<'_, OdometryState> {
+    pub fn lock_odometry_state(&self) -> MutexGuard<OdometryState> {
         self.odometry_state.lock().unwrap()
     }
 

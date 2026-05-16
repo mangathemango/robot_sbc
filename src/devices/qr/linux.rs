@@ -1,6 +1,5 @@
 use std::{thread, time::Duration};
 use std::sync::Arc;
-use crate::ROBOT;
 use evdev::{Device, EventSummary, KeyCode};
 const QR_READER_DOTENV_KEY: &str = "QR_READER_PATH";
 
@@ -145,9 +144,5 @@ pub struct QrState {
 impl QrState {
     pub fn new() -> Self {
         QrState::default()
-    }
-
-    pub fn publish(&self) {
-        ROBOT.qr_state.store(Arc::new(self.clone()));
     }
 }
