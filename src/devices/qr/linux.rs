@@ -1,3 +1,4 @@
+use crate::devices::maixcam::circle::MaixcamCircleColor;
 use std::{thread, time::Duration};
 use std::sync::Arc;
 use evdev::{Device, EventSummary, KeyCode};

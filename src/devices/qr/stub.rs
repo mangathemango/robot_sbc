@@ -1,6 +1,4 @@
-use crate::ROBOT;
 use crate::devices::maixcam::circle::MaixcamCircleColor;
-use std::sync::Arc;
 use std::{thread, time::Duration};
 
 #[derive(Debug)]
