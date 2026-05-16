@@ -54,7 +54,7 @@ impl MotionPolicyPreset {
                 settle_time: Duration::from_millis(1000),
             },
             Self::Aggressive => MotionPolicy {
-                linear_pid: PidController::new(4.0, 0.0, 1.0, 0.05, 1.0),
+                linear_pid: PidController::new(5.0, 0.0, 1.0, 0.05, 1.0),
                 angular_pid: PidController::new(3.0, 0.0, 0.1, 0.05, 1.0),
                 settle_time: Duration::from_millis(200),
             },
