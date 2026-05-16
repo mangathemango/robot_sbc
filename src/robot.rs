@@ -64,7 +64,7 @@ impl Robot {
         self.qr_state.lock().unwrap().clone()
     }
 
-    pub fn lock_qr_state(&self) -> MutexGuard<QrState> {
+    pub fn lock_qr_state(&self) -> MutexGuard<'_, QrState> {
         self.qr_state.lock().unwrap()
     }
 
@@ -72,7 +72,7 @@ impl Robot {
         self.odometry_state.lock().unwrap().clone()
     }
 
-    pub fn lock_odometry_state(&self) -> MutexGuard<OdometryState> {
+    pub fn lock_odometry_state(&self) -> MutexGuard<'_, OdometryState> {
         self.odometry_state.lock().unwrap()
     }
 
