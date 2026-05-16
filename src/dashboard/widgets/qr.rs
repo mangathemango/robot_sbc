@@ -2,7 +2,7 @@ use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
 
-use crate::debug::helpers::{paragraph, bool_icon};
+use crate::dashboard::helpers::{paragraph, bool_icon};
 
 pub fn draw_qr(f: &mut Frame, area: Rect) {
     let qr = ROBOT.get_qr_state();

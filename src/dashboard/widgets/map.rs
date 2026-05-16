@@ -1,7 +1,7 @@
 use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
-use crate::debug::helpers::{format_radian, paragraph};
+use crate::dashboard::helpers::{format_radian, paragraph};
 use crate::math::Pose;
 
 pub fn draw_map(f: &mut Frame, area: Rect) {

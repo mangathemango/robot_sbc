@@ -2,7 +2,7 @@ use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
 
-use crate::debug::helpers::{format_radian, paragraph};
+use crate::dashboard::helpers::{format_radian, paragraph};
 
 pub fn draw_odometry(f: &mut Frame, area: Rect) {
     let odometry_state = ROBOT.get_odometry_state();

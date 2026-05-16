@@ -5,10 +5,10 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Wrap},
 };
 
-use crate::{ROBOT, debug::helpers::format_radian};
+use crate::{ROBOT, dashboard::helpers::format_radian};
 use crate::devices::gyro::state::GyroState;
 
-use crate::debug::helpers::bool_icon;
+use crate::dashboard::helpers::bool_icon;
 
 pub fn draw_gyro(f: &mut Frame, area: Rect) {
     let g = ROBOT.get_gyro_state();

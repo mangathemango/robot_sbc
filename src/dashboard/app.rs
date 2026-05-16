@@ -11,7 +11,7 @@ use crossterm::{
 
 use ratatui::{Terminal, backend::CrosstermBackend};
 
-use crate::debug::layout::ui;
+use crate::dashboard::layout::ui;
 
 pub fn start() {
     thread::spawn(|| {

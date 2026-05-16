@@ -7,7 +7,7 @@ use ratatui::{
     style::{Color, Style},
 };
 
-use crate::debug::helpers::read_temperature;
+use crate::dashboard::helpers::read_temperature;
 
 pub fn draw_system(f: &mut Frame, area: Rect) {
     let mut sys = System::new_all();

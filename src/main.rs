@@ -1,17 +1,18 @@
+mod console;
 mod control;
-mod debug;
+mod dashboard;
 mod devices;
 mod math;
 mod robot;
 mod scheduler;
 
-use crate::scheduler::spawn_scheduler_thread;
 use crate::control::states::odometry::spawn_odometry_thread;
-use crate::debug::spawn_debug_thread;
+use crate::dashboard::spawn_dashboard_thread;
 use crate::devices::gyro::spawn_gyro_thread;
 use crate::devices::maixcam::spawn_maixcam_thread;
 use crate::devices::qr::spawn_qr_thread;
 use crate::devices::stm32::spawn_stm32_thread;
+use crate::scheduler::spawn_scheduler_thread;
 
 use once_cell::sync::Lazy;
 use robot::Robot;
@@ -37,9 +38,9 @@ fn main() {
     // Thread to estimate current position + movement of the robot. Updates ROBOT.odometry_state
     spawn_odometry_thread();
 
-    // Thread to queue high level actions and sequences. Updates ROBOT.controller_state
+    // Thread to queue high level actions and sequences. Updates ROBOT.scheduler_state
     spawn_scheduler_thread();
 
     // Thread to render TUI for debugging
-    spawn_debug_thread();
+    spawn_dashboard_thread();
 }

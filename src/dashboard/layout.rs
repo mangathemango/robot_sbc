@@ -3,7 +3,7 @@ use ratatui::{
     layout::{Constraint, Layout},
 };
 
-use crate::debug::widgets::{
+use crate::dashboard::widgets::{
     compass::draw_compass, controller::draw_controller, gyro::draw_gyro, maixcam::draw_maixcam,
     map::draw_map, odometry::draw_odometry, qr::draw_qr, stm32::draw_stm32, system::draw_system,
 };
