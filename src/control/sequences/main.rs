@@ -24,6 +24,7 @@ pub fn main_sequence() -> Sequence {
         .then(calibrate_at_source_zone())
         .then(move_to_temporary_storage_zone())
         .then(calibrate_at_temporary_storage_zone())
+        .then(wait_for_qr())
         .then(place_material_at_temporary_storage_zone_1())
         .then(pick_up_material_from_temporary_storage_zone_1())
         .then(move_to_final_processing_zone())
