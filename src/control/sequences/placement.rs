@@ -6,43 +6,51 @@ use crate::control::actions::general::WaitFor;
 use crate::control::actions::lift_arm::{ArmLiftPreset, LiftArm, LowerArm};
 use crate::control::actions::rotate_arm::{ArmRotationPreset, RotateArm};
 use crate::control::actions::rotate_claw::RotateClaw;
-use crate::control::sequences::Sequence;
+use crate::control::sequences::{RuntimeSequence, Sequence};
 use crate::devices::maixcam::circle::MaixcamCircleColor;
 
 
-pub fn place_material_at_temporary_storage_zone_1() -> Sequence {
-    if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
-        place_material_at_temporary_storage_zone(color_queue)
-    } else {
-        Sequence::new(format!("Skipping place material... {:?}", ROBOT.get_qr_state().color_queue_1).as_str())
-            .then(WaitFor::new(Duration::from_millis(3000)))
-    }
+pub fn place_material_at_temporary_storage_zone_1() -> RuntimeSequence {
+    RuntimeSequence::new(|| 
+        if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
+            place_material_at_temporary_storage_zone(color_queue)
+        } else {
+            Sequence::new("Skipping place material...")
+                .then(WaitFor::new(Duration::from_millis(3000)))
+        }
+    )
 }
 
-pub fn pick_up_material_from_temporary_storage_zone_1() -> Sequence {
-    if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
-        pick_up_material_from_temporary_storage_zone(color_queue)
-    } else {
-        Sequence::new("Skipping pickup material...")
+pub fn pick_up_material_from_temporary_storage_zone_1() -> RuntimeSequence {
+    RuntimeSequence::new(|| 
+        if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
+            pick_up_material_from_temporary_storage_zone(color_queue)
+        } else {
+            Sequence::new("Skipping pickup material...")
             .then(WaitFor::new(Duration::from_millis(3000)))
-    }
+        }
+    )
 }
 
-pub fn place_material_at_temporary_storage_zone_2() -> Sequence {
-    if let Some(color_queue) = ROBOT.get_qr_state().color_queue_2 {
-        place_material_at_temporary_storage_zone(color_queue)
-    } else {
-        Sequence::new("Skipping place material...")
-            .then(WaitFor::new(Duration::from_millis(3000)))
-    }
+pub fn place_material_at_temporary_storage_zone_2() -> RuntimeSequence {
+    RuntimeSequence::new(|| 
+        if let Some(color_queue) = ROBOT.get_qr_state().color_queue_2 {
+            place_material_at_temporary_storage_zone(color_queue)
+        } else {
+            Sequence::new("Skipping place material...")
+                .then(WaitFor::new(Duration::from_millis(3000)))
+        }
+    )
 }
-pub fn pick_up_material_from_temporary_storage_zone_2() -> Sequence {
-    if let Some(color_queue) = ROBOT.get_qr_state().color_queue_2 {
-        pick_up_material_from_temporary_storage_zone(color_queue)
-    } else {
-        Sequence::new("Skipping pickup material...")
-            .then(WaitFor::new(Duration::from_millis(3000)))
-    }
+pub fn pick_up_material_from_temporary_storage_zone_2() -> RuntimeSequence {
+    RuntimeSequence::new(|| 
+        if let Some(color_queue) = ROBOT.get_qr_state().color_queue_2 {
+            pick_up_material_from_temporary_storage_zone(color_queue)
+        } else {
+            Sequence::new("Skipping pickup material...")
+                .then(WaitFor::new(Duration::from_millis(3000)))
+        }
+    )
 }
 
 pub fn place_material_at_final_processing_zone() -> Sequence {

@@ -6,7 +6,7 @@ pub mod calibration;
 
 use core::fmt;
 use std::{collections::VecDeque, fmt::Display, time::Duration};
-use crate::control::actions::Action;
+use crate::control::actions::{self, Action};
 
 #[derive(Default)]
 pub struct Sequence {
@@ -97,5 +97,54 @@ impl Display for Sequence {
    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}: \n{}", 
             self.name, self.current_action_string())
+    }
+}
+
+pub struct RuntimeSequence
+{
+    generator: Box<dyn Fn() -> Sequence>,
+    generated: Sequence,
+}
+
+impl RuntimeSequence
+{   
+    pub fn new<F>(f: F) -> Self 
+    where 
+        F: Fn() -> Sequence + 'static
+    {
+        Self {
+            generator: Box::new(f),
+            generated: Sequence::new("Unknown generated function")
+        }
+    }
+}
+
+impl Action for RuntimeSequence
+{
+    fn start(&mut self) {
+        self.generated = (self.generator)()    
+    }
+
+    fn update(&mut self, dt: Duration) {
+        self.generated.update(dt);
+    }
+
+    fn stop(&mut self) {
+        self.generated.stop();
+    }
+
+    fn is_finished(&self) -> bool {
+        self.generated.is_finished()
+    }
+
+    fn current_action(&self) -> &dyn Action {
+        self.generated.current_action()
+    }
+}
+
+impl Display for RuntimeSequence
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "(Runtime Generated) {}", self.generated)
     }
 }
