@@ -2,10 +2,7 @@ use crate::{
     ROBOT,
     control::{
         actions::general::{OneShot, WaitUntil},
-        sequences::Sequence,
     },
-    debug::widgets::qr,
-    math::Pose,
 };
 
 pub fn wait_for_qr() -> WaitUntil {

@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{ROBOT, devices::gyro::sample::GyroSample};
 
 /// Current gyroscope state

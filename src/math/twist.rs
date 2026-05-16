@@ -38,9 +38,5 @@ impl Twist {
             omega,
         }
     }
-
-    pub fn to_mecanum_velocities(&self) -> MecanumVelocities {
-        MecanumVelocities::from_twist(*self)
-    }
 }
 

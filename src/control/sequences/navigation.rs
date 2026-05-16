@@ -4,7 +4,6 @@ use crate::control::actions::r#move::Move;
 use crate::control::actions::rotate_arm::RotateArm;
 use crate::control::landmark::Landmark;
 use crate::control::sequences::Sequence;
-use crate::math::Pose;
 
 pub fn move_to_qr() -> Sequence {
     Sequence::new("Moving to Qr Zone")

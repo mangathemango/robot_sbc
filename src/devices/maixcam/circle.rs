@@ -1,6 +1,6 @@
 use glam::Vec2;
 
-use crate::control::actions::{extend_arm::ArmExtendPreset, rotate_arm::ArmRotationPreset};
+use crate::control::actions::{extend_arm::ArmExtendPreset};
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct MaixcamCircle {

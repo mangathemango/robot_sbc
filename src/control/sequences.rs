@@ -6,7 +6,7 @@ pub mod calibration;
 
 use core::fmt;
 use std::{collections::VecDeque, fmt::Display, time::Duration};
-use crate::control::actions::{self, Action};
+use crate::control::actions::Action;
 
 #[derive(Default)]
 pub struct Sequence {

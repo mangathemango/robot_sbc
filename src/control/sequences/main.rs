@@ -6,16 +6,20 @@ use crate::control::sequences::{
     },
     navigation::*,
     placement::{
-        pick_up_material_from_temporary_storage_zone_1, pick_up_material_from_temporary_storage_zone_2, place_material_at_final_processing_zone, place_material_at_final_processing_zone_stacked, place_material_at_temporary_storage_zone_1, place_material_at_temporary_storage_zone_2
+        pick_up_material_from_temporary_storage_zone_1,
+        pick_up_material_from_temporary_storage_zone_2, place_material_at_final_processing_zone,
+        place_material_at_final_processing_zone_stacked,
+        place_material_at_temporary_storage_zone_1, place_material_at_temporary_storage_zone_2,
     },
     utils::{
-        set_oled_display_text_qr, set_oled_display_text_start, set_oled_display_text_stop,
+        beep, set_oled_display_text_qr, set_oled_display_text_start, set_oled_display_text_stop,
         wait_for_qr,
     },
 };
 
 pub fn main_sequence() -> Sequence {
     Sequence::new("Main Sequence")
+        .then(beep())
         .then(set_oled_display_text_start())
         .then(move_to_qr())
         .then(wait_for_qr())

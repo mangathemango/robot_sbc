@@ -5,7 +5,6 @@ pub mod sequences;
 pub mod states;
 
 use std::fmt::Debug;
-use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use crate::control::actions::Action;
@@ -62,6 +61,10 @@ pub struct ControllerState {
 }
 
 impl ControllerState {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     pub fn publish(&self) {
         ROBOT.set_controller_state(self.clone());
     }

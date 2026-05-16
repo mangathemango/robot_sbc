@@ -3,7 +3,7 @@ mod debug;
 mod devices;
 mod math;
 mod robot;
-use crate::control::states::odometry::{self, spawn_odometry_thread};
+use crate::control::states::odometry::spawn_odometry_thread;
 use crate::control::spawn_main_controller_thread;
 use crate::debug::spawn_debug_thread;
 use crate::devices::gyro::spawn_gyro_thread;

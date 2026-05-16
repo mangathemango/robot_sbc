@@ -33,17 +33,7 @@ pub struct OdometryState {
 
 impl OdometryState {
     pub fn new() -> Self {
-        let gyro_state = ROBOT.get_gyro_state();
-        let initial_rotation = if gyro_state.driver_is_connected {
-            gyro_state.yaw
-        } else {
-            f32::NAN
-        };
-
-        Self {
-            initial_rotation,
-            ..Default::default()
-        }
+        Self::default()
     }
 
     pub fn update(&mut self, dt: Duration) {

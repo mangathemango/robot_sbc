@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{ROBOT, devices::stm32::message::Stm32Message};
 
 /// A struct representing the current states polled from the Stm32

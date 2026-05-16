@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::ROBOT;
-use crate::control::actions::extend_arm::{ArmExtendPreset, ExtendArm};
+use crate::control::actions::extend_arm::{ArmExtendPreset, ExtendArm, RetractArm};
 use crate::control::actions::general::WaitFor;
 use crate::control::actions::lift_arm::{ArmLiftPreset, LiftArm, LowerArm};
 use crate::control::actions::rotate_arm::{ArmRotationPreset, RotateArm};
@@ -193,14 +193,14 @@ fn grab_material(
         .as_str(),
     )
     .then(LiftArm::up())
-    .then(ExtendArm::back())
+    .then(RetractArm::back())
     .then(RotateArm::to_preset(source_rotation))
     .then(RotateClaw::open())
     .then(LowerArm::to_preset(source_height))
     .then(ExtendArm::to_preset(source_extension))
     .then(RotateClaw::close())
     .then(LiftArm::up())
-    .then(ExtendArm::back())
+    .then(RetractArm::back())
 }
 
 fn place_material(
@@ -216,10 +216,11 @@ fn place_material(
         .as_str(),
     )
     .then(LiftArm::up())
-    .then(ExtendArm::back())
+    .then(RetractArm::back())
     .then(RotateArm::to_preset(target_rotation))
     .then(ExtendArm::to_preset(target_extension))
     .then(LowerArm::to_preset(target_height))
     .then(RotateClaw::open())
     .then(LiftArm::up())
+    .then(RetractArm::back())
 }

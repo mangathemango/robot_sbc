@@ -28,7 +28,9 @@ impl QrDriver {
 
     pub fn try_read(&mut self) -> Result<Option<String>, String> {
         thread::sleep(Duration::from_millis(100));
-        Ok(None)
+        match &mut self.device {
+            DriverHIDDevice::Disconnected(msg) => Err(msg.clone())
+        }
     }
 }
 
@@ -45,10 +47,7 @@ pub struct QrState {
 
 impl QrState {
     pub fn new() -> Self {
-        Self {
-            error_msg: "The qr code module depends on evdev to read data, which is a crate only built for Linux OS".into(),
-            ..QrState::default()
-        }
+        Self::default()
     }
 
     pub fn update(&mut self, code: String) {

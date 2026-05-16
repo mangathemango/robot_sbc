@@ -58,7 +58,6 @@ impl ArmExtendPreset {
             ArmExtendPreset::Storage => 100,
             ArmExtendPreset::PlacementStraight => 1000,
             ArmExtendPreset::PlacementDiagonal => 8000,
-            _ => 10000
         }
     }
 }

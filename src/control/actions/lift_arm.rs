@@ -10,10 +10,6 @@ pub struct LiftArm {
 }
 
 impl LiftArm {
-    pub fn to_position(target_position: u16) -> Self {
-        Self { target_position }
-    }
-
     pub fn to_preset(position: ArmLiftPreset) -> Self {
         Self {
             target_position: position.to_position(),
@@ -22,15 +18,6 @@ impl LiftArm {
 
     pub fn up() -> Self {
         Self::to_preset(ArmLiftPreset::Up)
-    }
-    pub fn storage() -> Self {
-        Self::to_preset(ArmLiftPreset::Storage)
-    }
-    pub fn ground() -> Self {
-        Self::to_preset(ArmLiftPreset::Ground)
-    }
-    pub fn stack() -> Self {
-        Self::to_preset(ArmLiftPreset::Stack)
     }
 }
 

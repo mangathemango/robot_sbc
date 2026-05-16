@@ -33,15 +33,6 @@ impl RotateArm {
     pub fn right() -> Self {
         Self::to_preset(ArmRotationPreset::Right)
     }
-    pub fn middle_storage() -> Self {
-        Self::to_preset(ArmRotationPreset::MiddleStorage)
-    }
-    pub fn left_storage() -> Self {
-        Self::to_preset(ArmRotationPreset::LeftStorage)
-    }
-    pub fn right_storage() -> Self {
-        Self::to_preset(ArmRotationPreset::RightStorage)
-    }
 }
 
 impl Action for RotateArm {
