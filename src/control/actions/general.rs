@@ -75,14 +75,16 @@ impl Display for WaitFor {
 
 pub struct WaitUntil {
     condition: Box<dyn Fn() -> bool>,
+    name: String
 }
 
 impl WaitUntil {
-    pub fn new<F>(condition: F) -> Self
+    pub fn new<F>(condition_name: &str, condition: F) -> Self
     where
         F: Fn() -> bool + 'static,
     {
         Self {
+            name: condition_name.into(),
             condition: Box::new(condition),
         }
     }
@@ -100,7 +102,7 @@ impl Action for WaitUntil {
 
 impl Display for WaitUntil {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Waiting until custom condition...")
+        writeln!(f, "Waiting until {}...", self.name)
     }
 }
 
