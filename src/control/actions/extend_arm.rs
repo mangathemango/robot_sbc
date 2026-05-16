@@ -46,6 +46,7 @@ impl Display for ExtendArm {
 
 pub enum ArmExtendPreset {
     Back,
+    Storage,
     PlacementStraight,
     PlacementDiagonal
 }
@@ -54,6 +55,7 @@ impl ArmExtendPreset {
     pub fn to_position(&self) -> u16 {
         match self {
             ArmExtendPreset::Back => 0,
+            ArmExtendPreset::Storage => 100,
             ArmExtendPreset::PlacementStraight => 1000,
             ArmExtendPreset::PlacementDiagonal => 8000,
             _ => 10000

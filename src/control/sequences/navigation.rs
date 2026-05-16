@@ -7,19 +7,19 @@ use crate::control::sequences::Sequence;
 use crate::math::Pose;
 
 pub fn move_to_qr() -> Sequence {
-    Sequence::new("Flag 1")
+    Sequence::new("Moving to Qr Zone")
         .then(RotateArm::middle())
         .then(Move::to(Landmark::QrZone))
 }
 
 pub fn move_from_qr_to_source_zone() -> Sequence {
-    Sequence::new("Flag 2")
+    Sequence::new("Moving from Qr zone to Source Zone")
         .then(Move::to(Landmark::SourceZone))
         .then(RotateArm::right())
 }
 
 pub fn move_to_temporary_storage_zone() -> Sequence {
-    Sequence::new("Flag 3")
+    Sequence::new("Moving to Temporary storage zone")
         .then(RotateArm::middle())
         .then(Move::to(Landmark::CentralRightCrossing))
         .then(Move::to(Landmark::TemporaryStorageZone))
@@ -27,7 +27,7 @@ pub fn move_to_temporary_storage_zone() -> Sequence {
 }
 
 pub fn move_to_final_processing_zone() -> Sequence {
-    Sequence::new("Flag 4")
+    Sequence::new("Moving to Final processing zone")
         .then(RotateArm::middle())
         .then(Move::to(Landmark::UpperLeftTurn))
         .then(Move::to(Landmark::FinalProcessingZone))
@@ -35,31 +35,15 @@ pub fn move_to_final_processing_zone() -> Sequence {
 }
 
 pub fn move_from_final_processing_zone_to_source() -> Sequence {
-    Sequence::new("Flag 5")
+    Sequence::new("Moving from Final processing zone to source zone")
         .then(RotateArm::middle())
         .then(Move::to(Landmark::UpperRightTurn))
         .then(Move::to(Landmark::SourceZone))
         .then(RotateArm::right())
 }
 
-pub fn flag_6() -> Sequence {
-    Sequence::new("Flag 6")
-        .then(RotateArm::middle())
-        .then(Move::to(Landmark::CentralRightCrossing))
-        .then(Move::to(Landmark::TemporaryStorageZone))
-        .then(RotateArm::left())
-}
-
-pub fn flag_7() -> Sequence {
-    Sequence::new("Flag 7")
-        .then(RotateArm::middle())
-        .then(Move::to(Landmark::UpperLeftTurn))
-        .then(Move::to(Landmark::FinalProcessingZone))
-        .then(RotateArm::right())
-}
-
 pub fn move_back_to_start() -> Sequence {
-    Sequence::new("Flag 8")
+    Sequence::new("Moving back to start zone")
         .then(RotateArm::middle())
         .then(Move::to(Landmark::UpperRightTurn))
         .then(Move::to(Landmark::Start))

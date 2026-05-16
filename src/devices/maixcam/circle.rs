@@ -1,5 +1,7 @@
 use glam::Vec2;
 
+use crate::control::actions::{extend_arm::ArmExtendPreset, rotate_arm::ArmRotationPreset};
+
 #[derive(Debug, Default, Clone, Copy)]
 pub struct MaixcamCircle {
     pub position: Vec2,
@@ -37,6 +39,13 @@ impl MaixcamCircleColor {
             2 => MaixcamCircleColor::Green,
             3 => MaixcamCircleColor::Blue,
             _ => MaixcamCircleColor::Unknown,
+        }
+    }
+
+    pub fn placement_arm_extension(&self) -> ArmExtendPreset {
+        match self {
+            MaixcamCircleColor::Green => ArmExtendPreset::PlacementStraight,
+            _ => ArmExtendPreset::PlacementDiagonal
         }
     }
 }
