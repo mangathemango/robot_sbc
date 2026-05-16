@@ -5,13 +5,14 @@ use crate::control::sequences::{
         calibrate_at_source_zone, calibrate_at_temporary_storage_zone,
     },
     navigation::*,
-    utils::{set_oled_display_text_qr, set_oled_display_text_start, set_oled_display_text_stop},
+    utils::{set_oled_display_text_qr, set_oled_display_text_start, set_oled_display_text_stop, wait_for_qr},
 };
 
 pub fn main_sequence() -> Sequence {
     Sequence::new("Main Sequence")
         .then(set_oled_display_text_start())
         .then(move_to_qr())
+        .then(wait_for_qr())
         .then(set_oled_display_text_qr())
         .then(move_from_qr_to_source_zone())
         .then(calibrate_at_source_zone())

@@ -8,6 +8,13 @@ use crate::{
     math::Pose,
 };
 
+pub fn wait_for_qr() -> WaitUntil {
+    WaitUntil::new(|| {
+        ROBOT.get_qr_state().color_queue_1.is_some()
+        && ROBOT.get_qr_state().color_queue_2.is_some()
+    })
+}
+
 pub fn set_oled_display_text_start() -> OneShot {
     OneShot::new(|| {
         ROBOT
