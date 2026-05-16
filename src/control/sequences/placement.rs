@@ -9,116 +9,116 @@ use crate::control::actions::rotate_claw::RotateClaw;
 use crate::control::sequences::{RuntimeSequence, Sequence};
 use crate::devices::maixcam::circle::MaixcamCircleColor;
 
-
 pub fn place_material_at_temporary_storage_zone_1() -> RuntimeSequence {
-    RuntimeSequence::new(|| 
+    RuntimeSequence::new(|| {
         if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
             place_material_at_temporary_storage_zone(color_queue)
         } else {
             Sequence::new("Skipping place material...")
                 .then(WaitFor::new(Duration::from_millis(3000)))
         }
-    )
+    })
 }
 
 pub fn pick_up_material_from_temporary_storage_zone_1() -> RuntimeSequence {
-    RuntimeSequence::new(|| 
+    RuntimeSequence::new(|| {
         if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
             pick_up_material_from_temporary_storage_zone(color_queue)
         } else {
             Sequence::new("Skipping pickup material...")
-            .then(WaitFor::new(Duration::from_millis(3000)))
+                .then(WaitFor::new(Duration::from_millis(3000)))
         }
-    )
+    })
 }
 
 pub fn place_material_at_temporary_storage_zone_2() -> RuntimeSequence {
-    RuntimeSequence::new(|| 
+    RuntimeSequence::new(|| {
         if let Some(color_queue) = ROBOT.get_qr_state().color_queue_2 {
             place_material_at_temporary_storage_zone(color_queue)
         } else {
             Sequence::new("Skipping place material...")
                 .then(WaitFor::new(Duration::from_millis(3000)))
         }
-    )
+    })
 }
 pub fn pick_up_material_from_temporary_storage_zone_2() -> RuntimeSequence {
-    RuntimeSequence::new(|| 
+    RuntimeSequence::new(|| {
         if let Some(color_queue) = ROBOT.get_qr_state().color_queue_2 {
             pick_up_material_from_temporary_storage_zone(color_queue)
         } else {
             Sequence::new("Skipping pickup material...")
                 .then(WaitFor::new(Duration::from_millis(3000)))
         }
-    )
+    })
 }
 
-pub fn place_material_at_final_processing_zone() -> Sequence {
-    let mut sequence = Sequence::new("Placing sequence at temporary storage zone");
+pub fn place_material_at_final_processing_zone() -> RuntimeSequence {
+    RuntimeSequence::new(|| {
+        let mut sequence = Sequence::new("Placing sequence at temporary storage zone");
 
-    if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
-        if color_queue.len() != 3 {
-            return sequence;
+        if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
+            if color_queue.len() != 3 {
+                return sequence;
+            }
+
+            let storage_order = [
+                (ArmRotationPreset::LeftStorage, color_queue[0]),
+                (ArmRotationPreset::MiddleStorage, color_queue[1]),
+                (ArmRotationPreset::RightStorage, color_queue[2]),
+            ];
+
+            for (storage, color) in storage_order {
+                sequence
+                    .enqueue(grab_material(
+                        storage,
+                        ArmLiftPreset::Storage,
+                        ArmExtendPreset::Storage,
+                    ))
+                    .enqueue(place_material(
+                        ArmRotationPreset::LeftPlacement(color),
+                        ArmLiftPreset::Ground,
+                        color.placement_arm_extension(),
+                    ));
+            }
         }
 
-        let storage_order = [
-            (ArmRotationPreset::LeftStorage, color_queue[0]),
-            (ArmRotationPreset::MiddleStorage, color_queue[1]),
-            (ArmRotationPreset::RightStorage, color_queue[2]),
-        ];
-
-        for (storage, color) in storage_order {
-            sequence
-                .enqueue(grab_material(
-                    storage,
-                    ArmLiftPreset::Storage,
-                    ArmExtendPreset::Storage,
-                ))
-                .enqueue(place_material(
-                    ArmRotationPreset::LeftPlacement(color),
-                    ArmLiftPreset::Ground,
-                    color.placement_arm_extension(),
-                ));
-        }
-    }
-
-    sequence
+        sequence
+    })
 }
 
+pub fn place_material_at_final_processing_zone_stacked() -> RuntimeSequence {
+    RuntimeSequence::new(|| {
+        let mut sequence = Sequence::new("Placing sequence at temporary storage zone");
 
-pub fn place_material_at_final_processing_zone_stacked() -> Sequence {
-    let mut sequence = Sequence::new("Placing sequence at temporary storage zone");
+        if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
+            if color_queue.len() != 3 {
+                return sequence;
+            }
 
-    if let Some(color_queue) = ROBOT.get_qr_state().color_queue_1 {
-        if color_queue.len() != 3 {
-            return sequence;
+            let storage_order = [
+                (ArmRotationPreset::LeftStorage, color_queue[0]),
+                (ArmRotationPreset::MiddleStorage, color_queue[1]),
+                (ArmRotationPreset::RightStorage, color_queue[2]),
+            ];
+
+            for (storage, color) in storage_order {
+                sequence
+                    .enqueue(grab_material(
+                        storage,
+                        ArmLiftPreset::Storage,
+                        ArmExtendPreset::Storage,
+                    ))
+                    .enqueue(place_material(
+                        ArmRotationPreset::LeftPlacement(color),
+                        ArmLiftPreset::Stack,
+                        color.placement_arm_extension(),
+                    ));
+            }
         }
 
-        let storage_order = [
-            (ArmRotationPreset::LeftStorage, color_queue[0]),
-            (ArmRotationPreset::MiddleStorage, color_queue[1]),
-            (ArmRotationPreset::RightStorage, color_queue[2]),
-        ];
-
-        for (storage, color) in storage_order {
-            sequence
-                .enqueue(grab_material(
-                    storage,
-                    ArmLiftPreset::Storage,
-                    ArmExtendPreset::Storage,
-                ))
-                .enqueue(place_material(
-                    ArmRotationPreset::LeftPlacement(color),
-                    ArmLiftPreset::Stack,
-                    color.placement_arm_extension(),
-                ));
-        }
-    }
-
-    sequence
+        sequence
+    })
 }
-
-
 
 fn pick_up_material_from_temporary_storage_zone(color_queue: Vec<MaixcamCircleColor>) -> Sequence {
     let mut sequence = Sequence::new("Placing sequence at temporary storage zone");
@@ -179,8 +179,6 @@ fn place_material_at_temporary_storage_zone(color_queue: Vec<MaixcamCircleColor>
 
     sequence
 }
-
-
 
 fn grab_material(
     source_rotation: ArmRotationPreset,
