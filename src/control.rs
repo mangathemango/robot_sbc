@@ -63,6 +63,6 @@ pub struct ControllerState {
 
 impl ControllerState {
     pub fn publish(&self) {
-        ROBOT.controller_state.store(Arc::new(self.clone()));
+        ROBOT.set_controller_state(self.clone());
     }
 }

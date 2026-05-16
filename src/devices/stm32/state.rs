@@ -43,6 +43,6 @@ impl Stm32State {
     }
 
     pub fn publish(&self) {
-        ROBOT.stm32_state.store(Arc::new(self.clone()));
+        ROBOT.set_stm32_state(self.clone());
     }
 }

@@ -11,7 +11,7 @@ use crate::devices::gyro::state::GyroState;
 use crate::debug::helpers::bool_icon;
 
 pub fn draw_gyro(f: &mut Frame, area: Rect) {
-    let g = ROBOT.gyro_state.load();
+    let g = ROBOT.get_gyro_state();
     draw_gyro_text(f, area, &*g);
 }
 

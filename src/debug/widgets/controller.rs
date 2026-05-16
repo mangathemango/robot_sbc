@@ -4,7 +4,7 @@ use crate::ROBOT;
 use crate::debug::helpers::paragraph;
 
 pub fn draw_controller(f: &mut Frame, area: Rect) {
-    let controller_state = ROBOT.controller_state.load();
+    let controller_state = ROBOT.get_controller_state();
 
     let text = format!(
         "Current Command: {}\nDT: {:.2} ms\n",

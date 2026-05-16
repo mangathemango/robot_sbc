@@ -34,6 +34,6 @@ impl GyroState {
     }
 
     pub fn publish(&self) {
-        ROBOT.gyro_state.store(Arc::new(self.clone()));
+        ROBOT.set_gyro_state(self.clone());
     }
 }

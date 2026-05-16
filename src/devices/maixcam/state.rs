@@ -19,7 +19,7 @@ impl MaixcamState {
     }
 
     pub fn publish(&self) {
-        ROBOT.maixcam_state.store(Arc::new(self.clone()));
+        ROBOT.set_maixcam_state(self.clone());
     }
 
     pub fn find_priority_circle(&self, priority_list: &[MaixcamCircleColor]) -> Option<&MaixcamCircle> {

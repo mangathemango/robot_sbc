@@ -23,10 +23,7 @@ pub fn spawn_stm32_thread() {
         let (sender, receiver) = mpsc::channel();
 
         // Sender is set globally. Other threads can clone to control the STM32
-        ROBOT
-            .stm32_controller
-            .set(Stm32Controller::new(sender))
-            .expect("Unable to set STM32_CONTROLLER: {}");
+        ROBOT.set_stm32_controller(Stm32Controller::new(sender));
 
         let mut driver = Stm32Driver::new();
         let mut state = Stm32State::new();

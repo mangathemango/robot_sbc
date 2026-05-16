@@ -5,7 +5,7 @@ use crate::ROBOT;
 use crate::debug::helpers::{bool_icon, paragraph};
 
 pub fn draw_stm32(f: &mut Frame, area: Rect) {
-    let s = ROBOT.stm32_state.load();
+    let s = ROBOT.get_stm32_state();
 
     let text = format!(
         "Running: {}\nYaw Servo: {:?}\nWheel Velocities{:#?}\nConnected: {}\nFPS: {:.1}\n",

@@ -26,7 +26,7 @@ pub fn set_oled_display_text_stop() -> OneShot {
 
 pub fn set_oled_display_text_qr() -> OneShot {
     OneShot::new(|| {
-        let qr_text = ROBOT.qr_state.load().code.clone();
+        let qr_text = ROBOT.get_qr_state().code.clone();
         ROBOT.get_stm32_controller().set_display_text(qr_text)
     })
 }

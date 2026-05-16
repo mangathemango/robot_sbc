@@ -53,6 +53,6 @@ impl QrState {
     }
 
     pub fn publish(&self) {
-        ROBOT.qr_state.store(Arc::new(self.clone()));
+        ROBOT.set_qr_state(self.clone());
     }
 }

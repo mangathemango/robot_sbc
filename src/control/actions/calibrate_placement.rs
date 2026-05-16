@@ -54,7 +54,7 @@ impl Action for CalibratePlacement {
 
     fn update(&mut self, dt: Duration) {
         let current_rotation = ROBOT.get_odometry_state().pose.rotation;
-        let maixcam_state = ROBOT.maixcam_state.load();
+        let maixcam_state = ROBOT.get_maixcam_state();
         if maixcam_state.circles.is_empty() {
             return;
         }
@@ -104,7 +104,7 @@ impl Action for CalibratePlacement {
     }
 
     fn is_finished(&self) -> bool {
-        self.motion_policy.is_settled() || !ROBOT.maixcam_state.load().driver_is_connected || true
+        self.motion_policy.is_settled() || !ROBOT.get_maixcam_state().driver_is_connected || true
     }
 }
 

@@ -33,7 +33,7 @@ pub struct OdometryState {
 
 impl OdometryState {
     pub fn new() -> Self {
-        let gyro_state = ROBOT.gyro_state.load();
+        let gyro_state = ROBOT.get_gyro_state();
         let initial_rotation = if gyro_state.driver_is_connected {
             gyro_state.yaw
         } else {
@@ -49,8 +49,8 @@ impl OdometryState {
     pub fn update(&mut self, dt: Duration) {
         self.dt = dt;
 
-        let stm32_state = ROBOT.stm32_state.load();
-        let gyro_state = ROBOT.gyro_state.load();
+        let stm32_state = ROBOT.get_stm32_state();
+        let gyro_state = ROBOT.get_gyro_state();
 
         if self.initial_rotation.is_nan() {
             self.initial_rotation = gyro_state.yaw;

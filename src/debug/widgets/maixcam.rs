@@ -5,7 +5,7 @@ use crate::ROBOT;
 use crate::debug::helpers::{paragraph, bool_icon};
 
 pub fn draw_maixcam(f: &mut Frame, area: Rect) {
-    let maixcam = ROBOT.maixcam_state.load();
+    let maixcam = ROBOT.get_maixcam_state();
 
     let text = format!(
         "Connected: {}\nCircles {:?}\nFPS: {:.1}",
