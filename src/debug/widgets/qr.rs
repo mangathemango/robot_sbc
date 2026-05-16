@@ -13,7 +13,7 @@ pub fn draw_qr(f: &mut Frame, area: Rect) {
     };
 
     let text = format!(
-        "Qr: {:#?}\nConnected: {}\n{}",
+        "Qr: {}\nConnected: {}\n{}",
         qr,
         bool_icon(qr.driver_is_connected),
         error_text

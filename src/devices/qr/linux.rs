@@ -180,3 +180,11 @@ impl QrState {
         
     }
 }
+
+
+impl Display for QrState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Connected: {}\nCode:{:?}\nColor Queue 1:{:?}\nColor Queue 2:{:?}",
+                self.driver_is_connected, self.code, self.color_queue_1, self.color_queue_2)
+    }
+}
