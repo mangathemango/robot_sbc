@@ -51,6 +51,12 @@ pub fn spawn_stm32_thread() {
                     Stm32Command::SetYawServoAngle { angle } => {
                         state.yaw_servo_current_angle = angle;
                     }
+                    Stm32Command::SetVerticalArmPosition { position } => {
+                        state.vertical_arm_position = position
+                    }
+                    Stm32Command::SetHorizontalArmPosition { position } => {
+                        state.horizontal_arm_position = position
+                    }
                     _ => (),
                 }
                 let _ = driver.send_command(cmd);
