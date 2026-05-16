@@ -1,5 +1,8 @@
+use std::time::Duration;
+
 use crate::ROBOT;
 use crate::control::actions::extend_arm::{ArmExtendPreset, ExtendArm};
+use crate::control::actions::general::WaitFor;
 use crate::control::actions::lift_arm::{ArmLiftPreset, LiftArm, LowerArm};
 use crate::control::actions::rotate_arm::{ArmRotationPreset, RotateArm};
 use crate::control::actions::rotate_claw::RotateClaw;
@@ -12,6 +15,7 @@ pub fn place_material_at_temporary_storage_zone_1() -> Sequence {
         place_material_at_temporary_storage_zone(color_queue)
     } else {
         Sequence::new("Skipping place material...")
+            .then(WaitFor::new(Duration::from_millis(1000)))
     }
 }
 
@@ -20,6 +24,7 @@ pub fn pick_up_material_from_temporary_storage_zone_1() -> Sequence {
         pick_up_material_from_temporary_storage_zone(color_queue)
     } else {
         Sequence::new("Skipping pickup material...")
+            .then(WaitFor::new(Duration::from_millis(1000)))
     }
 }
 
@@ -28,6 +33,7 @@ pub fn place_material_at_temporary_storage_zone_2() -> Sequence {
         place_material_at_temporary_storage_zone(color_queue)
     } else {
         Sequence::new("Skipping place material...")
+            .then(WaitFor::new(Duration::from_millis(1000)))
     }
 }
 pub fn pick_up_material_from_temporary_storage_zone_2() -> Sequence {
@@ -35,6 +41,7 @@ pub fn pick_up_material_from_temporary_storage_zone_2() -> Sequence {
         pick_up_material_from_temporary_storage_zone(color_queue)
     } else {
         Sequence::new("Skipping pickup material...")
+            .then(WaitFor::new(Duration::from_millis(1000)))
     }
 }
 
