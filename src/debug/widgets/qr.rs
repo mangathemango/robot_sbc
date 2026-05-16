@@ -13,8 +13,8 @@ pub fn draw_qr(f: &mut Frame, area: Rect) {
     };
 
     let text = format!(
-        "Qr Code: {}\nConnected: {}\n{}",
-        if qr.code.len() == 0 {"Waiting..."} else {&qr.code},
+        "Qr: {:#?}\nConnected: {}\n{}",
+        qr,
         bool_icon(qr.driver_is_connected),
         error_text
     );

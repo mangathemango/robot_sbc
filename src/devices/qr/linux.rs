@@ -135,7 +135,9 @@ impl QrDriver {
 #[derive(Debug, Clone, Default)]
 pub struct QrState {
     pub driver_is_connected: bool,
-    pub code: String,
+    pub code: Option<String>,
+    pub color_queue_1: Option<Vec<MaixcamCircleColor>>,
+    pub color_queue_2: Option<Vec<MaixcamCircleColor>>,
     pub error_msg: String,
     /// Delta time for FPS calculation
     pub dt: std::time::Duration,
@@ -144,5 +146,36 @@ pub struct QrState {
 impl QrState {
     pub fn new() -> Self {
         QrState::default()
+    }
+
+    pub fn update(&mut self, code: String) {
+        self.code = Some(code.clone());
+        if let Some((left, right)) = code.split_once('+') {
+            self.color_queue_1 = Self::parse_code(left.to_string());
+            self.color_queue_2 = Self::parse_code(right.to_string());
+        } else {
+            self.color_queue_1 = None;
+            self.color_queue_2 = None;
+        }
+    }
+
+    pub fn parse_code(code: String) -> Option<Vec<MaixcamCircleColor>> {
+        if code.len() != 3 {
+            return None;
+        }
+        let result: Vec<MaixcamCircleColor> = code.chars().map(|c|
+            match c {
+                '1' => MaixcamCircleColor::Red,
+                '2' => MaixcamCircleColor::Green,
+                '3' => MaixcamCircleColor::Blue,
+                _ => MaixcamCircleColor::Unknown
+            }
+        ).collect();
+        if result.iter().any(|color| *color == MaixcamCircleColor::Unknown) {
+            None
+        } else {
+            Some(result)
+        }
+        
     }
 }

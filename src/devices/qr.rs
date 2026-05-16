@@ -24,7 +24,7 @@ pub fn spawn_qr_thread() {
 
             match driver.try_read() {
                 Ok(Some(code)) => {
-                    ROBOT.lock_qr_state().code = code.clone();
+                    ROBOT.lock_qr_state().update(code);
                 }
                 Ok(None) => {}
                 Err(msg) => {
