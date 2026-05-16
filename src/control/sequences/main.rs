@@ -1,17 +1,18 @@
-use crate::control::{
-    sequences::{
-        Sequence,
-        calibration::{
-            calibrate_at_final_processing_zone_1, calibrate_at_final_processing_zone_2,
-            calibrate_at_source_zone, calibrate_at_temporary_storage_zone,
-        },
-        navigation::*,
+use crate::control::sequences::{
+    Sequence,
+    calibration::{
+        calibrate_at_final_processing_zone_1, calibrate_at_final_processing_zone_2,
+        calibrate_at_source_zone, calibrate_at_temporary_storage_zone,
     },
+    navigation::*,
+    utils::{set_oled_display_text_qr, set_oled_display_text_start, set_oled_display_text_stop},
 };
 
 pub fn main_sequence() -> Sequence {
     Sequence::new("Main Sequence")
+        .then(set_oled_display_text_start())
         .then(move_to_qr())
+        .then(set_oled_display_text_qr())
         .then(move_from_qr_to_source_zone())
         .then(calibrate_at_source_zone())
         .then(move_to_temporary_storage_zone())
@@ -24,4 +25,5 @@ pub fn main_sequence() -> Sequence {
         .then(move_to_final_processing_zone())
         .then(calibrate_at_final_processing_zone_2())
         .then(move_back_to_start())
+        .then(set_oled_display_text_stop())
 }
