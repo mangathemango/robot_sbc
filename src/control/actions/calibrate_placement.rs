@@ -55,44 +55,49 @@ impl Action for CalibratePlacement {
     fn update(&mut self, dt: Duration) {
         let current_rotation = ROBOT.get_odometry_state().pose.rotation;
         let maixcam_state = ROBOT.get_maixcam_state();
-        if maixcam_state.circles.is_empty() {
-            return;
-        }
-        let circle = maixcam_state.circles[0];
-        let circle_position = match circle.color {
-            MaixcamCircleColor::Blue =>     circle.position + Vec2::new(500.0, 0.0),
-            MaixcamCircleColor::Green =>    circle.position,
-            MaixcamCircleColor::Red =>      circle.position - Vec2::new(500.0, 0.0),
-            MaixcamCircleColor::Unknown =>  circle.position
-        };
+        let circle = maixcam_state.find_priority_circle(&[
+            MaixcamCircleColor::Green,
+            MaixcamCircleColor::Blue,
+            MaixcamCircleColor::Red
+        ]);
+        
+        if let Some(circle) = circle {
 
-
-        // Move the robot linearly so that the circle ends up in the target position while keeping the initial rotation stable
-        let current_state = Pose {
-            position: circle_position,
-            rotation: current_rotation,
-        };
-
-        let target_state = Pose {
-            position: self.mode.target_circle_position(),
-            rotation: self.initial_rotation,
-        };
-
-        let (linear_error, angular_error) = current_state.difference(target_state).to_components();
-
-        // Get PID outputs from motion_policy
-        let (mut linear_output, angular_output) =
+            let circle_position = match circle.color {
+                MaixcamCircleColor::Blue =>     circle.position + Vec2::new(0.5, 0.0),
+                MaixcamCircleColor::Green =>    circle.position,
+                MaixcamCircleColor::Red =>      circle.position + Vec2::new(-0.5, 0.0),
+                MaixcamCircleColor::Unknown =>  circle.position
+            };
+            
+            
+            // Move the robot linearly so that the circle ends up in the target position while keeping the initial rotation stable
+            let current_state = Pose {
+                position: circle_position,
+                rotation: current_rotation,
+            };
+            
+            let target_state = Pose {
+                position: self.mode.target_circle_position(),
+                rotation: self.initial_rotation,
+            };
+            
+            let (linear_error, angular_error) = current_state.difference(target_state).to_components();
+            
+            // Get PID outputs from motion_policy
+            let (mut linear_output, angular_output) =
             self.motion_policy.update(linear_error, angular_error, dt);
-
-        // Rotate linear_output back to world space
-        linear_output = linear_output.rotate(Vec2::from_angle(match self.arm_rotation {
-            ArmRotationPreset::Left => -FRAC_PI_2,
-            ArmRotationPreset::Right => FRAC_PI_2,
-            _ => 0.0,
-        }));
-
-        let target_twist = Twist::new(linear_output, angular_output);
-        ROBOT.get_stm32_controller().set_twist(target_twist);
+            
+            // Rotate linear_output back to world space
+            linear_output = linear_output.rotate(Vec2::from_angle(match self.arm_rotation {
+                ArmRotationPreset::Left => -FRAC_PI_2,
+                ArmRotationPreset::Right => FRAC_PI_2,
+                _ => 0.0,
+            }));
+            
+            let target_twist = Twist::new(linear_output, angular_output);
+            ROBOT.get_stm32_controller().set_twist(target_twist);
+        }
     }
 
     fn stop(&mut self) {
@@ -104,7 +109,7 @@ impl Action for CalibratePlacement {
     }
 
     fn is_finished(&self) -> bool {
-        self.motion_policy.is_settled() || !ROBOT.get_maixcam_state().driver_is_connected || true
+        self.motion_policy.is_settled() || !ROBOT.get_maixcam_state().driver_is_connected
     }
 }
 
@@ -124,8 +129,8 @@ pub enum CalibrateMode {
 impl CalibrateMode {
     pub fn target_circle_position(&self) -> Vec2 {
         match self {
-            CalibrateMode::Ground => Vec2::new(120.0, 120.0),
-            CalibrateMode::Stack => Vec2::new(120.0, 120.0),
+            CalibrateMode::Ground => Vec2::new(0.5, 0.5),
+            CalibrateMode::Stack => Vec2::new(0.5, 0.5),
         }
     }
 }
