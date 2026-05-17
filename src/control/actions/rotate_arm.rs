@@ -88,13 +88,11 @@ impl ArmRotationPreset {
                 MaixcamCircleColor::Green => ArmRotationPreset::Left.to_angle(),
                 MaixcamCircleColor::Blue => ArmRotationPreset::Left.to_angle() + 11,
                 MaixcamCircleColor::Red => ArmRotationPreset::Left.to_angle() - 11,
-                MaixcamCircleColor::Unknown => ArmRotationPreset::Left.to_angle(),
             },
             ArmRotationPreset::RightPlacement(color) => match color {
                 MaixcamCircleColor::Green => ArmRotationPreset::Right.to_angle(),
                 MaixcamCircleColor::Blue => ArmRotationPreset::Right.to_angle() + 11,
                 MaixcamCircleColor::Red => ArmRotationPreset::Right.to_angle() - 11,
-                MaixcamCircleColor::Unknown => ArmRotationPreset::Right.to_angle(),
             },
             ArmRotationPreset::Custom(angle) => *angle,
         }

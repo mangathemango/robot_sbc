@@ -109,7 +109,7 @@ impl MaixcamDriver {
                     "red" => MaixcamCircleColor::Red,
                     "green" => MaixcamCircleColor::Green,
                     "blue" => MaixcamCircleColor::Blue,
-                    _ => MaixcamCircleColor::Unknown,
+                    _ => Default::default(),
                 };
 
                 let kind = match d.detection_type.as_str() {

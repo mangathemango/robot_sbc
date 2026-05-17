@@ -147,7 +147,7 @@ pub struct QrState {
 
 impl QrState {
     pub fn new() -> Self {
-        QrState::default()
+        Self::default()
     }
 
     pub fn update(&mut self, code: String) {
@@ -162,7 +162,7 @@ impl QrState {
     }
 
     pub fn parse_code(code: String) -> Option<Vec<MaixcamCircleColor>> {
-        if code.len() != 3 {
+        if code.len() != 3 || code.chars().any(|a| !"123".contains(a)){
             return None;
         }
         let result: Vec<MaixcamCircleColor> = code.chars().map(|c|
@@ -170,18 +170,12 @@ impl QrState {
                 '1' => MaixcamCircleColor::Red,
                 '2' => MaixcamCircleColor::Green,
                 '3' => MaixcamCircleColor::Blue,
-                _ => MaixcamCircleColor::Unknown
+                _ => Default::default()
             }
         ).collect();
-        if result.iter().any(|color| *color == MaixcamCircleColor::Unknown) {
-            None
-        } else {
-            Some(result)
-        }
-        
+        Some(result)
     }
 }
-
 
 impl Display for QrState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -21,7 +21,6 @@ impl Display for MaixcamCircle {
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum MaixcamCircleColor {
     #[default]
-    Unknown,
     Red,
     Green,
     Blue,
@@ -33,7 +32,7 @@ impl MaixcamCircleColor {
             1 => MaixcamCircleColor::Red,
             2 => MaixcamCircleColor::Green,
             3 => MaixcamCircleColor::Blue,
-            _ => MaixcamCircleColor::Unknown,
+            _ => Default::default()
         }
     }
 

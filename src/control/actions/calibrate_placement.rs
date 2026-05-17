@@ -67,7 +67,6 @@ impl Action for CalibratePlacement {
                 MaixcamCircleColor::Blue =>     circle.position + Vec2::new(0.5, 0.0),
                 MaixcamCircleColor::Green =>    circle.position,
                 MaixcamCircleColor::Red =>      circle.position + Vec2::new(-0.5, 0.0),
-                MaixcamCircleColor::Unknown =>  circle.position
             };
             
             
