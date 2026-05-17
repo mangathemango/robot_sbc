@@ -1,6 +1,5 @@
 use crate::devices::{
     maixcam::circle::MaixcamCircle, 
-    utils::SerialMessage
 };
 
 #[derive(Debug, Clone)]

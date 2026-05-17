@@ -1,6 +1,6 @@
 use std::{fmt::Display};
 
-use crate::{ROBOT, control::actions::Action};
+use crate::{ROBOT, control::actions::Action, devices::maixcam::circle::MaixcamCircleColor};
 
 pub type RetractArm = ExtendArm;
 
@@ -42,18 +42,28 @@ impl Display for ExtendArm {
 
 pub enum ArmExtendPreset {
     Back,
-    Storage,
-    PlacementStraight,
-    PlacementDiagonal
+    Storage(MaixcamCircleColor),
+    Placement(MaixcamCircleColor)
 }
 
 impl ArmExtendPreset {
     pub fn to_position(&self) -> u16 {
         match self {
-            ArmExtendPreset::Back => 0,
-            ArmExtendPreset::Storage => 100,
-            ArmExtendPreset::PlacementStraight => 1000,
-            ArmExtendPreset::PlacementDiagonal => 8000,
+            Self::Back => 0,
+            Self::Storage(color) => {
+                match color {
+                    MaixcamCircleColor::Green => 1000,
+                    MaixcamCircleColor::Blue => 2000,
+                    MaixcamCircleColor::Red => 3000
+                }
+            },
+            Self::Placement(color) => {
+                match color {
+                    MaixcamCircleColor::Blue => 8000,
+                    MaixcamCircleColor::Green => 2000,
+                    MaixcamCircleColor::Red => 8000
+                }
+            }
         }
     }
 }

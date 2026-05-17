@@ -1,6 +1,6 @@
 use crate::control::{
     actions::{
-        calibrate_placement::CalibratePlacement, calibrate_source::CalibrateSource, general::Sequence, rotate_arm::ArmRotationPreset
+        calibrate_placement::CalibratePlacement, calibrate_source::CalibrateSource, general::Sequence
     },
     landmark::Landmark,
     routines::{navigation::set_current_landmark},
