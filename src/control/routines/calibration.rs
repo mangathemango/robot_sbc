@@ -1,10 +1,9 @@
 use crate::control::{
     actions::{
-        calibrate_placement::CalibratePlacement, calibrate_source::CalibrateSource,
-        rotate_arm::ArmRotationPreset,
+        calibrate_placement::CalibratePlacement, calibrate_source::CalibrateSource, general::Sequence, rotate_arm::ArmRotationPreset
     },
     landmark::Landmark,
-    sequences::{Sequence, navigation::set_current_landmark},
+    routines::{navigation::set_current_landmark},
 };
 
 pub fn calibrate_at_source_zone() -> Sequence {

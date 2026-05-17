@@ -1,5 +1,4 @@
-use crate::control::sequences::{
-    Sequence,
+use crate::control::{actions::general::Sequence, routines::{
     calibration::{
         calibrate_at_final_processing_zone, calibrate_at_final_processing_zone_stacked,
         calibrate_at_source_zone, calibrate_at_temporary_storage_zone,
@@ -15,7 +14,7 @@ use crate::control::sequences::{
         beep, set_oled_display_text_qr, set_oled_display_text_start, set_oled_display_text_stop,
         wait_for_qr,
     },
-};
+}};
 
 pub fn main_sequence() -> Sequence {
     Sequence::new("Main Sequence")

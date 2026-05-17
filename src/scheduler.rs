@@ -4,8 +4,8 @@ use std::time::{Duration, Instant};
 
 use crate::ROBOT;
 use crate::control::actions::Action;
-use crate::control::sequences::Sequence;
-use crate::control::sequences::main::main_sequence;
+use crate::control::actions::general::Sequence;
+use crate::control::routines::main::main_sequence;
 
 pub fn spawn_scheduler_thread() {
     std::thread::spawn(|| {

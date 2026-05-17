@@ -2,11 +2,10 @@ use std::time::Duration;
 
 use crate::ROBOT;
 use crate::control::actions::extend_arm::{ArmExtendPreset, ExtendArm, RetractArm};
-use crate::control::actions::general::WaitFor;
+use crate::control::actions::general::{RuntimeSequence, Sequence, WaitFor};
 use crate::control::actions::lift_arm::{ArmLiftPreset, LiftArm, LowerArm};
 use crate::control::actions::rotate_arm::{ArmRotationPreset, RotateArm};
 use crate::control::actions::rotate_claw::RotateClaw;
-use crate::control::sequences::{RuntimeSequence, Sequence};
 use crate::devices::maixcam::circle::MaixcamCircleColor;
 
 pub fn place_material_at_temporary_storage_zone_1() -> RuntimeSequence {
