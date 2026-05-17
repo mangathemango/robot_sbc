@@ -10,6 +10,7 @@ use crate::devices::stm32::driver::Stm32Driver;
 use crate::devices::stm32::state::Stm32State;
 use crate::math::MecanumVelocities;
 
+
 use std::sync::mpsc;
 use std::time::Duration;
 const STM32_DOTENV_KEY: &str = "STM32_PATH";
@@ -40,7 +41,9 @@ pub fn spawn_stm32_thread() {
             // 🟣 1. Handle outgoing commands
             while let Ok(cmd) = receiver.try_recv() {
                 state.update_command(cmd.clone());
-                let _ = driver.send_command(cmd.clone());
+                if let Err(e) = driver.send_command(cmd.clone()) {
+                    state.log_msg = e;
+                }
                 state.last_command = cmd;
             }
 
@@ -51,7 +54,8 @@ pub fn spawn_stm32_thread() {
                         state.update_message(message);
                     }
                 }
-                Err(_) => {
+                Err(e) => {
+                    state.log_msg = e;
                     driver.reconnect();
                     std::thread::sleep(std::time::Duration::from_millis(10));
                 }
