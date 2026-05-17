@@ -21,14 +21,8 @@ impl RotateArm {
         Self::to_angle(target_position.to_angle())
     }
 
-    pub fn middle() -> Self {
-        Self::to_preset(ArmRotationPreset::Middle)
-    }
-    pub fn left() -> Self {
-        Self::to_preset(ArmRotationPreset::Left)
-    }
-    pub fn right() -> Self {
-        Self::to_preset(ArmRotationPreset::Right)
+    pub fn idle() -> Self {
+        Self::to_preset(ArmRotationPreset::Idle)
     }
 }
 
@@ -60,48 +54,38 @@ impl Display for RotateArm {
 #[derive(Debug, Clone, Copy, Default)]
 pub enum ArmRotationPreset {
     #[default]
-    Middle,
-    Left,
-    LeftPlacement(MaixcamCircleColor),
-    Right,
-    RightPlacement(MaixcamCircleColor),
-    LeftStorage,
-    MiddleStorage,
-    RightStorage,
-    Custom(u8),
+    Idle,
+    Storage(MaixcamCircleColor),
+    Placement(MaixcamCircleColor),
+    Calibration,
+
 }
 
 impl ArmRotationPreset {
     pub fn to_angle(&self) -> u8 {
         match self {
-            ArmRotationPreset::Middle => 60,
-            ArmRotationPreset::Left => 120,
-            ArmRotationPreset::Right => 0,
-            ArmRotationPreset::LeftStorage => 50,
-            ArmRotationPreset::MiddleStorage => 60,
-            ArmRotationPreset::RightStorage => 70,
-            ArmRotationPreset::LeftPlacement(color) => match color {
-                MaixcamCircleColor::Green => ArmRotationPreset::Left.to_angle(),
-                MaixcamCircleColor::Blue => ArmRotationPreset::Left.to_angle() + 11,
-                MaixcamCircleColor::Red => ArmRotationPreset::Left.to_angle() - 11,
+            Self::Idle => 0,
+            Self::Storage(color) => {
+                match color {
+                    MaixcamCircleColor::Blue => 10,
+                    MaixcamCircleColor::Green => 20,
+                    MaixcamCircleColor::Red => 30,
+                }
             },
-            ArmRotationPreset::RightPlacement(color) => match color {
-                MaixcamCircleColor::Green => ArmRotationPreset::Right.to_angle(),
-                MaixcamCircleColor::Blue => ArmRotationPreset::Right.to_angle() + 11,
-                MaixcamCircleColor::Red => ArmRotationPreset::Right.to_angle() - 11,
-            },
-            ArmRotationPreset::Custom(angle) => *angle,
+            Self::Placement(color) => {
+                match color {
+                    MaixcamCircleColor::Blue => 40,
+                    MaixcamCircleColor::Green => 50,
+                    MaixcamCircleColor::Red => 60
+                }
+            }
+            Self::Calibration => 90
         }
     }
 
     pub fn from_angle(angle: u8) -> Self {
         match angle {
-            0 => ArmRotationPreset::Right,
-            50 => ArmRotationPreset::LeftStorage,
-            60 => ArmRotationPreset::Middle,
-            70 => ArmRotationPreset::RightStorage,
-            120 => ArmRotationPreset::Left,
-            _ => ArmRotationPreset::Custom(angle),
+            _ => Self::Idle,
         }
     }
 }

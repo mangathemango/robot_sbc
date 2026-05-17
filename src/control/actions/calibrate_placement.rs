@@ -26,7 +26,7 @@ impl CalibratePlacement {
         Self {
             motion_policy: MotionPolicyPreset::CalibrationPlace.to_motion_policy(),
             mode,
-            arm_rotation: ArmRotationPreset::Left,
+            arm_rotation: ArmRotationPreset::Idle,
             ..Default::default()
         }
     }
@@ -87,13 +87,7 @@ impl Action for CalibratePlacement {
             let (mut linear_output, angular_output) =
             self.motion_policy.update(linear_error, angular_error, dt);
             
-            // Rotate linear_output back to world space
-            linear_output = linear_output.rotate(Vec2::from_angle(match self.arm_rotation {
-                ArmRotationPreset::Left => -FRAC_PI_2,
-                ArmRotationPreset::Right => FRAC_PI_2,
-                _ => 0.0,
-            }));
-            
+
             let target_twist = Twist::new(linear_output, angular_output);
             ROBOT.get_stm32_controller().set_twist(target_twist);
         }
