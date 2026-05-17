@@ -103,10 +103,6 @@ impl Action for CalibratePlacement {
         ROBOT.get_stm32_controller().set_twist(Twist::ZERO);
     }
 
-    fn current_action(&self) -> &dyn Action {
-        self
-    }
-
     fn is_finished(&self) -> bool {
         self.motion_policy.is_settled() || !ROBOT.get_maixcam_state().driver_is_connected
     }

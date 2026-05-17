@@ -18,6 +18,4 @@ pub trait Action: Display {
     fn is_finished(&self) -> bool {true}
 
     fn stop(&mut self) {}
-
-    fn current_action(&self) -> &dyn Action;
 }

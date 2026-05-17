@@ -61,11 +61,7 @@ impl Action for CalibrateSource {
             },
         }
     }
-
-    fn current_action(&self) -> &dyn Action {
-        self
-    }
-
+    
     fn is_finished(&self) -> bool {
         true
     }

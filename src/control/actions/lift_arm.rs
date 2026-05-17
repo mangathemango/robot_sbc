@@ -27,10 +27,6 @@ impl Action for LiftArm {
         stm32_controller.set_vertical_arm_position(self.target_position);
     }
 
-    fn current_action(&self) -> &dyn Action {
-        self
-    }
-
     fn is_finished(&self) -> bool {
         self.target_position
             .abs_diff(ROBOT.get_stm32_state().vertical_arm_position)

@@ -29,10 +29,6 @@ impl Action for ExtendArm {
         stm32_controller.set_horizontal_arm_position(self.target_position);
     }
 
-    fn current_action(&self) -> &dyn Action {
-        self
-    }
-
     fn is_finished(&self) -> bool {
         self.target_position.abs_diff(ROBOT.get_stm32_state().horizontal_arm_position) < 100
     }

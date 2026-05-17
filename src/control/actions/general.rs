@@ -78,14 +78,6 @@ impl Action for Sequence {
         }
         self.action_queue.clear();
     }
-
-    fn current_action(&self) -> &dyn Action {
-        if let Some(action) = &self.current_action {
-            action.current_action()
-        } else {
-            self
-        }
-    }
 }
 
 impl Display for Sequence {
@@ -131,10 +123,6 @@ impl Action for RuntimeSequence
     fn is_finished(&self) -> bool {
         self.generated.is_finished()
     }
-
-    fn current_action(&self) -> &dyn Action {
-        self.generated.current_action()
-    }
 }
 
 impl Display for RuntimeSequence
@@ -165,10 +153,6 @@ impl Action for OneShot {
     fn is_finished(&self) -> bool {
         true
     }
-
-    fn current_action(&self) -> &dyn Action {
-        self
-    }
 }
 
 impl Display for OneShot {
@@ -195,10 +179,6 @@ impl WaitFor {
 impl Action for WaitFor {
     fn update(&mut self, dt: Duration) {
         self.elapsed += dt
-    }
-
-    fn current_action(&self) -> &dyn Action {
-        self
     }
 
     fn is_finished(&self) -> bool {
@@ -234,10 +214,6 @@ impl WaitUntil {
 }
 
 impl Action for WaitUntil {
-    fn current_action(&self) -> &dyn Action {
-        self
-    }
-
     fn is_finished(&self) -> bool {
         (self.condition)()
     }
@@ -284,9 +260,7 @@ impl Action for UntilTimeout {
     fn stop(&mut self) {
         self.action.stop();
     }
-    fn current_action(&self) -> &dyn Action {
-        self
-    }
+
 }
 
 impl Display for UntilTimeout {

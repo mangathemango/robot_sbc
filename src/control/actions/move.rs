@@ -87,10 +87,6 @@ impl Action for Move {
         let stm32_controller = ROBOT.get_stm32_controller();
         stm32_controller.set_wheel_velocities([0, 0, 0, 0]);
     }
-
-    fn current_action(&self) -> &dyn Action {
-        self
-    }
 }
 
 impl Display for Move {
