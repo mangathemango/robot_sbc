@@ -1,62 +1,131 @@
 use crate::devices::{
-    maixcam::{MAIXCAM_DOTENV_KEY, message::MaixcamMessage},
-    utils::{DriverSerialPort, SerialDecoder},
+    maixcam::{
+        MAIXCAM_DOTENV_KEY,
+        circle::{MaixcamCircle, MaixcamCircleColor, MaixcamCircleKind},
+        message::MaixcamMessage,
+    }
+};
+
+use glam::Vec2;
+use serde::Deserialize;
+
+#[derive(Debug, Deserialize)]
+struct NetworkPosition {
+    x: f32,
+    y: f32,
+}
+
+#[derive(Debug, Deserialize)]
+struct NetworkDetection {
+    #[serde(rename = "type")]
+    detection_type: String,
+
+    color: String,
+
+    position: NetworkPosition,
+}
+
+#[derive(Debug, Deserialize)]
+struct NetworkPacket {
+    detections: Vec<NetworkDetection>,
+}
+
+use std::{
+    io::{BufRead, BufReader},
+    net::TcpStream,
 };
 
 #[derive(Debug)]
+pub enum DriverTcpStream {
+    Connected(BufReader<TcpStream>),
+    Disconnected(String),
+}
+
+#[derive(Debug)]
 pub struct MaixcamDriver {
-    port: DriverSerialPort,
-    decoder: SerialDecoder<MaixcamMessage>
+    stream: DriverTcpStream,
 }
 
 impl MaixcamDriver {
     pub fn new() -> Self {
-        MaixcamDriver {
-            port: DriverSerialPort::from_dotenv_key(MAIXCAM_DOTENV_KEY),
-            decoder: SerialDecoder::new()
-        }
+        let stream = match TcpStream::connect(dotenv::var(MAIXCAM_DOTENV_KEY).unwrap_or("".into()))
+        {
+            Ok(stream) => {
+                stream.set_nonblocking(true).ok();
+
+                DriverTcpStream::Connected(BufReader::new(stream))
+            }
+
+            Err(e) => DriverTcpStream::Disconnected(format!("{}", e)),
+        };
+
+        Self { stream }
     }
 
     pub fn reconnect(&mut self) {
-        self.port = DriverSerialPort::from_dotenv_key(MAIXCAM_DOTENV_KEY);
+        *self = Self::new()
     }
 
     pub fn is_connected(&self) -> bool {
-        self.port.is_connected()
+        matches!(self.stream, DriverTcpStream::Connected(_))
     }
 
     pub fn try_read_frame(&mut self) -> Result<Vec<MaixcamMessage>, String> {
-        let port = match &mut self.port {
-            DriverSerialPort::Disconnected(msg) => {
-                return Err(format!("Maixcam driver not active: {}", msg))
+        let reader = match &mut self.stream {
+            DriverTcpStream::Disconnected(msg) => {
+                return Err(format!("Maixcam disconnected: {}", msg));
             }
-            DriverSerialPort::Connected(port) => {
-                port
-            }
+
+            DriverTcpStream::Connected(reader) => reader,
         };
 
-        let mut buffer = [0u8; 256];
+        let mut line = String::new();
 
-        let mut result = Vec::new();
-
-        match port.read(&mut buffer) {
-            Ok(n) => {
-                for byte in &buffer[..n] {
-                    if let Some(msg) = self.decoder.push_byte(*byte) {
-                        result.push(msg);
-                    }
-                }
+        match reader.read_line(&mut line) {
+            Ok(0) => {
+                return Ok(Vec::new());
             }
+
+            Ok(_) => {}
+
             Err(e) => {
-                if e.kind() == std::io::ErrorKind::TimedOut {
+                if e.kind() == std::io::ErrorKind::WouldBlock {
                     return Ok(Vec::new());
-                } else {
-                    self.port =
-                        DriverSerialPort::Disconnected(format!("Read from Maixcam failed: {}", e));
-                    return Err(format!("Read from Maixcam failed: {}", e));
                 }
+
+                self.stream = DriverTcpStream::Disconnected(format!("{}", e));
+
+                return Err(format!("TCP read failed: {}", e));
             }
         }
-        Ok(result)
+
+        let packet: NetworkPacket = serde_json::from_str(&line).map_err(|e| e.to_string())?;
+
+        let circles = packet
+            .detections
+            .into_iter()
+            .map(|d| {
+                let color = match d.color.as_str() {
+                    "red" => MaixcamCircleColor::Red,
+                    "green" => MaixcamCircleColor::Green,
+                    "blue" => MaixcamCircleColor::Blue,
+                    _ => MaixcamCircleColor::Unknown,
+                };
+
+                let kind = match d.detection_type.as_str() {
+                    "ring" => MaixcamCircleKind::Ring,
+                    "solid" => MaixcamCircleKind::Solid,
+                    &_ => MaixcamCircleKind::default()
+                };
+
+                MaixcamCircle {
+                    position: Vec2::new(d.position.x, d.position.y),
+                    kind,
+                    color,
+                }
+            })
+            .collect();
+
+        Ok(vec![MaixcamMessage::CircleData(circles)])
     }
 }

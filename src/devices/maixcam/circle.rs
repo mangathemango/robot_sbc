@@ -1,3 +1,5 @@
+use std::default;
+
 use glam::Vec2;
 
 use crate::control::actions::{extend_arm::ArmExtendPreset};
@@ -6,20 +8,11 @@ use crate::control::actions::{extend_arm::ArmExtendPreset};
 pub struct MaixcamCircle {
     pub position: Vec2,
     pub color: MaixcamCircleColor,
+    pub kind: MaixcamCircleKind,
 }
 
 impl MaixcamCircle {
-    pub fn from_bytes(bytes: &[u8]) -> Self {
-        
-        let pos_x = u16::from_le_bytes([bytes[0], bytes[1]]) as f32 / 10000.0;
-        let pos_y = u16::from_le_bytes([bytes[2], bytes[3]]) as f32 / 10000.0;
-        let position = Vec2::new(pos_x, pos_y);
-        let color = MaixcamCircleColor::from_id(bytes[4]);
-        Self {
-            position,
-            color
-        }
-    }
+
 }
 
 
@@ -48,4 +41,11 @@ impl MaixcamCircleColor {
             _ => ArmExtendPreset::PlacementDiagonal
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum MaixcamCircleKind {
+    Ring,
+    #[default]
+    Solid
 }
