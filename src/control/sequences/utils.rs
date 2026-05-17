@@ -7,8 +7,9 @@ use crate::{
 
 pub fn wait_for_qr() -> WaitUntil {
     WaitUntil::new("Qr is scanned", || {
-        ROBOT.get_qr_state().color_queue_1.is_some()
-        && ROBOT.get_qr_state().color_queue_2.is_some()
+        (ROBOT.get_qr_state().color_queue_1.is_some()
+        && ROBOT.get_qr_state().color_queue_2.is_some()) 
+        || !ROBOT.get_qr_state().driver_is_connected
     })
 }
 

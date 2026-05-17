@@ -1,6 +1,6 @@
 use crate::devices::stm32::STM32_START_BYTE;
 
-#[derive(Debug)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Stm32Command {
     /// angle: 0-180
     SetYawServoAngle {
@@ -25,7 +25,7 @@ pub enum Stm32Command {
     SetHorizontalArmPosition {
         position: u16,
     },
-
+    #[default]
     Beep,
     /// velocities: values mapped from -10000 (-max) - 10000 (max)
     /// Note: Only set wheel velocity to target velocity, do not auto ramp velocity back to 0

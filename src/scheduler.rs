@@ -10,7 +10,7 @@ use crate::control::sequences::main::main_sequence;
 pub fn spawn_scheduler_thread() {
     std::thread::spawn(|| {
         let mut scheduler = Scheduler::new();
-
+        scheduler.sequence.enqueue(main_sequence());
         let mut last_tick = Instant::now();
         loop {
             let now = Instant::now();

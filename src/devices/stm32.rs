@@ -1,15 +1,14 @@
 pub mod command;
 pub mod controller;
 pub mod driver;
-pub mod state;
 pub mod message;
+pub mod state;
 
 use crate::ROBOT;
 use crate::devices::stm32::controller::Stm32Controller;
 use crate::devices::stm32::driver::Stm32Driver;
 use crate::devices::stm32::state::Stm32State;
 use crate::math::MecanumVelocities;
-use command::Stm32Command;
 
 use std::sync::mpsc;
 use std::time::Duration;
@@ -28,7 +27,7 @@ pub fn spawn_stm32_thread() {
         let mut driver = Stm32Driver::new();
         let mut state = Stm32State::new();
         let mut last_update = std::time::Instant::now();
-        let mut target_mecanum_velocities = MecanumVelocities::default();
+        let mut target_mecanum_velocities ;
         loop {
             let now = std::time::Instant::now();
             let dt = now - last_update;
@@ -40,33 +39,16 @@ pub fn spawn_stm32_thread() {
 
             // 🟣 1. Handle outgoing commands
             while let Ok(cmd) = receiver.try_recv() {
-                match cmd {
-                    Stm32Command::SetWheelTargetVelocities { velocities } => {
-                        target_mecanum_velocities =
-                            MecanumVelocities::from_array(velocities.map(|v| v as f32));
-                    }
-                    Stm32Command::SetClawServoAngle { angle } => {
-                        state.claw_servo_current_angle = angle;
-                    }
-                    Stm32Command::SetYawServoAngle { angle } => {
-                        state.yaw_servo_current_angle = angle;
-                    }
-                    Stm32Command::SetVerticalArmPosition { position } => {
-                        state.vertical_arm_position = position
-                    }
-                    Stm32Command::SetHorizontalArmPosition { position } => {
-                        state.horizontal_arm_position = position
-                    }
-                    _ => (),
-                }
-                let _ = driver.send_command(cmd);
+                state.update_command(cmd.clone());
+                let _ = driver.send_command(cmd.clone());
+                state.last_command = cmd;
             }
 
             // 🔵 2. Handle incoming data
             match driver.try_read_frame() {
                 Ok(messages) => {
                     for message in messages {
-                        state.update(message);
+                        state.update_message(message);
                     }
                 }
                 Err(_) => {
@@ -75,6 +57,8 @@ pub fn spawn_stm32_thread() {
                 }
             }
 
+            target_mecanum_velocities = 
+                MecanumVelocities::from_array(state.target_wheel_velocities.map(|v| v as f32));
             let current_mecanum_velocities =
                 MecanumVelocities::from_array(state.actual_wheel_velocities.map(|v| v as f32));
             let simulated_mecanum_velocities = current_mecanum_velocities

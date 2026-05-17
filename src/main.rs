@@ -1,4 +1,3 @@
-mod console;
 mod control;
 mod dashboard;
 mod devices;

@@ -1,6 +1,8 @@
+use std::default;
+
 use crate::devices::{stm32::STM32_START_BYTE, utils::SerialMessage};
 
-#[derive(Debug)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Stm32Message {
     Log {
         msg: String,
@@ -15,6 +17,7 @@ pub enum Stm32Message {
     VerticalArmPosition {
         position: u16,
     },
+    #[default]
     /// running: 0x00 for false, 0x01 for true. Will set to 1 when button on STM32 is clicked
     Key1,
 }
