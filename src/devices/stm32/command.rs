@@ -14,10 +14,6 @@ pub enum Stm32Command {
         text: String,
     },
 
-    /// Motor drivers will (hopefully) handle these two
-    CalibrateVerticalArm,
-    CalibrateHorizontalArm,
-
     /// position: values mapped from 0 (bottom/backwards) - 10000 (top/forwards)
     SetVerticalArmPosition {
         position: u16,
@@ -40,8 +36,6 @@ impl Stm32Command {
             Stm32Command::SetYawServoAngle { .. } => 0x01,
             Stm32Command::SetClawServoAngle { .. } => 0x02,
             Stm32Command::SetDisplayText { .. } => 0x03,
-            Stm32Command::CalibrateVerticalArm { .. } => 0x04,
-            Stm32Command::CalibrateHorizontalArm { .. } => 0x05,
             Stm32Command::SetVerticalArmPosition { .. } => 0x06,
             Stm32Command::SetHorizontalArmPosition { .. } => 0x07,
             Stm32Command::Beep { .. } => 0x08,

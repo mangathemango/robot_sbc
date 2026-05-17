@@ -18,10 +18,7 @@ impl RotateArm {
     }
 
     pub fn to_preset(target_position: ArmRotationPreset) -> Self {
-        Self {
-            target_angle: target_position.to_angle(),
-            ..Default::default()
-        }
+        Self::to_angle(target_position.to_angle())
     }
 
     pub fn middle() -> Self {
