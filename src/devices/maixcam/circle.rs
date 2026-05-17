@@ -1,4 +1,5 @@
-use std::default;
+use core::fmt;
+use std::{default, fmt::Display};
 
 use glam::Vec2;
 
@@ -11,10 +12,11 @@ pub struct MaixcamCircle {
     pub kind: MaixcamCircleKind,
 }
 
-impl MaixcamCircle {
-
+impl Display for MaixcamCircle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?} {:?} circle at {:.2}",self.color, self.kind, self.position)
+    }
 }
-
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum MaixcamCircleColor {

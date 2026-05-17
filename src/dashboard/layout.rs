@@ -30,10 +30,10 @@ pub fn ui(f: &mut Frame) {
     let [top_devices, bottom_devices] =
         Layout::vertical([Constraint::Fill(1), Constraint::Fill(2)]).areas(devices_area);
 
-    let [maixcam_panel, qr_panel] =
+    let [gyro_panel, qr_panel] =
         Layout::horizontal([Constraint::Fill(1), Constraint::Fill(1)]).areas(top_devices);
 
-    let [gyro_panel, stm32_panel] =
+    let [maixcam_panel, stm32_panel] =
         Layout::horizontal([Constraint::Fill(1), Constraint::Fill(1)]).areas(bottom_devices);
 
     draw_map(f, map_area);

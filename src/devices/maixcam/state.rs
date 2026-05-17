@@ -43,8 +43,10 @@ impl Display for MaixcamState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Connected: {}\nCircles {:?}\ndt: {:?}",
-            self.driver_is_connected, self.circles, self.dt,
+            "Connected: {}\nCircles {}\ndt: {:?}",
+            self.driver_is_connected, 
+            self.circles.iter().fold("".to_string(), |acc, circle| (acc + format!("{}\n", circle).as_str())), 
+            self.dt,
         )
     }
 }
