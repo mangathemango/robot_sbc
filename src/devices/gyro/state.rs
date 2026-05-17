@@ -1,4 +1,6 @@
-use crate::{ROBOT, devices::gyro::sample::GyroSample};
+use std::fmt::Display;
+
+use crate::{ROBOT, dashboard::helpers::format_radian, devices::gyro::sample::GyroSample};
 
 /// Current gyroscope state
 #[derive(Debug, Default, Clone)]
@@ -33,5 +35,20 @@ impl GyroState {
 
     pub fn publish(&self) {
         ROBOT.set_gyro_state(self.clone());
+    }
+}
+
+impl Display for GyroState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Raw yaw: {}\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\ndt: {:?}\nError: {:?}",
+            format_radian(self.yaw),
+            self.gy,
+            self.gz,
+            self.driver_is_connected,
+            self.dt,
+            self.error_msg
+        )
     }
 }

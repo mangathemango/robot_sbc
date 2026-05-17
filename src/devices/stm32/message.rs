@@ -1,5 +1,3 @@
-use std::default;
-
 use crate::devices::{stm32::STM32_START_BYTE, utils::SerialMessage};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]

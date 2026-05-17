@@ -5,10 +5,9 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Wrap},
 };
 
-use crate::{ROBOT, dashboard::helpers::format_radian};
+use crate::ROBOT;
 use crate::devices::gyro::state::GyroState;
 
-use crate::dashboard::helpers::bool_icon;
 
 pub fn draw_gyro(f: &mut Frame, area: Rect) {
     let g = ROBOT.get_gyro_state();
@@ -22,22 +21,7 @@ fn draw_gyro_text(f: &mut Frame, area: Rect, g: &GyroState) {
         Color::Green
     };
 
-    let text = format!(
-        "Raw yaw: {}\nGY: {:.2}\nGZ: {:.2}\nConnected: {}\nFPS: {:.1}\n{}",
-        format_radian(g.yaw),
-        g.gy,
-        g.gz,
-        bool_icon(g.driver_is_connected),
-        if g.dt.as_secs_f32() > 0.0 {
-            1.0 / g.dt.as_secs_f32()
-        } else {
-            0.0
-        } as i32,
-        match &g.error_msg {
-            Some(msg) => msg,
-            None => "",
-        }
-    );
+    let text = format!("{}", g);
 
     let block = Block::default()
         .title("GYRO")

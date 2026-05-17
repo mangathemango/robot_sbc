@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{fmt::Display, sync::Arc};
 
 use crate::{
     ROBOT,
@@ -22,18 +22,29 @@ impl MaixcamState {
         ROBOT.set_maixcam_state(self.clone());
     }
 
-    pub fn find_priority_circle(&self, priority_list: &[MaixcamCircleColor]) -> Option<&MaixcamCircle> {
+    pub fn find_priority_circle(
+        &self,
+        priority_list: &[MaixcamCircleColor],
+    ) -> Option<&MaixcamCircle> {
         for color in priority_list {
             if let Some(circle) = self.find_circle(color) {
-                return Some(circle)
+                return Some(circle);
             }
         }
         None
     }
 
     pub fn find_circle(&self, color: &MaixcamCircleColor) -> Option<&MaixcamCircle> {
-        self.circles
-            .iter()
-            .find(|circle| circle.color == *color)
+        self.circles.iter().find(|circle| circle.color == *color)
+    }
+}
+
+impl Display for MaixcamState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Connected: {}\nCircles {:?}\ndt: {:?}",
+            self.driver_is_connected, self.circles, self.dt,
+        )
     }
 }

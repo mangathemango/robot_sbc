@@ -4,8 +4,6 @@ use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
 
-use crate::dashboard::helpers::bool_icon;
-
 pub fn draw_qr(f: &mut Frame, area: Rect) {
     let qr = ROBOT.get_qr_state();
     let error_text = if qr.error_msg.is_empty() || qr.driver_is_connected {
@@ -15,9 +13,8 @@ pub fn draw_qr(f: &mut Frame, area: Rect) {
     };
 
     let text = format!(
-        "Qr: {}\nConnected: {}\n{}",
+        "{}\n{}",
         qr,
-        bool_icon(qr.driver_is_connected),
         error_text
     );
 
