@@ -1,8 +1,10 @@
+use ratatui::style::{Color, Style};
+use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
 
-use crate::dashboard::helpers::{paragraph, bool_icon};
+use crate::dashboard::helpers::bool_icon;
 
 pub fn draw_qr(f: &mut Frame, area: Rect) {
     let qr = ROBOT.get_qr_state();
@@ -19,5 +21,12 @@ pub fn draw_qr(f: &mut Frame, area: Rect) {
         error_text
     );
 
-    paragraph(f, area, "QR", text);
+    let block = Block::default()
+        .title("QR")
+        .borders(Borders::ALL)
+        .style(Style::default().fg(if qr.driver_is_connected {Color::Green} else {Color::Red}));
+
+    let p = Paragraph::new(text).wrap(Wrap { trim: true }).block(block);
+
+    f.render_widget(p, area);
 }

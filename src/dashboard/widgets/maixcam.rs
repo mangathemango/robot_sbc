@@ -1,3 +1,5 @@
+use ratatui::style::{Color, Style};
+use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
@@ -14,5 +16,12 @@ pub fn draw_maixcam(f: &mut Frame, area: Rect) {
         if maixcam.dt.as_secs_f32() > 0.0 { 1.0 / maixcam.dt.as_secs_f32() } else { 0.0 } as i32,
     );
 
-    paragraph(f, area, "MAIXCAM", text);
+    let block = Block::default()
+        .title("MAIXCAM")
+        .borders(Borders::ALL)
+        .style(Style::default().fg(if maixcam.driver_is_connected {Color::Green} else {Color::Red}));
+
+    let p = Paragraph::new(text).wrap(Wrap { trim: true }).block(block);
+
+    f.render_widget(p, area);
 }

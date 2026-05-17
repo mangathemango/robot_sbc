@@ -1,13 +1,20 @@
+use ratatui::style::{Color, Style};
+use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use ratatui::{Frame, layout::Rect};
 
 use crate::ROBOT;
 
-use crate::dashboard::helpers::{bool_icon, paragraph};
-
 pub fn draw_stm32(f: &mut Frame, area: Rect) {
-    let s = ROBOT.get_stm32_state();
+    let state = ROBOT.get_stm32_state();
 
-    let text = format!("{}", s);
+    let text = format!("{}", state);
 
-    paragraph(f, area, "STM32", text);
+    let block = Block::default()
+        .title("STM32")
+        .borders(Borders::ALL)
+        .style(Style::default().fg(if state.driver_is_connected {Color::Green} else {Color::Red}));
+
+    let p = Paragraph::new(text).wrap(Wrap { trim: true }).block(block);
+
+    f.render_widget(p, area);
 }
