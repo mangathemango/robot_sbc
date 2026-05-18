@@ -24,7 +24,7 @@ pub struct Stm32State {
     pub vertical_arm_position: u16,
 
     pub last_command: Stm32Command,
-    pub last_message: Stm32Message,
+    pub last_message: Option<Stm32Message>,
     pub log_msg: String,
     // Movement
     pub target_wheel_velocities: [i16; 4],
@@ -73,7 +73,18 @@ impl Stm32State {
             }
             Stm32Message::VerticalArmPosition { position } => self.vertical_arm_position = position,
         };
-        self.last_message = message.clone();
+        self.last_message = Some(message.clone());
+    }
+
+    pub fn last_command_byte_string(&self) -> String {
+        self.last_command.to_bytes_string()
+    }
+
+    pub fn last_message_byte_string(&self) -> String {
+        match self.last_message.clone() {
+            Some(message) => message.to_bytes_string(),
+            None => "[]".into()
+        }
     }
 
     pub fn publish(&self) {
@@ -86,8 +97,8 @@ impl Display for Stm32State {
         write!(
             f,
             "Last command: {:?}\n({})\n\nLast message: {:?}\n({})\n\nFront Wheels: {:06}   {:06}\nBack Wheels:  {:06}   {:06}\nYaw servo: {}\nClaw servo: {}\nVertical Arm: {}\nHorizontal Arm: {}\nLog: {}\ndt: {:?}",
-            self.last_command, self.last_command.to_bytes_string(),
-            self.last_message, self.last_message.to_bytes_string(),
+            self.last_command, self.last_command_byte_string(),
+            self.last_message, self.last_message_byte_string(),
             self.yaw_servo_current_angle,
             self.claw_servo_current_angle,
             self.vertical_arm_position,
