@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use crate::control::{actions::general::Sequence, routines::{
     calibration::{
         calibrate_at_final_processing_zone, calibrate_at_final_processing_zone_stacked,
@@ -6,13 +8,13 @@ use crate::control::{actions::general::Sequence, routines::{
     navigation::*,
     placement::{pick_up_all_materials_from_ground_1, pick_up_all_materials_from_ground_2, place_all_materials_on_ground_1, place_all_materials_on_ground_2, place_all_materials_stacked},
     utils::{
-        beep, set_oled_display_text_qr, set_oled_display_text_start, set_oled_display_text_stop,
-        wait_for_qr,
+        beep, set_oled_display_text_qr, set_oled_display_text_start, set_oled_display_text_stop, setup, wait_for_qr
     },
 }};
 
 pub fn main_sequence() -> Sequence {
     Sequence::new("Main Sequence")
+        .then(setup())
         .then(beep())
         .then(set_oled_display_text_start())
         .then(move_to_qr())
