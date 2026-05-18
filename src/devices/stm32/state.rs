@@ -85,7 +85,7 @@ impl Display for Stm32State {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Last command: {:?}\n({})\n\nLast message: {:?}\n({})Front Wheels: {:06}   {:06}\nBack Wheels:  {:06}   {:06}\nYaw servo: {}\nClaw servo: {}\nVertical Arm: {}\nHorizontal Arm: {}\nLog: {}\ndt: {:?}",
+            "Last command: {:?}\n({})\n\nLast message: {:?}\n({})\n\nFront Wheels: {:06}   {:06}\nBack Wheels:  {:06}   {:06}\nYaw servo: {}\nClaw servo: {}\nVertical Arm: {}\nHorizontal Arm: {}\nLog: {}\ndt: {:?}",
             self.last_command, self.last_command.to_bytes_string(),
             self.last_message, self.last_message.to_bytes_string(),
             self.yaw_servo_current_angle,
