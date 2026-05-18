@@ -17,6 +17,7 @@ pub fn spawn_scheduler_thread() {
             let now = Instant::now();
             let dt = now - last_tick;
             if dt < Duration::from_millis(20) {
+                std::thread::sleep(Duration::from_millis(1));
                 continue;
             }
             if ROBOT

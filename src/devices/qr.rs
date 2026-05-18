@@ -4,7 +4,7 @@ mod linux;
 #[cfg(not(target_os = "linux"))]
 mod stub;
 
-use std::time::Duration;
+use std::{thread, time::Duration};
 
 #[cfg(target_os = "linux")]
 pub use linux::*;
@@ -23,6 +23,7 @@ pub fn spawn_qr_thread() {
             let now = std::time::Instant::now();
             let dt = now.duration_since(last_update);
             if dt < Duration::from_millis(1000) {
+                thread::sleep(Duration::from_millis(100));
                 continue;
             } 
             ROBOT.lock_qr_state().dt = dt;

@@ -14,6 +14,7 @@ pub fn spawn_odometry_thread() {
             let now = std::time::Instant::now();
             let dt = now.duration_since(last_update);
             if dt < Duration::from_millis(10) {
+                std::thread::sleep(Duration::from_millis(1));
                 continue;
             }
             last_update = now;

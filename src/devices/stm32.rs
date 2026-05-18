@@ -33,6 +33,7 @@ pub fn spawn_stm32_thread() {
             let now = std::time::Instant::now();
             let dt = now - last_update;
             if dt < Duration::from_millis(50) {
+                std::thread::sleep(Duration::from_millis(1));
                 continue;
             }
             state.dt = now.duration_since(last_update);

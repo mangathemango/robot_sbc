@@ -49,6 +49,7 @@ fn run() -> Result<(), io::Error> {
         if last_tick.elapsed() >= tick_rate {
             last_tick = Instant::now();
         }
+        std::thread::sleep(Duration::from_millis(1));
     }
 
     disable_raw_mode()?;
