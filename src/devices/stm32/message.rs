@@ -31,6 +31,52 @@ impl Stm32Message {
             _ => None,
         }
     }
+
+    pub fn to_frame(&self) -> Vec<u8> {
+        let (id, data): (u8, Vec<u8>) = match self {
+            Stm32Message::Log { msg } => (0x50, msg.as_bytes().to_vec()),
+
+            Stm32Message::WheelVelocities { velocities } => {
+                let mut data = Vec::with_capacity(8);
+
+                for velocity in velocities {
+                    data.extend_from_slice(&velocity.to_le_bytes());
+                }
+
+                (0x51, data)
+            }
+
+            Stm32Message::Key1 => (0x52, vec![]),
+
+            Stm32Message::HorizontalArmPosition { position } => {
+                (0x53, position.to_le_bytes().to_vec())
+            }
+
+            Stm32Message::VerticalArmPosition { position } => {
+                (0x54, position.to_le_bytes().to_vec())
+            }
+        };
+
+        let mut frame = Vec::with_capacity(3 + data.len());
+
+        frame.push(Self::START_BYTE);
+        frame.push(id);
+        frame.push(data.len() as u8);
+        frame.extend_from_slice(&data);
+
+        frame
+    }
+
+    pub fn to_bytes_string(&self) -> String {
+        let bytes = self.to_frame();
+
+        let formatted: Vec<String> = bytes
+            .iter()
+            .map(|b| format!("0x{:02X}", b))
+            .collect();
+
+        format!("[{}]", formatted.join(", "))
+    }
 }
 
 impl SerialMessage for Stm32Message {

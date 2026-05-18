@@ -39,24 +39,25 @@ impl Stm32State {
     }
 
     pub fn update_command(&mut self, command: Stm32Command) {
-    match command {
-        Stm32Command::SetWheelTargetVelocities { velocities } => {
-            self.target_wheel_velocities = velocities;
+        match command {
+            Stm32Command::SetWheelTargetVelocities { velocities } => {
+                self.target_wheel_velocities = velocities;
+            }
+            Stm32Command::SetClawServoAngle { angle } => {
+                self.claw_servo_current_angle = angle;
+            }
+            Stm32Command::SetYawServoAngle { angle } => {
+                self.yaw_servo_current_angle = angle;
+            }
+            Stm32Command::SetVerticalArmPosition { position } => {
+                self.vertical_arm_position = position
+            }
+            Stm32Command::SetHorizontalArmPosition { position } => {
+                self.horizontal_arm_position = position
+            }
+            _ => (),
         }
-        Stm32Command::SetClawServoAngle { angle } => {
-            self.claw_servo_current_angle = angle;
-        }
-        Stm32Command::SetYawServoAngle { angle } => {
-            self.yaw_servo_current_angle = angle;
-        }
-        Stm32Command::SetVerticalArmPosition { position } => {
-            self.vertical_arm_position = position
-        }
-        Stm32Command::SetHorizontalArmPosition { position } => {
-            self.horizontal_arm_position = position
-        }
-        _ => (),
-    }}
+    }
 
     pub fn update_message(&mut self, message: Stm32Message) {
         match message.clone() {
@@ -84,8 +85,9 @@ impl Display for Stm32State {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Last command: {:?}\n({})\n\nYaw servo: {}\nClaw servo: {}\nVertical Arm: {}\nHorizontal Arm: {}\nFront Wheels: {:06}   {:06}\nBack Wheels:  {:06}   {:06}\nLog: {}\ndt: {:?}",
+            "Last command: {:?}\n({})\n\nLast message: {:?}\n({})Front Wheels: {:06}   {:06}\nBack Wheels:  {:06}   {:06}\nYaw servo: {}\nClaw servo: {}\nVertical Arm: {}\nHorizontal Arm: {}\nLog: {}\ndt: {:?}",
             self.last_command, self.last_command.to_bytes_string(),
+            self.last_message, self.last_message.to_bytes_string(),
             self.yaw_servo_current_angle,
             self.claw_servo_current_angle,
             self.vertical_arm_position,
