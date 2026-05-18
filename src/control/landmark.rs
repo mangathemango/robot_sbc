@@ -1,6 +1,6 @@
 pub const LANDMARK_SCALE: f32 = 0.6;
 
-use std::f32::consts::{FRAC_2_PI, PI};
+use std::{f32::consts::{FRAC_PI_2, PI}};
 
 use glam::Vec2;
 
@@ -48,12 +48,12 @@ impl Landmark {
 
             Landmark::UpperLeftTurn => Pose {
                 position: Vec2::new(-0.95, 0.95),
-                rotation: FRAC_2_PI,
+                rotation: FRAC_PI_2,
             },
 
             Landmark::FinalProcessingZone => Pose {
                 position: Vec2::new(-0.45, 0.95),
-                rotation: FRAC_2_PI,
+                rotation: FRAC_PI_2,
             },
 
             Landmark::UpperRightTurn => Pose {
