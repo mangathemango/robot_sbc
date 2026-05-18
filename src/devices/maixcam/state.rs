@@ -9,6 +9,7 @@ use crate::{
 pub struct MaixcamState {
     pub driver_is_connected: bool,
     pub circles: Vec<MaixcamCircle>,
+    pub error: Option<String>,
     /// Delta time for FPS calculation
     pub dt: std::time::Duration,
 }
@@ -43,11 +44,12 @@ impl Display for MaixcamState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Connected: {}\nCircles {}\ndt: {:?}",
+            "Connected: {}\nCircles {}\ndt: {:?}\nError: {:?}",
             self.driver_is_connected,
             self.circles.iter().fold("".to_string(), |acc, circle| (acc
                 + format!("{}\n", circle).as_str())),
             self.dt,
+            self.error
         )
     }
 }

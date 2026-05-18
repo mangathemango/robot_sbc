@@ -32,6 +32,7 @@ pub fn spawn_maixcam_thread() {
 
             match driver.try_read_frame() {
                 Ok(messages) => {
+                    state.error = None;
                     for message in messages {
                         match message {
                             MaixcamMessage::CircleData(circles) => {
@@ -40,9 +41,12 @@ pub fn spawn_maixcam_thread() {
                         }
                     }
                 }
-                Err(_) => {
+                Err(msg) => {
+                    state.circles.clear();
+                    state.driver_is_connected = false;
+                    state.error = Some(msg);
+                    state.publish();
                     driver.reconnect();
-                    std::thread::sleep(std::time::Duration::from_millis(200));
                 }
             }
             state.driver_is_connected = driver.is_connected();

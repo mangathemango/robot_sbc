@@ -32,7 +32,7 @@ struct NetworkPacket {
 
 use std::{
     io::{BufRead, BufReader},
-    net::TcpStream,
+    net::TcpStream, time::Duration,
 };
 
 #[derive(Debug)]
@@ -63,6 +63,7 @@ impl MaixcamDriver {
     }
 
     pub fn reconnect(&mut self) {
+        std::thread::sleep(Duration::from_secs(1));
         *self = Self::new()
     }
 
@@ -83,7 +84,8 @@ impl MaixcamDriver {
 
         match reader.read_line(&mut line) {
             Ok(0) => {
-                return Ok(Vec::new());
+                self.stream = DriverTcpStream::Disconnected(format!("Nothing was read lol"));
+                return Err(format!("TCP read failed"));
             }
 
             Ok(_) => {}
