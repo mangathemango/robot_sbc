@@ -175,6 +175,12 @@ impl QrState {
         ).collect();
         Some(result)
     }
+    
+    pub fn reset(&mut self) {
+        self.code = None;
+        self.color_queue_1 = None;
+        self.color_queue_2 = None;
+    }
 }
 
 impl Display for QrState {
