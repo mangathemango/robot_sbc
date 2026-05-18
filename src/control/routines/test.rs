@@ -4,6 +4,7 @@ use crate::control::{actions::general::{RuntimeSequence, Sequence, WaitFor}, rou
 
 pub fn test_sequence() -> Sequence {
     Sequence::new("Test Sequence")
+        .then(set_oled_display_text_start())
         .then(wait_for_qr())
         .then(set_oled_display_text_qr())
         // .then(set_oled_display_text_stopq())
