@@ -8,16 +8,8 @@ pub fn draw_map(f: &mut Frame, area: Rect) {
     let odometry_state = ROBOT.get_odometry_state();
     let map_text = build_pose_map(&odometry_state.pose, 21);
     let text = format!(
-        "{}\n\nPosition: {:.2}, {:.2}\nHeading: {}\nFPS: {:.1}",
-        map_text,
-        odometry_state.pose.position.x,
-        odometry_state.pose.position.y,
-        format_radian(odometry_state.pose.rotation),
-        if odometry_state.dt.as_secs_f32() > 0.0 {
-            1.0 / odometry_state.dt.as_secs_f32()
-        } else {
-            0.0
-        }
+        "{}",
+        map_text
     );
 
     paragraph(f, area, "MAP", text);

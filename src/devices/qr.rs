@@ -4,6 +4,8 @@ mod linux;
 #[cfg(not(target_os = "linux"))]
 mod stub;
 
+use std::time::Duration;
+
 #[cfg(target_os = "linux")]
 pub use linux::*;
 
@@ -19,7 +21,11 @@ pub fn spawn_qr_thread() {
         ROBOT.lock_qr_state().driver_is_connected = driver.is_connected();
         loop {
             let now = std::time::Instant::now();
-            ROBOT.lock_qr_state().dt = now.duration_since(last_update);
+            let dt = now.duration_since(last_update);
+            if dt < Duration::from_millis(1000) {
+                continue;
+            } 
+            ROBOT.lock_qr_state().dt = dt;
             last_update = now;
 
             match driver.try_read() {
