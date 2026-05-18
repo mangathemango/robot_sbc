@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::devices::gyro::{driver::GyroDriver, state::GyroState};
 
 pub mod driver;
@@ -14,6 +16,10 @@ pub fn spawn_gyro_thread() {
 
         loop {
             let now = std::time::Instant::now();
+            let dt = now.duration_since(last_update);
+            if dt < Duration::from_millis(40) {
+                continue;
+            }
             state.dt = now.duration_since(last_update);
             last_update = now;
 

@@ -24,7 +24,7 @@ pub fn spawn_maixcam_thread() {
         loop {
             let now = std::time::Instant::now();
             let dt = now.duration_since(last_update);
-            if dt < Duration::from_millis(20) {
+            if dt < Duration::from_millis(50) {
                 continue;
             }
             state.dt = now.duration_since(last_update);
