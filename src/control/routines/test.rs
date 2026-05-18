@@ -5,11 +5,7 @@ use crate::{ROBOT, control::{actions::general::{OneShot, RuntimeSequence, Sequen
 pub fn test_sequence() -> Sequence {
     Sequence::new("Test Sequence")
         .then(set_oled_display_text_start())
-        .then(OneShot::new(|| {
-            ROBOT.lock_qr_state().code = None;
-            ROBOT.lock_qr_state().color_queue_1 = None;
-            ROBOT.lock_qr_state().color_queue_2 = None;
-        }))
+        .then(OneShot::new(|| {ROBOT.lock_qr_state().reset();}))
         .then(wait_for_qr())
         .then(set_oled_display_text_qr())
         // .then(set_oled_display_text_stopq())
