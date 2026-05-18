@@ -1,5 +1,7 @@
 pub const LANDMARK_SCALE: f32 = 0.6;
 
+use std::f32::consts::{FRAC_2_PI, PI};
+
 use glam::Vec2;
 
 use crate::math::Pose;
@@ -36,22 +38,22 @@ impl Landmark {
 
             Landmark::CentralRightCrossing => Pose {
                 position: Vec2::new(-0.05, 0.50),
-                rotation: 0.0,
+                rotation: PI,
             },
 
             Landmark::TemporaryStorageZone => Pose {
                 position: Vec2::new(-0.95, 0.50),
-                rotation: 0.0,
+                rotation: PI,
             },
 
             Landmark::UpperLeftTurn => Pose {
                 position: Vec2::new(-0.95, 0.95),
-                rotation: 0.0,
+                rotation: FRAC_2_PI,
             },
 
             Landmark::FinalProcessingZone => Pose {
                 position: Vec2::new(-0.45, 0.95),
-                rotation: 0.0,
+                rotation: FRAC_2_PI,
             },
 
             Landmark::UpperRightTurn => Pose {

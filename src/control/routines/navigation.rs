@@ -46,6 +46,6 @@ pub fn move_back_to_start() -> Sequence {
 
 pub fn set_current_landmark(landmark: Landmark) -> OneShot {
     OneShot::new(move || {
-        ROBOT.lock_odometry_state().pose = landmark.pose();
+        ROBOT.lock_odometry_state().set_current_landmark(landmark);
     })
 }

@@ -1,6 +1,7 @@
 use glam::Vec2;
 
 use crate::ROBOT;
+use crate::control::landmark::{self, Landmark};
 use crate::math::{MecanumVelocities, Pose, Twist, utils::wrap_angle};
 use std::time::Duration;
 
@@ -26,7 +27,7 @@ pub fn spawn_odometry_thread() {
 pub struct OdometryState {
     pub twist: Twist,
     pub pose: Pose,
-    pub initial_rotation: f32,
+    pub gyro_offset: f32,
     /// Delta time for FPS calculation
     pub dt: std::time::Duration,
 }
@@ -42,8 +43,8 @@ impl OdometryState {
         let stm32_state = ROBOT.get_stm32_state();
         let gyro_state = ROBOT.get_gyro_state();
 
-        if self.initial_rotation.is_nan() {
-            self.initial_rotation = gyro_state.yaw;
+        if self.gyro_offset.is_nan() {
+            self.gyro_offset = gyro_state.yaw;
         }
 
         let [vfl, vfr, vrl, vrr] = stm32_state
@@ -56,6 +57,13 @@ impl OdometryState {
             (self.twist.linear * dt.as_secs_f32()).rotate(Vec2::from_angle(self.pose.rotation));
 
         self.pose.position += translation;
-        self.pose.rotation = wrap_angle(gyro_state.yaw - self.initial_rotation);
+        self.pose.rotation = wrap_angle(gyro_state.yaw - self.gyro_offset);
+    }
+
+    pub fn set_current_landmark(&mut self, landmark: Landmark) {
+        let landmark_pose = landmark.pose();
+        let gyro_state = ROBOT.get_gyro_state();
+        self.pose = landmark_pose;
+        self.gyro_offset = wrap_angle(gyro_state.yaw - landmark_pose.rotation);
     }
 }
