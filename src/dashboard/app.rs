@@ -35,7 +35,6 @@ fn run() -> Result<(), io::Error> {
     let mut last_tick = Instant::now();
 
     loop {
-        terminal.draw(|f| ui(f))?;
 
         // exit key (optional)
         if event::poll(Duration::from_millis(10))? {
@@ -47,6 +46,7 @@ fn run() -> Result<(), io::Error> {
         }
 
         if last_tick.elapsed() >= tick_rate {
+            terminal.draw(|f| ui(f))?;
             last_tick = Instant::now();
         }
         std::thread::sleep(Duration::from_millis(1));
