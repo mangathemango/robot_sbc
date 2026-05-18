@@ -99,14 +99,14 @@ impl Display for Stm32State {
             "Last command: {:?}\n({})\n\nLast message: {:?}\n({})\n\nFront Wheels: {:06}   {:06}\nBack Wheels:  {:06}   {:06}\nYaw servo: {}\nClaw servo: {}\nVertical Arm: {}\nHorizontal Arm: {}\nLog: {}\ndt: {:?}",
             self.last_command, self.last_command_byte_string(),
             self.last_message, self.last_message_byte_string(),
-            self.yaw_servo_current_angle,
-            self.claw_servo_current_angle,
-            self.vertical_arm_position,
-            self.horizontal_arm_position,
             self.actual_wheel_velocities[0],
             self.actual_wheel_velocities[1],
             self.actual_wheel_velocities[2],
             self.actual_wheel_velocities[3],
+            self.yaw_servo_current_angle,
+            self.claw_servo_current_angle,
+            self.vertical_arm_position,
+            self.horizontal_arm_position,
             self.log_msg,
             self.dt
         )
