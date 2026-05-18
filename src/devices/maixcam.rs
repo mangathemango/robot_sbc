@@ -3,7 +3,7 @@ pub mod driver;
 pub mod sample;
 pub mod state;
 pub mod message;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use crate::devices::maixcam::{driver::MaixcamDriver, message::MaixcamMessage, state::MaixcamState};
 
@@ -40,6 +40,7 @@ pub fn spawn_maixcam_thread() {
                             }
                         }
                     }
+                    state.last_updated = Instant::now();
                 }
                 Err(msg) => {
                     state.circles.clear();
@@ -48,6 +49,9 @@ pub fn spawn_maixcam_thread() {
                     state.publish();
                     driver.reconnect();
                 }
+            }
+            if Instant::now().duration_since(state.last_updated) > Duration::from_millis(1000) {
+                state.circles.clear();
             }
             state.driver_is_connected = driver.is_connected();
             state.publish();

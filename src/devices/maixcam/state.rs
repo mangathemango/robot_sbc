@@ -1,22 +1,35 @@
-use std::fmt::Display;
+use std::{fmt::Display, time::{Duration, Instant}};
 
 use crate::{
     ROBOT,
     devices::maixcam::circle::{MaixcamCircle, MaixcamCircleColor, MaixcamCircleKind},
 };
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct MaixcamState {
     pub driver_is_connected: bool,
     pub circles: Vec<MaixcamCircle>,
     pub error: Option<String>,
+    pub last_updated: Instant,
     /// Delta time for FPS calculation
     pub dt: std::time::Duration,
 }
 
+impl Default for MaixcamState {
+    fn default() -> Self {
+        Self {
+            last_updated: Instant::now(),
+            driver_is_connected: false,
+            circles: Vec::new(),
+            error: None,
+            dt: Duration::ZERO
+        }
+    }
+}
+
 impl MaixcamState {
     pub fn new() -> Self {
-        MaixcamState::default()
+        Self::default()
     }
 
     pub fn publish(&self) {
