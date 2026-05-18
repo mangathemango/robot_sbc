@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::{
     ROBOT,
-    devices::maixcam::circle::{MaixcamCircle, MaixcamCircleColor},
+    devices::maixcam::circle::{MaixcamCircle, MaixcamCircleColor, MaixcamCircleKind},
 };
 
 #[derive(Debug, Default, Clone)]
@@ -22,20 +22,20 @@ impl MaixcamState {
         ROBOT.set_maixcam_state(self.clone());
     }
 
-    pub fn find_priority_circle(
+    pub fn find_priority_ring(
         &self,
         priority_list: &[MaixcamCircleColor],
-    ) -> Option<&MaixcamCircle> {
+    ) -> Option<MaixcamCircle> {
         for color in priority_list {
-            if let Some(circle) = self.find_circle(color) {
-                return Some(circle);
+            if let Some(circle) = self.find_ring(color) {
+                return Some(circle.clone());
             }
         }
         None
     }
 
-    pub fn find_circle(&self, color: &MaixcamCircleColor) -> Option<&MaixcamCircle> {
-        self.circles.iter().find(|circle| circle.color == *color)
+    pub fn find_ring(&self, color: &MaixcamCircleColor) -> Option<&MaixcamCircle> {
+        self.circles.iter().find(|circle| circle.color == *color && circle.kind == MaixcamCircleKind::Ring)
     }
 }
 
@@ -44,8 +44,9 @@ impl Display for MaixcamState {
         write!(
             f,
             "Connected: {}\nCircles {}\ndt: {:?}",
-            self.driver_is_connected, 
-            self.circles.iter().fold("".to_string(), |acc, circle| (acc + format!("{}\n", circle).as_str())), 
+            self.driver_is_connected,
+            self.circles.iter().fold("".to_string(), |acc, circle| (acc
+                + format!("{}\n", circle).as_str())),
             self.dt,
         )
     }
