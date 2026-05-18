@@ -24,7 +24,12 @@ pub fn spawn_scheduler_thread() {
                 .start_flag
                 .swap(false, Ordering::Relaxed)
             {
-                scheduler.sequence.enqueue(main_sequence());
+                if scheduler.sequence.current_action.is_none() {
+                    scheduler.sequence.enqueue(test_sequence());
+                } else {
+                    scheduler.sequence.abort();
+                }
+                
             }
             scheduler.update(dt);
             scheduler.state.publish();

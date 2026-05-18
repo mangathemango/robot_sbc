@@ -41,6 +41,14 @@ impl Sequence {
             "Empty".into()
         }
     }
+
+    pub fn abort(&mut self) {
+        if let Some(mut action) = self.current_action.take() {
+            action.stop();
+        }
+        self.action_queue.clear();
+        self.current_action = None;
+    }
 }
 
 impl Action for Sequence {
