@@ -25,7 +25,7 @@ fn main() {
     spawn_stm32_thread();
 
     // Thread to retrieve raw data from the HWTCT101 gyroscope. Updates ROBOT.gyro_data
-    // spawn_gyro_thread();
+    spawn_gyro_thread();
 
     // Thread to retrieve detected circle data from the maixcam. Updates ROBOT.maixcam_state
     spawn_maixcam_thread();

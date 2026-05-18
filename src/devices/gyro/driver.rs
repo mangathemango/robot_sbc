@@ -1,4 +1,4 @@
-use std::f32::consts::PI;
+use std::{f32::consts::PI, time::Duration};
 
 use crate::devices::{
     utils::DriverSerialPort,
@@ -40,6 +40,7 @@ impl GyroDriver {
                     match port.read_exact(&mut buffer) {
                         Ok(_) => {}
                         Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => {
+                            std::thread::sleep(Duration::from_millis(5));
                             continue;
                         }
                         Err(e) => {
