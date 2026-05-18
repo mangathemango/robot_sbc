@@ -18,6 +18,15 @@ impl ExtendArm {
         Self::to_position(preset.to_position())
     }
 
+    pub fn to_storage(color: MaixcamCircleColor) -> Self {
+        Self::to_preset(ArmExtendPreset::Storage(color))
+    }
+
+    
+    pub fn to_placement(color: MaixcamCircleColor) -> Self {
+        Self::to_preset(ArmExtendPreset::Placement(color))
+    }
+
     pub fn back() -> Self {
         Self::to_preset(ArmExtendPreset::Back)
     }

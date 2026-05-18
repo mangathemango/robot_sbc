@@ -19,6 +19,18 @@ impl LiftArm {
     pub fn up() -> Self {
         Self::to_preset(ArmLiftPreset::Up)
     }
+
+    pub fn to_storage() -> Self {
+        Self::to_preset(ArmLiftPreset::Storage)
+    }
+
+    pub fn to_ground() -> Self {
+        Self::to_preset(ArmLiftPreset::Ground)
+    }
+
+    pub fn to_stacked() -> Self {
+        Self::to_preset(ArmLiftPreset::Stack)
+    }
 }
 
 impl Action for LiftArm {

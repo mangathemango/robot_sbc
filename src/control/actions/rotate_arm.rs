@@ -21,6 +21,15 @@ impl RotateArm {
         Self::to_angle(target_position.to_angle())
     }
 
+    pub fn to_storage(color: MaixcamCircleColor) -> Self {
+        Self::to_preset(ArmRotationPreset::Storage(color))
+    }
+
+    
+    pub fn to_placement(color: MaixcamCircleColor) -> Self {
+        Self::to_preset(ArmRotationPreset::Placement(color))
+    }
+    
     pub fn idle() -> Self {
         Self::to_preset(ArmRotationPreset::Idle)
     }
