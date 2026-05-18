@@ -28,7 +28,7 @@ fn main() {
     spawn_gyro_thread();
 
     // Thread to retrieve detected circle data from the maixcam. Updates ROBOT.maixcam_state
-    spawn_maixcam_thread();
+    // spawn_maixcam_thread();
 
     // Thread to continuously read data from the QR code reader. Updates ROBOT.qr_state
     spawn_qr_thread();
@@ -38,7 +38,7 @@ fn main() {
     spawn_odometry_thread();
 
     // Thread to queue high level actions and sequences. Updates ROBOT.scheduler_state
-    // spawn_scheduler_thread();
+    spawn_scheduler_thread();
 
     // Thread to render TUI for debugging
     spawn_dashboard_thread();
