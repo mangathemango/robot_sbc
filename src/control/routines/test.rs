@@ -7,6 +7,8 @@ pub fn test_sequence() -> Sequence {
         .then(set_oled_display_text_start())
         .then(OneShot::new(|| {
             ROBOT.lock_qr_state().code = None;
+            ROBOT.lock_qr_state().color_queue_1 = None;
+            ROBOT.lock_qr_state().color_queue_2 = None;
         }))
         .then(wait_for_qr())
         .then(set_oled_display_text_qr())
