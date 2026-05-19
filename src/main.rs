@@ -1,9 +1,22 @@
+//! # Robot System Entry Point
+//!
+//! This binary orchestrates the full robot runtime.
+//!
+//! It initializes global shared state (`ROBOT`) and spawns all subsystem threads:
+//! - device I/O (STM32, gyro, camera, QR)
+//! - control systems (odometry, action execution)
+//! - debugging interface (dashboard)
+//!
+//! # Execution model
+//! The system is fully concurrent and runs as a set of independent loops
+//! communicating through shared state and channels.
+
 mod control;
 mod dashboard;
 mod devices;
 mod math;
 mod robot;
-mod scheduler;
+mod action_executor;
 
 use std::sync::LazyLock;
 
@@ -13,7 +26,7 @@ use crate::devices::gyro::spawn_gyro_thread;
 use crate::devices::maixcam::spawn_maixcam_thread;
 use crate::devices::qr::spawn_qr_thread;
 use crate::devices::stm32::spawn_stm32_thread;
-use crate::scheduler::spawn_scheduler_thread;
+use crate::action_executor::spawn_action_executor_thread;
 
 use robot::Robot;
 
@@ -22,24 +35,24 @@ static ROBOT: LazyLock<Robot> = LazyLock::new(|| Robot::new());
 
 fn main() {
     // DEVICE THREADS
-    // Thread to retrieve and send serial data to the STM32. Updates ROBOT.stm32_state and provides ROBOT.get_stm32_controller()
+    // STM32 communication (commands + telemetry). Updates ROBOT.stm32_state and provides ROBOT.get_stm32_controller()
     spawn_stm32_thread();
 
-    // Thread to retrieve raw data from the HWTCT101 gyroscope. Updates ROBOT.gyro_data
+    // HWTCT101 gyroscope communication. Updates ROBOT.gyro_data
     spawn_gyro_thread();
 
-    // Thread to retrieve detected circle data from the maixcam. Updates ROBOT.maixcam_state
+    // Maixcam communication. Updates ROBOT.maixcam_state
     spawn_maixcam_thread();
 
-    // Thread to continuously read data from the QR code reader. Updates ROBOT.qr_state
+    // QR Reader communication. Updates ROBOT.qr_state
     spawn_qr_thread();
 
     // CONTROL THREADS
-    // Thread to estimate current position + movement of the robot. Updates ROBOT.odometry_state
+    // Odometry (position + velocity) estimation. Updates ROBOT.odometry_state
     spawn_odometry_thread();
 
     // Thread to queue high level actions and sequences. Updates ROBOT.action_queue
-    spawn_scheduler_thread();
+    spawn_action_executor_thread();
 
     // Thread to render TUI for debugging
     spawn_dashboard_thread();

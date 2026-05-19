@@ -5,7 +5,7 @@ use crate::control::actions::Action;
 use crate::control::routines::main::main_sequence;
 use crate::control::routines::test::test_sequence;
 
-pub fn spawn_scheduler_thread() {
+pub fn spawn_action_executor_thread() {
     std::thread::spawn(|| {
         ROBOT.action_queue_mut().enqueue(test_sequence());
         let mut last_tick = Instant::now();
