@@ -10,7 +10,7 @@ pub mod general;
 use std::{fmt::Display, time::Duration};
 
 #[allow(unused_variables)]
-pub trait Action: Display {
+pub trait Action: Display + Send + Sync {
     fn start(&mut self) {}
 
     fn update(&mut self, dt: Duration) {}

@@ -97,7 +97,7 @@ impl Display for Sequence {
 
 pub struct RuntimeSequence
 {
-    generator: Box<dyn Fn() -> Sequence>,
+    generator: Box<dyn Fn() -> Sequence + Send + Sync>,
     generated: Sequence,
 }
 
@@ -105,7 +105,7 @@ impl RuntimeSequence
 {   
     pub fn new<F>(f: F) -> Self 
     where 
-        F: Fn() -> Sequence + 'static
+        F: Fn() -> Sequence + Send + Sync + 'static
     {
         Self {
             generator: Box::new(f),
@@ -141,13 +141,13 @@ impl Display for RuntimeSequence
 }
 
 pub struct OneShot {
-    f: Box<dyn FnMut()>,
+    f: Box<dyn FnMut() + Send + Sync>,
 }
 
 impl OneShot {
     pub fn new<F>(f: F) -> Self
     where
-        F: FnMut() + 'static,
+        F: FnMut() + 'static + Send + Sync,
     {
         Self { f: Box::new(f) }
     }
@@ -205,14 +205,14 @@ impl Display for WaitFor {
 }
 
 pub struct WaitUntil {
-    condition: Box<dyn Fn() -> bool>,
+    condition: Box<dyn Fn() -> bool + Send + Sync>,
     name: String
 }
 
 impl WaitUntil {
     pub fn new<F>(condition_name: &str, condition: F) -> Self
     where
-        F: Fn() -> bool + 'static,
+        F: Fn() -> bool + 'static + Send + Sync,
     {
         Self {
             name: condition_name.into(),
