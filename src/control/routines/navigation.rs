@@ -12,8 +12,7 @@ pub fn move_to_qr() -> Sequence {
 }
 
 pub fn move_from_qr_to_source_zone() -> Sequence {
-    Sequence::new("Moving from Qr zone to Source Zone")
-        .then(Move::to(Landmark::SourceZone))
+    Sequence::new("Moving from Qr zone to Source Zone").then(Move::to(Landmark::SourceZone))
 }
 
 pub fn move_to_temporary_storage_zone() -> Sequence {
@@ -46,6 +45,6 @@ pub fn move_back_to_start() -> Sequence {
 
 pub fn set_current_landmark(landmark: Landmark) -> OneShot {
     OneShot::new(move || {
-        ROBOT.lock_odometry_state().set_current_landmark(landmark);
+        ROBOT.odometry_state_mut().set_current_landmark(landmark);
     })
 }

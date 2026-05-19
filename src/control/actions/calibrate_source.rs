@@ -1,4 +1,8 @@
-use std::{f32::consts::{FRAC_PI_2, PI}, fmt::Display, time::Duration};
+use std::{
+    f32::consts::{FRAC_PI_2, PI},
+    fmt::Display,
+    time::Duration,
+};
 
 use glam::Vec2;
 
@@ -8,7 +12,8 @@ use crate::{
         actions::Action,
         motion::{MotionPolicy, MotionPolicyPreset},
     },
-    devices::maixcam::circle::MaixcamCircleColor, math::{Pose, Twist},
+    devices::maixcam::circle::MaixcamCircleColor,
+    math::{Pose, Twist},
 };
 
 // This command assumes the arm is on the right side by hard code bc we only do that lmoa
@@ -48,7 +53,7 @@ impl Action for CalibrateSource {
     }
 
     fn update(&mut self, dt: Duration) {
-        let circle = ROBOT.get_maixcam_state().find_priority_ring(&[
+        let circle = ROBOT.maixcam_state().find_priority_ring(&[
             MaixcamCircleColor::Red,
             MaixcamCircleColor::Green,
             MaixcamCircleColor::Blue,
@@ -83,12 +88,12 @@ impl Action for CalibrateSource {
                 self.timer += dt;
 
                 if self.timer > self.move_time {
-                    ROBOT.get_stm32_controller().set_twist(Twist::ZERO);
+                    ROBOT.stm32_controller().set_twist(Twist::ZERO);
                     self.state = CalibrateState::WaitingForStable;
                     return;
                 }
                 if let Some(circle) = circle {
-                    let current_rotation = ROBOT.get_odometry_state().pose.rotation;
+                    let current_rotation = ROBOT.odometry_state().pose.rotation;
                     // Move the robot linearly so that the circle ends up in the target position while keeping the initial rotation stable
                     let current_state = Pose {
                         position: circle.position,
@@ -109,7 +114,7 @@ impl Action for CalibrateSource {
                     linear_output.y *= -1.0;
                     linear_output = linear_output.rotate(Vec2::from_angle(FRAC_PI_2));
                     let target_twist = Twist::new(linear_output, angular_output);
-                    ROBOT.get_stm32_controller().set_twist(target_twist);
+                    ROBOT.stm32_controller().set_twist(target_twist);
                 }
             }
         }

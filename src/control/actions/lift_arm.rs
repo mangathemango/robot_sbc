@@ -40,13 +40,13 @@ impl LiftArm {
 
 impl Action for LiftArm {
     fn start(&mut self) {
-        let stm32_controller = ROBOT.get_stm32_controller();
+        let stm32_controller = ROBOT.stm32_controller();
         stm32_controller.set_vertical_arm_position(self.target_position);
     }
 
     fn is_finished(&self) -> bool {
         self.target_position
-            .abs_diff(ROBOT.get_stm32_state().vertical_arm_position)
+            .abs_diff(ROBOT.stm32_state().vertical_arm_position)
             < 100
     }
 }

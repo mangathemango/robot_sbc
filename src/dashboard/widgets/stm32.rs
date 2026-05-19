@@ -5,7 +5,7 @@ use ratatui::{Frame, layout::Rect};
 use crate::ROBOT;
 
 pub fn draw_stm32(f: &mut Frame, area: Rect) {
-    let state = ROBOT.get_stm32_state();
+    let state = ROBOT.stm32_state();
 
     let text = format!("{}", state);
 

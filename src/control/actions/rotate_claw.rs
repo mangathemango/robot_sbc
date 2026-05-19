@@ -29,8 +29,8 @@ impl RotateClaw {
 #[allow(unused_variables)]
 impl Action for RotateClaw {
     fn start(&mut self) {
-        self.initial_angle = ROBOT.get_stm32_state().yaw_servo_current_angle;
-        let stm32_controller = ROBOT.get_stm32_controller();
+        self.initial_angle = ROBOT.stm32_state().yaw_servo_current_angle;
+        let stm32_controller = ROBOT.stm32_controller();
         stm32_controller.set_claw_servo(self.target_angle);
     }
 

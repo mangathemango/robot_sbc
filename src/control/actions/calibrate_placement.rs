@@ -45,13 +45,13 @@ impl CalibratePlacement {
 impl Action for CalibratePlacement {
     fn start(&mut self) {
         ROBOT
-            .get_stm32_controller()
+            .stm32_controller()
             .set_yaw_servo(ArmRotationPreset::Calibration.to_angle());
     }
 
     fn update(&mut self, dt: Duration) {
-        let current_rotation = ROBOT.get_odometry_state().pose.rotation;
-        let maixcam_state = ROBOT.get_maixcam_state();
+        let current_rotation = ROBOT.odometry_state().pose.rotation;
+        let maixcam_state = ROBOT.maixcam_state();
         self.chosen_circle = maixcam_state.find_priority_ring(&[
             MaixcamCircleColor::Green,
             MaixcamCircleColor::Blue,
@@ -86,23 +86,29 @@ impl Action for CalibratePlacement {
             linear_output = linear_output.rotate(Vec2::from_angle(FRAC_PI_2));
 
             let target_twist = Twist::new(linear_output, angular_output);
-            ROBOT.get_stm32_controller().set_twist(target_twist);
+            ROBOT.stm32_controller().set_twist(target_twist);
         }
     }
 
     fn stop(&mut self) {
-        ROBOT.get_stm32_controller().set_twist(Twist::ZERO);
+        ROBOT.stm32_controller().set_twist(Twist::ZERO);
     }
 
     fn is_finished(&self) -> bool {
-        self.motion_policy.is_settled() || !ROBOT.get_maixcam_state().driver_is_connected
+        self.motion_policy.is_settled() || !ROBOT.maixcam_state().driver_is_connected
     }
 }
 
 impl Display for CalibratePlacement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Calibrating placment with mode {:?}\nChosen Circle: {}\nTarget position: {}\nMotion Policy: {:?}", 
-            self.mode, self.chosen_circle.unwrap_or_default(), self.mode.target_circle_position(), self.motion_policy)
+        writeln!(
+            f,
+            "Calibrating placment with mode {:?}\nChosen Circle: {}\nTarget position: {}\nMotion Policy: {:?}",
+            self.mode,
+            self.chosen_circle.unwrap_or_default(),
+            self.mode.target_circle_position(),
+            self.motion_policy
+        )
     }
 }
 

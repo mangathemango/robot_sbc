@@ -8,9 +8,8 @@ use ratatui::{
 use crate::ROBOT;
 use crate::devices::gyro::state::GyroState;
 
-
 pub fn draw_gyro(f: &mut Frame, area: Rect) {
-    let g = ROBOT.get_gyro_state();
+    let g = ROBOT.gyro_state();
     draw_gyro_text(f, area, &*g);
 }
 

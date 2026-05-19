@@ -9,7 +9,7 @@ use ratatui::{
 use crate::ROBOT;
 
 pub fn draw_compass(f: &mut Frame, area: Rect) {
-    let odometry_state = ROBOT.get_odometry_state();
+    let odometry_state = ROBOT.odometry_state();
 
     draw_compass_inner(f, area, odometry_state.pose.rotation);
 }

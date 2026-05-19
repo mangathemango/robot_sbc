@@ -5,7 +5,7 @@ use ratatui::{Frame, layout::Rect};
 use crate::ROBOT;
 
 pub fn draw_maixcam(f: &mut Frame, area: Rect) {
-    let maixcam = ROBOT.get_maixcam_state();
+    let maixcam = ROBOT.maixcam_state();
 
     let text = format!("{}", maixcam);
 

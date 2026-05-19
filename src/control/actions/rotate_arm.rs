@@ -7,7 +7,7 @@ pub struct RotateArm {
     pub initial_angle: u8,
     pub target_angle: u8,
     pub elapsed_time: Duration,
-    pub preset: Option<ArmRotationPreset>
+    pub preset: Option<ArmRotationPreset>,
 }
 
 impl RotateArm {
@@ -26,7 +26,6 @@ impl RotateArm {
         Self::to_preset(ArmRotationPreset::Storage(color))
     }
 
-    
     pub fn to_placement(color: MaixcamCircleColor) -> Self {
         Self::to_preset(ArmRotationPreset::Placement(color))
     }
@@ -34,7 +33,7 @@ impl RotateArm {
     pub fn to_source() -> Self {
         Self::to_preset(ArmRotationPreset::Calibration)
     }
-    
+
     pub fn idle() -> Self {
         Self::to_preset(ArmRotationPreset::Idle)
     }
@@ -42,8 +41,8 @@ impl RotateArm {
 
 impl Action for RotateArm {
     fn start(&mut self) {
-        self.initial_angle = ROBOT.get_stm32_state().yaw_servo_current_angle;
-        let stm32_controller = ROBOT.get_stm32_controller();
+        self.initial_angle = ROBOT.stm32_state().yaw_servo_current_angle;
+        let stm32_controller = ROBOT.stm32_controller();
         stm32_controller.set_yaw_servo(self.target_angle);
     }
 
@@ -72,28 +71,23 @@ pub enum ArmRotationPreset {
     Storage(MaixcamCircleColor),
     Placement(MaixcamCircleColor),
     Calibration,
-
 }
 
 impl ArmRotationPreset {
     pub fn to_angle(&self) -> u8 {
         match self {
             Self::Idle => 0,
-            Self::Storage(color) => {
-                match color {
-                    MaixcamCircleColor::Blue => 10,
-                    MaixcamCircleColor::Green => 20,
-                    MaixcamCircleColor::Red => 30,
-                }
+            Self::Storage(color) => match color {
+                MaixcamCircleColor::Blue => 10,
+                MaixcamCircleColor::Green => 20,
+                MaixcamCircleColor::Red => 30,
             },
-            Self::Placement(color) => {
-                match color {
-                    MaixcamCircleColor::Blue => 40,
-                    MaixcamCircleColor::Green => 50,
-                    MaixcamCircleColor::Red => 60
-                }
-            }
-            Self::Calibration => 90
+            Self::Placement(color) => match color {
+                MaixcamCircleColor::Blue => 40,
+                MaixcamCircleColor::Green => 50,
+                MaixcamCircleColor::Red => 60,
+            },
+            Self::Calibration => 90,
         }
     }
 

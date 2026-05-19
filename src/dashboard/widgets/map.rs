@@ -5,7 +5,7 @@ use crate::dashboard::helpers::{format_radian, paragraph};
 use crate::math::Pose;
 
 pub fn draw_map(f: &mut Frame, area: Rect) {
-    let odometry_state = ROBOT.get_odometry_state();
+    let odometry_state = ROBOT.odometry_state();
     let map_text = build_pose_map(&odometry_state.pose, 21);
     let text = format!(
         "{}",

@@ -5,7 +5,7 @@ use crate::ROBOT;
 use crate::dashboard::helpers::{format_radian, paragraph};
 
 pub fn draw_odometry(f: &mut Frame, area: Rect) {
-    let odometry_state = ROBOT.get_odometry_state();
+    let odometry_state = ROBOT.odometry_state();
     let text = format!(
         "Current Twist: {}\nCurrent Pose: {}\nInitial Yaw: {}\nFPS: {:.1}",
         odometry_state.twist,

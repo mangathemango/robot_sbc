@@ -19,7 +19,7 @@ pub fn spawn_odometry_thread() {
             }
             last_update = now;
 
-            ROBOT.lock_odometry_state().update(dt);
+            ROBOT.odometry_state_mut().update(dt);
         }
     });
 }
@@ -41,8 +41,8 @@ impl OdometryState {
     pub fn update(&mut self, dt: Duration) {
         self.dt = dt;
 
-        let stm32_state = ROBOT.get_stm32_state();
-        let gyro_state = ROBOT.get_gyro_state();
+        let stm32_state = ROBOT.stm32_state();
+        let gyro_state = ROBOT.gyro_state();
 
         if self.gyro_offset.is_nan() {
             self.gyro_offset = gyro_state.yaw;
@@ -63,7 +63,7 @@ impl OdometryState {
 
     pub fn set_current_landmark(&mut self, landmark: Landmark) {
         let landmark_pose = landmark.pose();
-        let gyro_state = ROBOT.get_gyro_state();
+        let gyro_state = ROBOT.gyro_state();
         self.pose = landmark_pose;
         self.gyro_offset = wrap_angle(gyro_state.yaw - landmark_pose.rotation);
     }
