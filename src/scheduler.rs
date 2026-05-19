@@ -1,5 +1,3 @@
-use std::fmt::Debug;
-use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
 use crate::ROBOT;
@@ -10,8 +8,7 @@ use crate::control::routines::test::test_sequence;
 
 pub fn spawn_scheduler_thread() {
     std::thread::spawn(|| {
-        let mut scheduler = Scheduler::new();
-        scheduler.sequence.enqueue(test_sequence());
+        ROBOT.lock_action_queue().enqueue(test_sequence());
         let mut last_tick = Instant::now();
         loop {
             let now = Instant::now();
@@ -20,58 +17,16 @@ pub fn spawn_scheduler_thread() {
                 std::thread::sleep(Duration::from_millis(1));
                 continue;
             }
-            if ROBOT
-                .get_stm32_state()
-                .start_flag
-                .swap(false, Ordering::Relaxed)
-            {
-                if scheduler.sequence.current_action.is_none() {
-                    scheduler.sequence.enqueue(test_sequence());
+            let mut action_queue = ROBOT.lock_action_queue();
+            if ROBOT.get_stm32_state().key1_is_pressed() {
+                if action_queue.is_finished() {
+                    action_queue.enqueue(test_sequence());
                 } else {
-                    scheduler.sequence.abort();
+                    action_queue.abort();
                 }
-                
             }
-            scheduler.update(dt);
-            scheduler.state.publish();
+            action_queue.update(dt);
             last_tick = now;
         }
     });
-}
-
-#[derive(Default)]
-pub struct Scheduler {
-    pub sequence: Sequence,
-    pub state: SchedulerState,
-}
-
-impl Scheduler {
-    pub fn new() -> Self {
-        Self {
-            sequence: Sequence::new("Controller"),
-            ..Default::default()
-        }
-    }
-
-    pub fn update(&mut self, dt: Duration) {
-        self.state.current_command_debug_string = format!("{}", self.sequence);
-        self.state.dt = dt;
-        self.sequence.update(dt);
-    }
-}
-
-#[derive(Debug, Default, Clone)]
-pub struct SchedulerState {
-    pub current_command_debug_string: String,
-    pub dt: Duration,
-}
-
-impl SchedulerState {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn publish(&self) {
-        ROBOT.set_controller_state(self.clone());
-    }
 }

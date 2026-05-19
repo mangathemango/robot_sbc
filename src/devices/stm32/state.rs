@@ -87,6 +87,10 @@ impl Stm32State {
         }
     }
 
+    pub fn key1_is_pressed(&self) -> bool {
+        self.start_flag.swap(false, Ordering::Relaxed)
+    }
+    
     pub fn publish(&self) {
         ROBOT.set_stm32_state(self.clone());
     }

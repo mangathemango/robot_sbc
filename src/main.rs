@@ -37,7 +37,7 @@ fn main() {
     // Thread to estimate current position + movement of the robot. Updates ROBOT.odometry_state
     spawn_odometry_thread();
 
-    // Thread to queue high level actions and sequences. Updates ROBOT.scheduler_state
+    // Thread to queue high level actions and sequences. Updates ROBOT.action_queue
     spawn_scheduler_thread();
 
     // Thread to render TUI for debugging
