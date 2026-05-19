@@ -3,8 +3,8 @@ use std::{thread, time::Duration};
 use image::GrayImage;
 use rqrr::PreparedImage;
 use rscam::{Camera, Config};
+use crate::devices::qr::QR_READER_DOTENV_KEY;
 
-#[derive(Debug)]
 pub struct QrDriver {
     pub camera: Option<Camera>,
 }

@@ -1,5 +1,6 @@
 use crate::devices::maixcam::circle::MaixcamCircleColor;
 use std::{fmt::Display, thread, time::Duration};
+use crate::devices::qr::QR_READER_DOTENV_KEY;
 
 #[derive(Debug)]
 pub enum DriverHIDDevice {
