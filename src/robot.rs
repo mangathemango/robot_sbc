@@ -31,7 +31,7 @@ impl Robot {
             maixcam_state: ArcSwap::from_pointee(MaixcamState::new()),
             qr_state: Arc::new(Mutex::new(QrState::new())),
             odometry_state: Arc::new(Mutex::new(OdometryState::new())),
-            action_queue: Arc::new(Mutex::new(Sequence::new("Scheduler"))),
+            action_queue: Arc::new(Mutex::new(Sequence::new("Action Queue"))),
 
             stm32_controller: OnceLock::new(),
         }
