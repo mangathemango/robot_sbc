@@ -6,7 +6,7 @@ use rscam::{Camera, Config};
 use crate::devices::qr::QR_READER_DOTENV_KEY;
 
 pub struct QrDriver {
-    pub camera: Option<Camera>,
+    camera: Option<Camera>,
 }
 
 impl QrDriver {

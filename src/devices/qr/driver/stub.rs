@@ -9,7 +9,7 @@ pub enum DriverHIDDevice {
 
 #[derive(Debug)]
 pub struct QrDriver {
-    pub device: DriverHIDDevice,
+    device: DriverHIDDevice,
 }
 
 impl QrDriver {

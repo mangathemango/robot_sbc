@@ -1,6 +1,6 @@
 
 #[derive(Debug)]
-pub enum DriverHIDDevice {
+enum DriverHIDDevice {
     Connected(Device),
     Disconnected(String),
 }
@@ -16,7 +16,7 @@ impl DriverHIDDevice {
 
 #[derive(Debug)]
 pub struct QrDriver {
-    pub device: DriverHIDDevice,
+    device: DriverHIDDevice,
 }
 
 impl QrDriver {
