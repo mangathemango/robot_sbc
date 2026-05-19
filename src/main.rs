@@ -5,6 +5,8 @@ mod math;
 mod robot;
 mod scheduler;
 
+use std::sync::LazyLock;
+
 use crate::control::states::odometry::spawn_odometry_thread;
 use crate::dashboard::spawn_dashboard_thread;
 use crate::devices::gyro::spawn_gyro_thread;
@@ -13,11 +15,10 @@ use crate::devices::qr::spawn_qr_thread;
 use crate::devices::stm32::spawn_stm32_thread;
 use crate::scheduler::spawn_scheduler_thread;
 
-use once_cell::sync::Lazy;
 use robot::Robot;
 
 // The global ROBOT variable used to share data across different threads
-static ROBOT: Lazy<Robot> = Lazy::new(|| Robot::new());
+static ROBOT: LazyLock<Robot> = LazyLock::new(|| Robot::new());
 
 fn main() {
     // DEVICE THREADS
