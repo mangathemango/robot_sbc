@@ -1,14 +1,20 @@
 pub mod circle;
 pub mod driver;
+pub mod message;
 pub mod sample;
 pub mod state;
-pub mod message;
-use std::time::{Duration, Instant};
+use std::{
+    ops::Div,
+    time::{Duration, Instant},
+};
 
-use crate::devices::maixcam::{driver::MaixcamDriver, message::MaixcamMessage, state::MaixcamState};
+use glam::Vec2;
+
+use crate::devices::maixcam::{
+    driver::MaixcamDriver, message::MaixcamMessage, state::MaixcamState,
+};
 
 const MAIXCAM_DOTENV_KEY: &str = "MAIXCAM_IP";
-
 
 /// The Maixcam does nothing but send circle coordinates, so it doesn't really need to scale for the time being
 /// A packet of data is formatted like this:
@@ -37,7 +43,22 @@ pub fn spawn_maixcam_thread() {
                     for message in messages {
                         match message {
                             MaixcamMessage::CircleData(circles) => {
-                                state.circles = circles;
+                                state.circles = circles
+                                    .into_iter()
+                                    .map(|current_circle| {
+                                        let last_circle =
+                                            state.last_circles.iter().find(|last_circle| {
+                                                last_circle.color == current_circle.color
+                                            });
+                                        let mut result = current_circle.clone();
+                                        if let Some(last_circle) = last_circle {
+                                            result.speed = (current_circle.position - last_circle.position).length() / dt.as_secs_f32();
+                                        } else {
+                                            result.speed = 0.0;
+                                        }
+                                        result
+                                    })
+                                    .collect();
                             }
                         }
                     }
@@ -52,14 +73,12 @@ pub fn spawn_maixcam_thread() {
                 }
             }
             if Instant::now().duration_since(state.last_updated) > Duration::from_millis(1000) {
+                state.last_circles.clear();
                 state.circles.clear();
             }
+            state.last_circles = state.circles.clone();
             state.driver_is_connected = driver.is_connected();
             state.publish();
         }
     });
 }
-
-
-
-

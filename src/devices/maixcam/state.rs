@@ -8,6 +8,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct MaixcamState {
     pub driver_is_connected: bool,
+    pub last_circles: Vec<MaixcamCircle>,
     pub circles: Vec<MaixcamCircle>,
     pub error: Option<String>,
     pub last_updated: Instant,
@@ -20,6 +21,7 @@ impl Default for MaixcamState {
         Self {
             last_updated: Instant::now(),
             driver_is_connected: false,
+            last_circles: Vec::new(),
             circles: Vec::new(),
             error: None,
             dt: Duration::ZERO
@@ -57,7 +59,7 @@ impl Display for MaixcamState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Connected: {}\nCircles {}\ndt: {:?}\nError: {:?}",
+            "Connected: {}\nCircles: \n{}\ndt: {:?}\nError: {:?}",
             self.driver_is_connected,
             self.circles.iter().fold("".to_string(), |acc, circle| (acc
                 + format!("{}\n", circle).as_str())),

@@ -122,6 +122,7 @@ impl MaixcamDriver {
 
                 MaixcamCircle {
                     position: Vec2::new(d.position.x, d.position.y),
+                    speed: 0.0,
                     kind,
                     color,
                 }
