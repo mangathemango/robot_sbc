@@ -16,6 +16,7 @@ pub enum Landmark {
     UpperLeftTurn,
     FinalProcessingZone,
     UpperRightTurn,
+    Custom(Pose)
 }
 
 impl Landmark {
@@ -60,6 +61,8 @@ impl Landmark {
                 position: Vec2::new(-0.05, 0.95),
                 rotation: 0.0,
             },
+
+            Landmark::Custom(pose) => *pose
         };
         normalized.scale(LANDMARK_SCALE)
     }
