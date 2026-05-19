@@ -7,6 +7,7 @@ pub struct RotateArm {
     pub initial_angle: u8,
     pub target_angle: u8,
     pub elapsed_time: Duration,
+    pub preset: Option<ArmRotationPreset>
 }
 
 impl RotateArm {
@@ -28,6 +29,10 @@ impl RotateArm {
     
     pub fn to_placement(color: MaixcamCircleColor) -> Self {
         Self::to_preset(ArmRotationPreset::Placement(color))
+    }
+
+    pub fn to_source() -> Self {
+        Self::to_preset(ArmRotationPreset::Calibration)
     }
     
     pub fn idle() -> Self {
@@ -56,7 +61,7 @@ impl Action for RotateArm {
 
 impl Display for RotateArm {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Rotating Arm to {}", self.target_angle)
+        writeln!(f, "Rotating Arm to {:?}", self.preset)
     }
 }
 

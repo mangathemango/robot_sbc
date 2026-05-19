@@ -1,13 +1,60 @@
 use crate::{
     ROBOT, control::actions::{
         extend_arm::{ExtendArm, RetractArm},
-        general::{RuntimeSequence, Sequence},
+        general::{RuntimeSequence, Sequence, WaitUntil},
         lift_arm::{LiftArm, LowerArm},
         rotate_arm::RotateArm,
         rotate_claw::RotateClaw,
     }, devices::maixcam::circle::MaixcamCircleColor
 };
 
+pub fn pick_up_all_materials_from_source_1() -> RuntimeSequence {
+    RuntimeSequence::new(|| {
+        let queue = ROBOT.get_qr_state().color_queue_1;
+        
+        let mut sequence = Sequence::new("Picking up materials from source (First sequence)");
+        if let Some(queue) = queue {
+            queue.into_iter().for_each(|color| {
+                sequence.enqueue(wait_and_pick_up_material_from_source(color));
+                sequence.enqueue(place_material_into_storage(color));
+            });
+        }
+        sequence
+    })
+}
+
+pub fn pick_up_all_materials_from_source_2() -> RuntimeSequence {
+    RuntimeSequence::new(|| {
+        let queue = ROBOT.get_qr_state().color_queue_2;
+        
+        let mut sequence = Sequence::new("Picking up materials from source (Second sequence)");
+        if let Some(queue) = queue {
+            queue.into_iter().for_each(|color| {
+                sequence.enqueue(wait_and_pick_up_material_from_source(color));
+                sequence.enqueue(place_material_into_storage(color));
+            });
+        }
+        sequence
+    })
+}
+
+pub fn wait_and_pick_up_material_from_source(color: MaixcamCircleColor) -> Sequence {
+    Sequence::new(format!("Waiting to pick up {:?} material from source", color).as_str())
+        .then(LiftArm::up())
+        .then(RetractArm::back())
+        .then(RotateClaw::open())
+        .then(RotateArm::to_source())
+        .then(WaitUntil::new(format!("{:?} material is in frame", color).as_str(), move || {
+            let circle_color = color.clone();
+            let maixcam = ROBOT.get_maixcam_state();
+            let circle = maixcam.find_ring(&circle_color);
+            if let Some(circle) = circle {
+                return circle.speed < 0.1;
+            }
+            false
+        }))
+        .then(RotateClaw::close())
+}
 
 pub fn pick_up_all_materials_from_ground_2() -> RuntimeSequence {
     RuntimeSequence::new(|| {

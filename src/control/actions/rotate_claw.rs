@@ -10,6 +10,7 @@ pub struct RotateClaw {
     pub initial_angle: u8,
     pub target_angle: u8,
     pub elapsed_time: Duration,
+    pub preset: Option<ClawRotationPreset>
 }
 
 impl RotateClaw {
@@ -45,7 +46,7 @@ impl Action for RotateClaw {
 
 impl Display for RotateClaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Rotate Claw to {}", self.target_angle)
+        writeln!(f, "Rotate Claw to {:?}", self.preset)
     }
 }
 

@@ -7,15 +7,23 @@ pub type RetractArm = ExtendArm;
 #[derive(Debug, Clone, Default)]
 pub struct ExtendArm {
     target_position: u16,
+    preset: Option<ArmExtendPreset>
 }
 
 impl ExtendArm {
     pub fn to_position(position: u16) -> Self {
-        ExtendArm { target_position: position }
+        ExtendArm { 
+            target_position: position,
+            preset: None
+        }
     }
 
     pub fn to_preset(preset: ArmExtendPreset) -> Self {
-        Self::to_position(preset.to_position())
+        ExtendArm { 
+            target_position: preset.to_position(),
+            preset: Some(preset)
+            
+        }
     }
 
     pub fn to_storage(color: MaixcamCircleColor) -> Self {
@@ -45,10 +53,11 @@ impl Action for ExtendArm {
 
 impl Display for ExtendArm {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Extending Arm to {}", self.target_position)
+        writeln!(f, "Extending Arm to {:?}", self.target_position)
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum ArmExtendPreset {
     Back,
     Storage(MaixcamCircleColor),

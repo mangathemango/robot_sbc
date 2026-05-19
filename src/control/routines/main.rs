@@ -6,7 +6,7 @@ use crate::control::{actions::general::Sequence, routines::{
         calibrate_at_source_zone, calibrate_at_temporary_storage_zone,
     },
     navigation::*,
-    placement::{pick_up_all_materials_from_ground_1, pick_up_all_materials_from_ground_2, place_all_materials_on_ground_1, place_all_materials_on_ground_2, place_all_materials_stacked},
+    material_handling::{pick_up_all_materials_from_ground_1, pick_up_all_materials_from_ground_2, place_all_materials_on_ground_1, place_all_materials_on_ground_2, place_all_materials_stacked},
     utils::{
         beep, set_oled_display_text_qr, set_oled_display_text_start, set_oled_display_text_stop, setup, wait_for_qr
     },

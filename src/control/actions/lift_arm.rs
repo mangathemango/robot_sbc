@@ -7,12 +7,14 @@ pub type LowerArm = LiftArm;
 #[derive(Debug, Clone, Default)]
 pub struct LiftArm {
     target_position: u16,
+    preset: Option<ArmLiftPreset>
 }
 
 impl LiftArm {
-    pub fn to_preset(position: ArmLiftPreset) -> Self {
+    pub fn to_preset(preset: ArmLiftPreset) -> Self {
         Self {
-            target_position: position.to_position(),
+            target_position: preset.to_position(),
+            preset: Some(preset)
         }
     }
 
@@ -20,6 +22,9 @@ impl LiftArm {
         Self::to_preset(ArmLiftPreset::Up)
     }
 
+    pub fn to_source() -> Self {
+        Self::to_preset(ArmLiftPreset::Source)
+    }
     pub fn to_storage() -> Self {
         Self::to_preset(ArmLiftPreset::Storage)
     }
@@ -48,7 +53,7 @@ impl Action for LiftArm {
 
 impl Display for LiftArm {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Lifting Arm to {}", self.target_position)
+        writeln!(f, "Lifting Arm to {:?}", self.preset)
     }
 }
 
@@ -56,6 +61,7 @@ impl Display for LiftArm {
 pub enum ArmLiftPreset {
     Up,
     Storage,
+    Source,
     Ground,
     Stack,
 }
@@ -65,6 +71,7 @@ impl ArmLiftPreset {
         match self {
             ArmLiftPreset::Up => 10000,
             ArmLiftPreset::Storage => 6000,
+            ArmLiftPreset::Source => 5000,
             ArmLiftPreset::Ground => 1000,
             ArmLiftPreset::Stack => 2000,
         }
