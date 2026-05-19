@@ -1,18 +1,10 @@
-#[cfg(target_os = "linux")]
-mod linux;
+pub mod driver;
+pub mod state;
+use std::time::Duration;
 
-#[cfg(not(target_os = "linux"))]
-mod stub;
+use driver::QrDriver;
 
-use std::{thread, time::Duration};
-
-#[cfg(target_os = "linux")]
-pub use linux::*;
-
-#[cfg(not(target_os = "linux"))]
-pub use stub::*;
-
-use crate::ROBOT;
+use crate::{ROBOT};
 
 pub fn spawn_qr_thread() {
     std::thread::spawn(move || {
@@ -23,7 +15,7 @@ pub fn spawn_qr_thread() {
             let now = std::time::Instant::now();
             let dt = now.duration_since(last_update);
             if dt < Duration::from_millis(1000) {
-                thread::sleep(Duration::from_millis(100));
+                std::thread::sleep(Duration::from_millis(100));
                 continue;
             } 
             ROBOT.lock_qr_state().dt = dt;
@@ -35,7 +27,6 @@ pub fn spawn_qr_thread() {
                 }
                 Ok(None) => {}
                 Err(msg) => {
-                    driver.device = DriverHIDDevice::Disconnected(msg.clone());
                     ROBOT.lock_qr_state().error_msg = msg.clone();
                     driver.reconnect();
                     std::thread::sleep(std::time::Duration::from_millis(200));

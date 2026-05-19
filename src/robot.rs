@@ -2,7 +2,7 @@ use crate::scheduler::SchedulerState;
 use crate::control::states::odometry::OdometryState;
 use crate::devices::gyro::state::GyroState;
 use crate::devices::maixcam::state::MaixcamState;
-use crate::devices::qr::QrState;
+use crate::devices::qr::state::QrState;
 use crate::devices::stm32::controller::Stm32Controller;
 use crate::devices::stm32::state::Stm32State;
 use arc_swap::{ArcSwap, Guard};
