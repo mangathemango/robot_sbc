@@ -82,7 +82,8 @@ impl Action for CalibratePlacement {
             // Get PID outputs from motion_policy
             let (mut linear_output, angular_output) =
                 self.motion_policy.update(linear_error, angular_error, dt);
-            linear_output = linear_output.rotate(Vec2::from_angle(-FRAC_PI_2));
+            linear_output.y *= -1.0;
+            linear_output = linear_output.rotate(Vec2::from_angle(FRAC_PI_2));
 
             let target_twist = Twist::new(linear_output, angular_output);
             ROBOT.get_stm32_controller().set_twist(target_twist);

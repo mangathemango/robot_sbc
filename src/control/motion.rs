@@ -61,12 +61,12 @@ impl MotionPolicyPreset {
             Self::CalibrationSource => MotionPolicy {
                 linear_pid: PidController::new(0.1, 0.0, 0.1, 0.2, 1.0),
                 angular_pid: PidController::new(3.0, 0.0, 0.1, 10.05, 1.0),
-                settle_time: Duration::from_millis(200),
+                settle_time: Duration::from_millis(1000),
             },
             Self::CalibrationPlace => MotionPolicy {
-                linear_pid: PidController::new(0.1, 0.0, 0.1, 0.2, 1.0),
+                linear_pid: PidController::new(0.1, 0.0, 0.1, 0.05, 1.0),
                 angular_pid: PidController::new(3.0, 0.0, 0.1, 10.05, 1.0),
-                settle_time: Duration::from_millis(200),
+                settle_time: Duration::from_millis(1000),
             },
             Self::Custom(profile) => *profile,
         }
