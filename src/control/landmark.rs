@@ -1,4 +1,4 @@
-pub const LANDMARK_SCALE: f32 = 0.05;
+pub const LANDMARK_SCALE: f32 = 0.1;
 
 use std::{f32::consts::{FRAC_PI_2, PI}};
 
