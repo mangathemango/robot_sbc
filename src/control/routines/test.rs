@@ -7,6 +7,7 @@ use crate::{ROBOT, control::{actions::{calibrate_source::CalibrateSource, genera
 pub fn test_sequence() -> Sequence {
     Sequence::new("Test Sequence")
         .then(beep())
+        .then(set_oled_display_text_start())
         .then(set_current_landmark(Landmark::Start))
         .then(test_movement())
 
