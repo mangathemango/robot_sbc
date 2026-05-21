@@ -6,6 +6,5 @@ use crate::{ROBOT, control::{actions::{calibrate_source::CalibrateSource, genera
 
 pub fn test_sequence() -> Sequence {
     Sequence::new("Test Sequence")
-        .then(set_current_landmark(Landmark::FinalProcessingZone))
-        .then(calibrate_at_final_processing_zone())
+        .then(beep())
 }

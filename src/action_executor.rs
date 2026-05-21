@@ -16,6 +16,7 @@ pub fn spawn_action_executor_thread() {
                 std::thread::sleep(Duration::from_millis(1));
                 continue;
             }
+
             let mut action_queue = ROBOT.action_queue_mut();
             if ROBOT.stm32_state().key1_is_pressed() {
                 if action_queue.is_finished() {
