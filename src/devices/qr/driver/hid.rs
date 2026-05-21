@@ -1,3 +1,13 @@
+use std::{
+    thread,
+    time::Duration,
+};
+
+use evdev::{
+    Device,
+    EventSummary,
+    KeyCode,
+};
 
 #[derive(Debug)]
 enum DriverHIDDevice {
