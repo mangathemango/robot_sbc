@@ -9,7 +9,7 @@ pub fn test_sequence() -> Sequence {
         .then(beep())
         .then(set_oled_display_text_start())
         .then(set_current_landmark(Landmark::Start))
-        .then(test_gyro())
+        .then(test_movement())
         .then(set_oled_display_text_stop())
 
         // .then(WaitFor::new(Duration::from_millis(1000)))
@@ -18,7 +18,7 @@ pub fn test_sequence() -> Sequence {
 pub fn test_movement() -> Sequence {
     Sequence::new("Movement")
         .then(OneShot::new(|| {
-            ROBOT.stm32_controller().set_wheel_velocities([100,100,100,100]);
+            ROBOT.stm32_controller().set_wheel_velocities([500,500,500,500]);
         }))
         .then(WaitFor::new(Duration::from_millis(500)))
         .then(OneShot::new(|| {
