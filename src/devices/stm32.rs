@@ -28,7 +28,6 @@ pub fn spawn_stm32_thread() {
         let mut driver = Stm32Driver::new();
         let mut state = Stm32State::new();
         let mut last_update = std::time::Instant::now();
-        let mut target_mecanum_velocities ;
         loop {
             let now = std::time::Instant::now();
             let dt = now - last_update;
@@ -61,15 +60,6 @@ pub fn spawn_stm32_thread() {
                     std::thread::sleep(std::time::Duration::from_millis(10));
                 }
             }
-
-            target_mecanum_velocities = 
-                MecanumVelocities::from_array(state.target_wheel_velocities.map(|v| v as f32));
-            let current_mecanum_velocities =
-                MecanumVelocities::from_array(state.actual_wheel_velocities.map(|v| v as f32));
-            let simulated_mecanum_velocities = current_mecanum_velocities
-                .simulate_mecanum_response(target_mecanum_velocities, state.dt);
-            state.actual_wheel_velocities =
-                simulated_mecanum_velocities.to_array().map(|v| v as i16);
             state.driver_is_connected = driver.is_connected();
             state.publish();
         }
