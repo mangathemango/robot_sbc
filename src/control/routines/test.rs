@@ -8,12 +8,29 @@ pub fn test_sequence() -> Sequence {
     Sequence::new("Test Sequence")
         .then(beep())
         .then(set_oled_display_text_start())
-        .then(set_current_landmark(Landmark::Start))
-        .then(Move::to(Landmark::QrZone))
+        // .then(full_movement_sequence())
         .then(set_oled_display_text_stop())
 
         // .then(WaitFor::new(Duration::from_millis(1000)))
 }   
+
+pub fn full_movement_sequence() -> Sequence {
+    Sequence::new("Full movement sequences")
+        .then(set_current_landmark(Landmark::Start))
+        .then(Move::to(Landmark::QrZone))
+        .then(Move::to(Landmark::SourceZone))
+        .then(Move::to(Landmark::CentralRightCrossing))
+        .then(Move::to(Landmark::TemporaryStorageZone))
+        .then(Move::to(Landmark::UpperLeftTurn))
+        .then(Move::to(Landmark::FinalProcessingZone))
+        .then(Move::to(Landmark::UpperRightTurn))
+        .then(Move::to(Landmark::SourceZone))
+        .then(Move::to(Landmark::CentralRightCrossing))
+        .then(Move::to(Landmark::TemporaryStorageZone))
+        .then(Move::to(Landmark::UpperLeftTurn))
+        .then(Move::to(Landmark::FinalProcessingZone))
+        .then(Move::to(Landmark::UpperRightTurn))
+}
 
 pub fn test_movement() -> Sequence {
     Sequence::new("Movement")
