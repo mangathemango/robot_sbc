@@ -8,6 +8,7 @@ use evdev::{
     EventSummary,
     KeyCode,
 };
+use crate::devices::qr::QR_READER_DOTENV_KEY;   
 
 #[derive(Debug)]
 enum DriverHIDDevice {
