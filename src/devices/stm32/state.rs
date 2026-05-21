@@ -41,7 +41,7 @@ impl Stm32State {
     pub fn update_command(&mut self, command: Stm32Command) {
         match command {
             Stm32Command::SetWheelTargetVelocities { velocities } => {
-                self.target_wheel_velocities = velocities;
+                self.target_wheel_velocities = velocities.map(|v| if v>1000 {0} else {v});
             }
             Stm32Command::SetClawServoAngle { angle } => {
                 self.claw_servo_current_angle = angle;
