@@ -1,6 +1,5 @@
 use std::{
-    io, thread,
-    time::{Duration, Instant},
+    io, sync::atomic::Ordering, thread, time::{Duration, Instant}
 };
 
 use crossterm::{
@@ -11,7 +10,7 @@ use crossterm::{
 
 use ratatui::{Terminal, backend::CrosstermBackend};
 
-use crate::dashboard::layout::ui;
+use crate::{ROBOT, dashboard::layout::ui};
 
 pub fn start() {
     thread::spawn(|| {
@@ -41,6 +40,9 @@ fn run() -> Result<(), io::Error> {
             if let Event::Key(key) = event::read()? {
                 if key.code == KeyCode::Char('q') {
                     break;
+                }
+                if key.code == KeyCode::Char('k') {
+                    ROBOT.stm32_state().start_flag.store(true, Ordering::Relaxed);
                 }
             }
         }
