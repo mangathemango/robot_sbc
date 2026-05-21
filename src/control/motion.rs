@@ -50,7 +50,7 @@ impl MotionPolicyPreset {
         match self {
             Self::Precise => MotionPolicy {
                 linear_pid: PidController::new(0.0, 0.0, 0.0, 10.0, 0.0),
-                angular_pid: PidController::new(-0.008, -0.0005, -0.003, 0.1, 1.0),
+                angular_pid: PidController::new(-0.008, -0.0005, -0.001, 0.1, 1.0),
                 settle_time: Duration::from_millis(1000), 
             },
             Self::Aggressive => MotionPolicy {
