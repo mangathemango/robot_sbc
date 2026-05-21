@@ -10,7 +10,7 @@ use crossterm::{
 
 use ratatui::{Terminal, backend::CrosstermBackend};
 
-use crate::{ROBOT, dashboard::layout::ui};
+use crate::{ROBOT, control::routines::utils::beep, dashboard::layout::ui};
 
 pub fn start() {
     thread::spawn(|| {
@@ -43,6 +43,9 @@ fn run() -> Result<(), io::Error> {
                 }
                 if key.code == KeyCode::Char('k') {
                     ROBOT.stm32_state().start_flag.store(true, Ordering::Relaxed);
+                }
+                if key.code == KeyCode::Char('b') {
+                    ROBOT.action_queue_mut().enqueue(beep());
                 }
             }
         }
