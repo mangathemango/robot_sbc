@@ -18,7 +18,7 @@ pub fn test_sequence() -> Sequence {
 pub fn test_movement() -> Sequence {
     Sequence::new("Movement")
         .then(OneShot::new(|| {
-            ROBOT.stm32_controller().set_wheel_velocities([500,500,500,500]);
+            ROBOT.stm32_controller().set_wheel_velocities([100,100,100,100]);
         }))
         .then(WaitFor::new(Duration::from_millis(500)))
         .then(OneShot::new(|| {
