@@ -40,9 +40,6 @@ impl Stm32State {
 
     pub fn update_command(&mut self, command: Stm32Command) {
         match command {
-            Stm32Command::SetWheelTargetVelocities { velocities } => {
-                self.target_wheel_velocities = velocities.map(|v| if v>1000 {0} else {v});
-            }
             Stm32Command::SetClawServoAngle { angle } => {
                 self.claw_servo_current_angle = angle;
             }
@@ -63,7 +60,7 @@ impl Stm32State {
         match message.clone() {
             Stm32Message::Log { msg } => self.log_msg = msg,
             Stm32Message::WheelVelocities { velocities } => {
-                self.actual_wheel_velocities = velocities;
+                self.actual_wheel_velocities = velocities.map(|v| if v.abs() < 1000 {v} else {0});
             }
             Stm32Message::Key1 => {
                 self.start_flag.store(true, Ordering::Relaxed);
