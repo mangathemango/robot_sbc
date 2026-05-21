@@ -28,7 +28,7 @@ impl Landmark {
             },
 
             Landmark::QrZone => Pose {
-                position: Vec2::new(-0.05, 0.33),
+                position: Vec2::new(-0.10, 0.33),
                 rotation: 0.0,
             },
 
