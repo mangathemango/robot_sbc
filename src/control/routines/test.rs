@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use glam::Vec2;
 
@@ -7,4 +7,7 @@ use crate::{ROBOT, control::{actions::{calibrate_source::CalibrateSource, genera
 pub fn test_sequence() -> Sequence {
     Sequence::new("Test Sequence")
         .then(beep())
+        .then(OneShot::new(|| {
+            ROBOT.stm32_controller().set_wheel_velocities([100,100,100,100]);
+        }))
 }
