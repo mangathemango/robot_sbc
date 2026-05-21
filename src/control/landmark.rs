@@ -24,12 +24,12 @@ impl Landmark {
         let normalized = match self {
             Landmark::Start => Pose {
                 position: Vec2::new(0.0, 0.0),
-                rotation: 0.0,
+                rotation: PI,
             },
 
             Landmark::QrZone => Pose {
                 position: Vec2::new(-0.10, 0.33),
-                rotation: 0.0,
+                rotation: PI,
             },
 
             Landmark::SourceZone => Pose {
