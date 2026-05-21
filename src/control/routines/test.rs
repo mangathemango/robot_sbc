@@ -8,7 +8,8 @@ pub fn test_sequence() -> Sequence {
     Sequence::new("Test Sequence")
 
         .then(beep())
-        .then(test_gyro())
+        .then(set_current_landmark(Landmark::Start))
+        .then(Move::to(Landmark::QrZone))
 
         // .then(WaitFor::new(Duration::from_millis(1000)))
 }   
