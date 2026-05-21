@@ -19,7 +19,7 @@ pub fn test_gyro() -> Sequence {
         .then(Move::to(Landmark::Start).policy(MotionPolicyPreset::Custom(
             MotionPolicy {
                 linear_pid: PidController::new(0.0, 0.0, 0.0, 0.0, 0.0),
-                angular_pid: PidController::new(-0.02, 0.0, -0.01, 0.04, 0.0),
+                angular_pid: PidController::new(-0.01, 0.0, -0.005, 0.04, 0.0),
                 settle_time: Duration::from_millis(10000), 
             }
         )))
