@@ -9,7 +9,7 @@ pub fn test_sequence() -> Sequence {
         .then(beep())
         .then(set_oled_display_text_start())
         .then(set_current_landmark(Landmark::Start))
-        .then(test_movement())
+        .then(test_gyro())
         .then(set_oled_display_text_stop())
 
         // .then(WaitFor::new(Duration::from_millis(1000)))
@@ -27,13 +27,22 @@ pub fn test_movement() -> Sequence {
 }
 
 pub fn test_gyro() -> Sequence {
+    let policy = MotionPolicy {
+        linear_pid: PidController::new(0.0, 0.0, 0.0, 10.0, 0.0),
+        angular_pid: PidController::new(-0.008, -0.0005, -0.0005, 0.1, 1.0),
+        settle_time: Duration::from_millis(1000), 
+    };
     Sequence::new("Testing gyro fr")
         .then(set_current_landmark(Landmark::Custom(Pose {
             position: Vec2::ZERO,
             rotation: 0.0,
         })))
-        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: 0.0,})))
-        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: FRAC_PI_2,})))
-        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: PI,})))
-        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: -FRAC_PI_2,})))
+        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: 0.0,}))
+            .policy(MotionPolicyPreset::Custom(policy)))
+        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: FRAC_PI_2,}))
+            .policy(MotionPolicyPreset::Custom(policy)))
+        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: PI,}))
+            .policy(MotionPolicyPreset::Custom(policy)))
+        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: -FRAC_PI_2,}))
+            .policy(MotionPolicyPreset::Custom(policy)))
 }
