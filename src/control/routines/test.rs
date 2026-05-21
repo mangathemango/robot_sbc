@@ -1,4 +1,4 @@
-use std::time::{Duration, Instant};
+use std::{f32::consts::{FRAC_PI_2, PI}, time::{Duration, Instant}};
 
 use glam::Vec2;
 
@@ -15,12 +15,12 @@ pub fn test_sequence() -> Sequence {
 
 pub fn test_gyro() -> Sequence {
     Sequence::new("Testing gyro fr")
-        .then(set_current_landmark(Landmark::Start))
-        .then(Move::to(Landmark::Start).policy(MotionPolicyPreset::Custom(
-            MotionPolicy {
-                linear_pid: PidController::new(0.0, 0.0, 0.0, 0.0, 0.0),
-                angular_pid: PidController::new(-0.01, 0.0, -0.005, 0.04, 0.0),
-                settle_time: Duration::from_millis(10000), 
-            }
-        )))
+        .then(set_current_landmark(Landmark::Custom(Pose {
+            position: Vec2::ZERO,
+            rotation: 0.0,
+        })))
+        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: 0.0,})))
+        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: FRAC_PI_2,})))
+        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: PI,})))
+        .then(Move::to(Landmark::Custom(Pose {position: Vec2::ZERO,rotation: -FRAC_PI_2,})))
 }

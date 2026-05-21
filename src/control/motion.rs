@@ -49,24 +49,24 @@ impl MotionPolicyPreset {
     pub fn to_motion_policy(&self) -> MotionPolicy {
         match self {
             Self::Precise => MotionPolicy {
-                linear_pid: PidController::new(5.0, 0.00, 1.8, 0.01, 1.0),
-                angular_pid: PidController::new(1.0, 0.0, 0.1, 0.3, 1.0),
-                settle_time: Duration::from_millis(1000),
+                linear_pid: PidController::new(0.0, 0.0, 0.0, 0.0, 0.0),
+                angular_pid: PidController::new(-0.01, 0.0, -0.005, 0.04, 0.0),
+                settle_time: Duration::from_millis(10000), 
             },
             Self::Aggressive => MotionPolicy {
                 linear_pid: PidController::new(5.0, 0.0, 1.0, 0.05, 1.0),
-                angular_pid: PidController::new(3.0, 0.0, 0.1, 10.05, 1.0),
+                angular_pid: PidController::new(-0.01, 0.0, -0.005, 0.04, 0.0),
                 settle_time: Duration::from_millis(200),
             },
             Self::CalibrationSource => MotionPolicy {
                 linear_pid: PidController::new(0.1, 0.0, 0.1, 0.2, 1.0),
-                angular_pid: PidController::new(3.0, 0.0, 0.1, 10.05, 1.0),
+                angular_pid: PidController::new(-0.01, 0.0, -0.005, 0.04, 0.0),
                 settle_time: Duration::from_millis(1000),
             },
             Self::CalibrationPlace => MotionPolicy {
                 linear_pid: PidController::new(0.1, 0.0, 0.1, 0.05, 1.0),
-                angular_pid: PidController::new(3.0, 0.0, 0.1, 10.05, 1.0),
-                settle_time: Duration::from_millis(1000),
+                angular_pid: PidController::new(-0.01, 0.0, -0.005, 0.001, 0.0),
+                settle_time: Duration::from_millis(1000),   
             },
             Self::Custom(profile) => *profile,
         }
