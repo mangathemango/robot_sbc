@@ -10,4 +10,8 @@ pub fn test_sequence() -> Sequence {
         .then(OneShot::new(|| {
             ROBOT.stm32_controller().set_wheel_velocities([100,100,100,100]);
         }))
+        .then(WaitFor::new(Duration::from_millis(500)))
+        .then(OneShot::new(|| {
+            ROBOT.stm32_controller().set_wheel_velocities([0,0,0,0]);
+        }))
 }
