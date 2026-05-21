@@ -32,7 +32,7 @@ pub fn spawn_stm32_thread() {
         loop {
             let now = std::time::Instant::now();
             let dt = now - last_update;
-            if dt < Duration::from_millis(50) {
+            if dt < Duration::from_millis(20) {
                 std::thread::sleep(Duration::from_millis(1));
                 continue;
             }
