@@ -63,9 +63,8 @@ impl Stm32Command {
 
     pub fn to_data_bytes(&self) -> Vec<u8> {
         match self {
-            Stm32Command::SetYawServoAngle { angle } => {
-                vec![*angle]
-            }
+            Stm32Command::SetYawServoAngle { angle } => {vec![*angle]}
+            Stm32Command::SetClawServoAngle { angle } => {vec![*angle]}
 
             Stm32Command::SetDisplayText { text } => text.as_bytes().to_vec(),
 
