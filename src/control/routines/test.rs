@@ -9,7 +9,7 @@ pub fn test_sequence() -> Sequence {
         .then(beep())
         .then(set_oled_display_text_start())
         .then(set_current_landmark(Landmark::Start))
-        .then(test_movement())
+        .then(test_gyro())
         .then(set_oled_display_text_stop())
 
         // .then(WaitFor::new(Duration::from_millis(1000)))
